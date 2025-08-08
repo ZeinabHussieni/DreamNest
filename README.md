@@ -5,9 +5,11 @@
 <!-- project overview -->
 <img src="./readme/title2.svg"/>
 
-> Description here.
+> DreamNest is an AI-powered web app that helps users visualize and achieve their goals. 
 >
-> Description here.
+> It connects like-minded people based on personality, creates personalized step-by-step plans, and generates motivational visuals to keep them inspired.
+> 
+> With progress tracking and daily reminders.
 
 <br><br>
 
@@ -16,7 +18,7 @@
 
 ### Add Title Here
 
-- To be decided on later on.
+- DreamNest.
 
 <br><br>
 
@@ -25,7 +27,10 @@
 
 ### Add Title Here
 
-- List the sexy features.
+- Users enter their goals, and the AI organizes a solid plan for them with a visual image board.
+- AI tracks the plan step-by-step and updates automatically when steps are completed or adjusts based on time or missed tasks.
+- AI matches users’ personalities through a personality quiz to connect like-minded people, helping them stay motivated and support each other.
+- AI sends notifications about progress and reminders.
 
 <br><br>
 
