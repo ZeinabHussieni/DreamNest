@@ -78,7 +78,7 @@ export class AuthService {
         lastName,
         userName,
         email,
-        password: hashedPassword,
+        passwordHash: hashedPassword,
         profilePicture,
       });
 

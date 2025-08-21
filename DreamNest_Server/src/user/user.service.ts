@@ -19,16 +19,17 @@ export class UserService {
     return user;
   }
 
-  async findByEmailOrUsername(email: string, username: string) {
-    const user = await this.prisma.user.findFirst({
-      where: {
-        OR: [{ email }, { userName: username }],
-      },
-    });
+  async findByEmailOrUsername(email: string, userName: string) {
+  return await this.prisma.user.findFirst({
+    where: {
+      OR: [
+        { email },
+        { userName }
+      ]
+    }
+  });
+}
 
-    if (!user) throw new NotFoundException('User not found');
-    return user;
-  }
 
   async findById(id: number) {
     const user = await this.prisma.user.findUnique({
@@ -44,7 +45,7 @@ export class UserService {
     lastName: string;
     userName: string;
     email: string;
-    password: string;
+    passwordHash: string;
     profilePicture?: string;
   }) {
     try {
@@ -54,11 +55,12 @@ export class UserService {
           lastName: data.lastName,
           userName: data.userName,
           email: data.email,
-          passwordHash: data.password,
+          passwordHash: data.passwordHash,
           profilePicture: data.profilePicture || null,
         },
       });
     } catch (err) {
+        console.log(err);
       throw new BadRequestException('User creation failed');
     }
   }

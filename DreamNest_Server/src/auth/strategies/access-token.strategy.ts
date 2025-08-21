@@ -7,13 +7,13 @@ import { ConfigService } from '@nestjs/config';
 export class AccessTokenStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(config: ConfigService) {
     super(<StrategyOptionsWithoutRequest>{
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: config.get<string>('JWT_ACCESS_SECRET')!,
-      ignoreExpiration: false,
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),//pull token from header
+      secretOrKey: config.get<string>('JWT_ACCESS_SECRET')!,//verify token
+      ignoreExpiration: false,//rejected token expired
     });
   }
 
-  async validate(payload: { sub: number; email: string }) {
-    return { userId: payload.sub, email: payload.email };
+  async validate(payload: { sub: number; email: string }) { //return a safe user
+    return { sub: payload.sub, email: payload.email };
   }
 }
