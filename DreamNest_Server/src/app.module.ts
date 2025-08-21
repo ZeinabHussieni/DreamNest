@@ -5,12 +5,15 @@ import { UserModule } from './user/user.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ConfigModule} from '@nestjs/config';
 import { GoalsModule } from './goals/goals.module';
+import { PlanModule } from './plan/plan.module';
+import { PlansModule } from './plans/plans.module';
+import { PlanModule } from './plan/plan.module';
 
 
 @Module({
   imports: [
   ConfigModule.forRoot({ isGlobal: true }),
-  AuthModule, UserModule, PrismaModule, GoalsModule
+  AuthModule, UserModule, PrismaModule, GoalsModule, PlanModule, PlansModule
 
 ],
   controllers: [],

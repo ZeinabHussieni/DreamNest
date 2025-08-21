@@ -36,8 +36,21 @@ model Goal {
   help_text        String?   
   vision_board_url String?  
   progress         Float    @default(0) 
+  plans     Plan[] 
   user_id          Int
   user             User       @relation(fields: [user_id], references: [id])
   createdAt        DateTime   @default(now())
   updatedAt        DateTime   @updatedAt
+}
+
+model Plan {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  due_date    DateTime
+  completed   Float
+  goal_id     Int
+  goal        Goal     @relation(fields: [goal_id], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
