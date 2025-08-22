@@ -1,81 +1,107 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Message as PrismaMessage, ChatRoom, ChatRoomUser } from '@prisma/client';
+import { Message as PrismaMessage, ChatRoom } from '@prisma/client';
+import { NotificationService } from 'src/notification/notification.service';
+
 
 @Injectable()
 export class ChatService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationService: NotificationService, 
+  ) {}
 
- async createChatRoom(userIds: number[], currentUserId: number): Promise<ChatRoom> {
-  if (userIds.length !== 2) {
-    throw new BadRequestException('Chat room must have exactly 2 users');
+  // create a chat room for  2 users
+  async createChatRoom(userIds: number[], currentUserId: number): Promise<ChatRoom> {
+    try {
+      if (userIds.length !== 2) throw new BadRequestException('Chat room must have exactly 2 users');
+
+      // we check if both users exist
+      const users = await this.prisma.user.findMany({
+        where: { id: { in: userIds } },
+      });
+      if (users.length !== 2) throw new NotFoundException('One or both users not found');
+
+      // and if chat room already exists
+      const existingRoom = await this.prisma.chatRoom.findFirst({
+        where: { participants: { every: { userId: { in: userIds } } } },
+      });
+      if (existingRoom) return existingRoom;
+
+      // we want to name the chatroom depend on other user 
+      const otherUser = users.find(u => u.id !== currentUserId);
+      if (!otherUser) throw new NotFoundException('Other user not found');
+
+      // create new chat room
+      return await this.prisma.chatRoom.create({
+        data: {
+          name: otherUser.userName,
+          participants: { create: userIds.map(id => ({ userId: id })) },
+        },
+        include: { participants: true },
+      });
+    } catch (error) {
+      console.error('Error creating chat room:', error);
+      throw new InternalServerErrorException('Failed to create chat room');
+    }
   }
-
-  // Check if both users exist
-  const users = await this.prisma.user.findMany({
-    where: { id: { in: userIds } },
-  });
-  if (users.length !== 2) {
-    throw new NotFoundException('One or both users not found');
-  }
-
-  // Check if chat room already exists for these 2 users
-  const existingRoom = await this.prisma.chatRoom.findFirst({
-    where: {
-      participants: { every: { userId: { in: userIds } } },
-    },
-  });
-  if (existingRoom) return existingRoom;
-
-  // Find the "other user" (not the logged-in user) for naming
-  const otherUser = users.find(u => u.id !== currentUserId);
-  if (!otherUser) throw new NotFoundException('Other user not found');
-
-  // Create new chat room
-  const chatRoom = await this.prisma.chatRoom.create({
-    data: {
-      name: otherUser.userName, // use the other user's name
-      participants: {
-        create: userIds.map(id => ({ userId: id })),
-      },
-    },
-    include: { participants: true },
-  });
-
-  return chatRoom;
-}
-
 
   // all chat rooms for a user
   async getUserChatRooms(userId: number): Promise<ChatRoom[]> {
-    const rooms = await this.prisma.chatRoom.findMany({
-      where: { participants: { some: { userId } } },
-      include: { participants: true, messages: { orderBy: { createdAt: 'asc' } } },
-    });
-    return rooms;
+    try {
+      return await this.prisma.chatRoom.findMany({
+        where: { participants: { some: { userId } } },
+        include: { participants: true, messages: { orderBy: { createdAt: 'asc' } } },
+      });
+    } catch (error) {
+      console.error('Error fetching chat rooms:', error);
+      throw new InternalServerErrorException('Failed to fetch chat rooms');
+    }
   }
 
   //  all messages for a room
   async getRoomMessages(chatRoomId: number): Promise<PrismaMessage[]> {
-    return this.prisma.message.findMany({
-      where: { chatRoomId },
-      orderBy: { createdAt: 'asc' },
-    });
+    try {
+      return await this.prisma.message.findMany({
+        where: { chatRoomId },
+        orderBy: { createdAt: 'asc' },
+      });
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+      throw new InternalServerErrorException('Failed to fetch messages');
+    }
   }
 
-  // Send a message in a room
-// Send a message in a room
-async createMessage(chatRoomId: number, senderId: number, content: string): Promise<PrismaMessage> {
-  if (!chatRoomId) throw new BadRequestException('chatRoomId is required');
-  if (!senderId) throw new BadRequestException('senderId is required');
-  if (!content) throw new BadRequestException('Message content is required');
+  // send a message in a room
+  async createMessage(chatRoomId: number, senderId: number, content: string): Promise<PrismaMessage> {
+    try {
+      if (!chatRoomId) throw new BadRequestException('chatRoomId is required');
+      if (!senderId) throw new BadRequestException('senderId is required');
+      if (!content) throw new BadRequestException('Message content is required');
 
-  const chatRoom = await this.prisma.chatRoom.findUnique({ where: { id: chatRoomId } });
-  if (!chatRoom) throw new NotFoundException('Chat room not found');
+      const chatRoom = await this.prisma.chatRoom.findUnique({ where: { id: chatRoomId } });
+      if (!chatRoom) throw new NotFoundException('Chat room not found');
 
-  return this.prisma.message.create({
-    data: { content, senderId, chatRoomId },
-  });
-}
 
+      const message =  await this.prisma.message.create({ data: { content, senderId, chatRoomId } });
+      const participants = await this.prisma.chatRoomUser.findMany({
+       where: { chatRoomId, userId: { not: senderId } },
+      });
+      for (const p of participants) {
+         await this.notificationService.createNotification({
+         type: 'NEW_MESSAGE',
+         userId: p.userId,       
+         actorId: senderId,      
+         chatRoomId,
+         messageId: message.id,
+         content: `New message from ${senderId}: ${content.slice(0, 50)}`
+        });
+       }
+     return message;
+
+    } catch (error) {
+      console.error('Error sending message:', error);
+      throw new InternalServerErrorException('Failed to send message');
+    }
+  }
 }

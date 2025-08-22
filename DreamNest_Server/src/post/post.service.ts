@@ -1,11 +1,15 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { NotificationService } from 'src/notification/notification.service';
 import { Post as PrismaPost } from '@prisma/client';
 
 
 @Injectable()
 export class PostService {
-    constructor(private readonly prisma: PrismaService) {}
+    constructor(
+        private readonly prisma: PrismaService,
+        private readonly notificationService: NotificationService, 
+    ) {}
 
     async create(data: { content: string; user_id: number }): Promise<PrismaPost> {
         try {
@@ -51,6 +55,8 @@ export class PostService {
 
   async toggleLike(userId: number, postId: number): Promise<{ liked: boolean; likeCount: number }> {
         try {
+         const post = await this.prisma.post.findUnique({ where: { id: postId }, include: { user: true } });
+         if (!post) throw new NotFoundException('Post not found');
          const existingLike = await this.prisma.postLike.findUnique({
              where: {
                   user_id_post_id: {
@@ -75,9 +81,18 @@ export class PostService {
                },
               });
               liked = true;
+              await this.notificationService.createNotification({
+              type: 'LIKE_POST',
+              userId: post.user_id,      
+              actorId: userId,          
+              postId: postId,
+              content: `${post.user.userName} liked your post`,
+           });
+
             }
 
            const likeCount = await this.prisma.postLike.count({ where: { post_id: postId } });
+           
 
            return { liked, likeCount };
        } catch (err) {

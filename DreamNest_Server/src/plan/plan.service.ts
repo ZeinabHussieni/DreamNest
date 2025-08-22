@@ -1,12 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Plan as PrismaPlan } from '@prisma/client';
+import { NotificationService } from 'src/notification/notification.service';
 
 
 
 @Injectable()
 export class PlanService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+      private readonly prisma: PrismaService,
+      private readonly notificationService: NotificationService, 
+  ) {}
 
   async findById(id: number): Promise<PrismaPlan> {
     const plan = await this.prisma.plan.findUnique({ where: { id } });
@@ -40,8 +44,26 @@ export class PlanService {
       data: { progress },
     });
 
+    await this.notificationService.createNotification({
+     type: 'GOAL_PROGRESS',
+     userId: plan.goal.user_id, 
+     goalId: plan.goal_id,
+     content: `Congrats! Your goal "${plan.goal.title}" progress is now ${progress.toFixed(0)}%`,
+    });
+  
+    if (updatedPlan.completed) {
+    await this.notificationService.createNotification({
+      type: 'PLAN_COMPLETED',
+      userId: plan.goal.user_id,
+      planId: updatedPlan.id,
+      content: `You completed the plan "${updatedPlan.title}"! Keep going`,
+    });
+    }
+
+
     return this.formatPlan(updatedPlan);
   }
+
 
   async create(goalId: number, data: { title: string; description: string; due_date: string; completed?: boolean }) {
   const goal = await this.prisma.goal.findUnique({ where: { id: goalId } });
