@@ -4,7 +4,7 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { GetUser } from '../common/decorators/get-user.decorator';
 import { PostService } from './post.service';
 
-@Controller('post')
+@Controller('posts')
 @UseGuards(AccessTokenGuard)
 export class PostController {
     constructor(private readonly postsService:PostService){}
