@@ -14,21 +14,26 @@ datasource db {
 }
 
 model User {
-  id             Int       @id @default(autoincrement())
-  email          String    @unique
-  userName       String    @unique
-  firstName      String?
-  lastName       String?
-  passwordHash   String
+  id               Int          @id @default(autoincrement())
+  email            String       @unique
+  userName         String       @unique
+  firstName        String?
+  lastName         String?
+  passwordHash     String
   refreshTokenHash String?
-  token          String?  
-  profilePicture String?
-  coins          Int       @default(0)
-  goals          Goal[] 
-  posts          Post[]
-  likes          PostLike[]   
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  token            String?  
+  profilePicture   String?
+  coins            Int          @default(0)
+
+  goals            Goal[] 
+  posts            Post[] 
+  likes            PostLike[] 
+  chatRooms        ChatRoomUser[] 
+  messages         Message[]   
+  messageReads     MessageRead[] 
+
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
 }
 
 model Goal {
@@ -77,3 +82,55 @@ model PostLike {
   updatedAt   DateTime @updatedAt
   @@unique([user_id, post_id])
 }
+
+model ChatRoom {
+  id            Int            @id @default(autoincrement()) 
+  createdAt     DateTime       @default(now())
+  name        String?   
+
+  participants  ChatRoomUser[] 
+  messages      Message[] 
+}
+
+model ChatRoomUser {
+  id        Int      @id @default(autoincrement()) 
+  userId    Int
+  chatRoomId Int
+
+  user      User     @relation(fields: [userId], references: [id])
+  chatRoom  ChatRoom @relation(fields: [chatRoomId], references: [id])
+
+  @@unique([userId, chatRoomId])          
+}
+
+model Message {
+  id         Int      @id @default(autoincrement())
+  content    String
+  createdAt  DateTime @default(now())
+
+  senderId   Int
+  sender     User     @relation(fields: [senderId], references: [id])
+
+  chatRoomId Int
+  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id])
+  reads      MessageRead[]   
+
+  @@index([chatRoomId, createdAt])
+}
+
+model MessageRead {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  messageId Int
+  readAt    DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+  message   Message  @relation(fields: [messageId], references: [id])
+  @@index([userId, readAt])
+
+
+  @@unique([userId, messageId])
+}
+
+
+
