@@ -48,7 +48,7 @@ model Plan {
   title       String
   description String
   due_date    DateTime
-  completed   Float
+  completed   Boolean 
   goal_id     Int
   goal        Goal     @relation(fields: [goal_id], references: [id])
   createdAt   DateTime @default(now())

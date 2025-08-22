@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Post,Query,Req, UseGuards ,BadRequestException,NotFoundException,InternalServerErrorException, UploadedFile, UseInterceptors} from '@nestjs/common';
+import {Body, Controller, Get, HttpCode,Post, Query, Req, UseGuards, BadRequestException, UploadedFile, UseInterceptors,} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -8,11 +8,13 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import type { Express, Request } from 'express';
+import { GetUser } from 'src/common/decorators/get-user.decorator';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private auth: AuthService) {}
+  constructor(private readonly auth: AuthService) {}
 
+  //register
   @Post('register')
   @UseInterceptors(
     FileInterceptor('profilePicture', {
@@ -29,80 +31,56 @@ export class AuthController {
     @Body() dto: RegisterDto,
     @UploadedFile() file?: Express.Multer.File,
   ) {
-    try {
-      return await this.auth.register(
-        dto.firstName,
-        dto.lastName,
-        dto.userName,
-        dto.email,
-        dto.password,
-        file?.filename,
-      );
-    } catch (error) {
-      if (error.status === 401) {
-        throw error;
-      }
-      throw new InternalServerErrorException('Registration failed');
-    }
+    const result = await this.auth.register(
+      dto.firstName,
+      dto.lastName,
+      dto.userName,
+      dto.email,
+      dto.password,
+      file?.filename,
+    );
+
+    return result;
   }
 
+  //login
   @HttpCode(200)
   @Post('login')
   async login(@Body() dto: LoginDto) {
-    try {
-      return await this.auth.login(dto.identifier, dto.password);
-    } catch (error) {
-      if (error.status === 401) {
-        throw error;
-      }
-      throw new InternalServerErrorException('Login failed');
-    }
+    return this.auth.login(dto.identifier, dto.password);
   }
 
+  //logout
   @UseGuards(AccessTokenGuard)
   @Post('logout')
-  async logout(@Req() req: Request) {
-    try {
-      const user = req.user as any;
-      return await this.auth.logout(user.sub);
-    } catch {
-      throw new InternalServerErrorException('Logout failed');
-    }
+  async logout(@GetUser('sub') userId:  any) {
+    return this.auth.logout(userId.sub);
   }
-
+  
+  //current user
   @UseGuards(AccessTokenGuard)
   @Get('me')
-  async me(@Req() req: Request) {
-    return req.user;
+  me(@GetUser('sub') user:  any) {
+    return user;
   }
 
+  //user by id
   @Get('getUser')
-  async findUser(@Query('id') id: string) {
+  findUser(@Query('id') id: string) {
     if (!id) throw new BadRequestException('User ID is required');
-    try {
-      return await this.auth.getUser(Number(id));
-    } catch(err) {
-      if (err instanceof NotFoundException) throw err;
-      throw new InternalServerErrorException('Failed to fetch user');
-    }
+    return this.auth.getUser(Number(id));
   }
+  
 
+  //refresh token
   @UseGuards(RefreshTokenGuard)
   @Post('refresh')
-  async refresh(@Req() req: Request) {
-    try {
-      const authHeader = req.headers.authorization;
-      if (!authHeader) throw new BadRequestException('Authorization header missing');
+  refresh(@GetUser('sub') userId: number,
+          @GetUser('email') email: string,  @Req() req: Request) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) throw new BadRequestException('Authorization header missing');
 
-      const token = authHeader.replace('Bearer ', '');
-      const user = req.user as any;
-
-      return await this.auth.refresh(user.sub, user.email, token);
-    } catch (error) {
-      if (error.status === 401) {
-        throw error;
-      }
-      throw new InternalServerErrorException('Token refresh failed');
-    }
+    const token = authHeader.replace('Bearer ', '');
+    return this.auth.refresh(userId, email, token);
   }
 }
