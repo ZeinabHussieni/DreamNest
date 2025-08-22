@@ -14,19 +14,21 @@ datasource db {
 }
 
 model User {
-  id               Int       @id @default(autoincrement())
-  email            String    @unique
-  userName         String    @unique
-  firstName        String?
-  lastName         String?
-  passwordHash     String
+  id             Int       @id @default(autoincrement())
+  email          String    @unique
+  userName       String    @unique
+  firstName      String?
+  lastName       String?
+  passwordHash   String
   refreshTokenHash String?
-  token            String?  
-  profilePicture   String?
-  coins            Int       @default(0) 
-  goals     Goal[] 
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  token          String?  
+  profilePicture String?
+  coins          Int       @default(0)
+  goals          Goal[] 
+  posts          Post[]
+  likes          PostLike[]   
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 }
 
 model Goal {
@@ -53,4 +55,25 @@ model Plan {
   goal        Goal     @relation(fields: [goal_id], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model Post {
+  id        Int        @id @default(autoincrement())
+  content   String
+  user_id   Int
+  user      User       @relation(fields: [user_id], references: [id])
+  likes     PostLike[] 
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model PostLike {
+  id          Int      @id @default(autoincrement()) 
+  user_id          Int
+  post_id          Int
+  user             User       @relation(fields: [user_id], references: [id]) 
+  post             Post       @relation(fields: [post_id], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  @@unique([user_id, post_id])
 }
