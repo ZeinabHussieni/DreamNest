@@ -12,6 +12,8 @@ import { AutomationModule } from './automation/jobs/automation.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { DashboardController } from './dashboard/dashboard.controller';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { OpenAIService } from './openai/openai.service';
+import { OpenaiModule } from './openai/openai.module';
 
 
 @Module({
@@ -19,9 +21,10 @@ import { DashboardModule } from './dashboard/dashboard.module';
   ScheduleModule.forRoot(),
   AutomationModule,
   ConfigModule.forRoot({ isGlobal: true }),
-  AuthModule, UserModule, PrismaModule, GoalsModule,PlanModule, PostModule, ChatModule, NotificationModule, AutomationModule, DashboardModule
+  AuthModule, UserModule, PrismaModule, GoalsModule,PlanModule, PostModule, ChatModule, NotificationModule, AutomationModule, DashboardModule, OpenaiModule
 
 ],
   controllers: [DashboardController],
+  providers: [OpenAIService],
 })
 export class AppModule {}

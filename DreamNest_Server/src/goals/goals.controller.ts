@@ -14,7 +14,7 @@ export class GoalsController {
     const id = Number(userId);
     if (isNaN(id)) throw new BadRequestException('Invalid user ID from token');
 
-    return this.goalsService.create({ ...body, user_id: id });
+    return this.goalsService.createGoalWithAI({ ...body, user_id: id });
   }
 
 
