@@ -10,6 +10,8 @@ import { ChatModule } from './chat/chat.module';
 import { NotificationModule } from './notification/notification.module';
 import { AutomationModule } from './automation/jobs/automation.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { DashboardController } from './dashboard/dashboard.controller';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 
 @Module({
@@ -17,9 +19,9 @@ import { ScheduleModule } from '@nestjs/schedule';
   ScheduleModule.forRoot(),
   AutomationModule,
   ConfigModule.forRoot({ isGlobal: true }),
-  AuthModule, UserModule, PrismaModule, GoalsModule,PlanModule, PostModule, ChatModule, NotificationModule, AutomationModule
+  AuthModule, UserModule, PrismaModule, GoalsModule,PlanModule, PostModule, ChatModule, NotificationModule, AutomationModule, DashboardModule
 
 ],
-  controllers: [],
+  controllers: [DashboardController],
 })
 export class AppModule {}

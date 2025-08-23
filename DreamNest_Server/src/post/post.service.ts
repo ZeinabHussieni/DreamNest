@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { NotificationService } from 'src/notification/notification.service';
+import { DashboardGateway } from 'src/dashboard/dashboard.gateway'; 
 import { Post as PrismaPost } from '@prisma/client';
 
 
@@ -9,6 +10,7 @@ export class PostService {
     constructor(
         private readonly prisma: PrismaService,
         private readonly notificationService: NotificationService, 
+        private readonly dashboardGateway: DashboardGateway,
     ) {}
 
     async create(data: { content: string; user_id: number }): Promise<PrismaPost> {
@@ -19,6 +21,8 @@ export class PostService {
                     user: { connect: { id: data.user_id } },
                 },
             });
+            //this for websocket dashboard
+            await this.dashboardGateway.emitDashboardUpdate(data.user_id);
             return this.formatPost(post);
         } catch (err) {
             console.log(err);
@@ -46,7 +50,10 @@ export class PostService {
 
     async deleteById(id:number): Promise<{success:boolean}>{
         try{
-            await this.prisma.post.delete({where:{id}});
+           const post= await this.prisma.post.delete({where:{id}});
+
+            //this for websocket dashboard
+            await this.dashboardGateway.emitDashboardUpdate(post.user_id);
             return{success:true};
         }catch(err){
             throw new NotFoundException('Post not found');

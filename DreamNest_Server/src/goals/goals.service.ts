@@ -1,10 +1,14 @@
 import { Injectable, NotFoundException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Goal as PrismaGoal } from '@prisma/client';
+import { DashboardGateway } from 'src/dashboard/dashboard.gateway'; 
 
 @Injectable()
 export class GoalsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly dashboardGateway: DashboardGateway,
+  ) {}
 
   //Public methods
 
@@ -45,6 +49,8 @@ export class GoalsService {
           user: { connect: { id: data.user_id } },
         },
       });
+      //for web
+      await this.dashboardGateway.emitDashboardUpdate(data.user_id);
       return this.formatGoal(goal);
     } catch (err) {
       console.log(err);
@@ -54,7 +60,9 @@ export class GoalsService {
 
   async deleteById(id: number): Promise<{ success: boolean }> {
     try {
-      await this.prisma.goal.delete({ where: { id } });
+      const goal=await this.prisma.goal.delete({ where: { id } });
+      //for web
+      await this.dashboardGateway.emitDashboardUpdate(goal.user_id);
       return { success: true };
     } catch (err) {
       throw new NotFoundException('Goal not found');
