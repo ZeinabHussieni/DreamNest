@@ -10,12 +10,12 @@ export class GoalsController {
   constructor(private readonly goalsService: GoalsService) {}
 
   @Post('create_goal')
-async create(@GetUser('sub') userId: any, @Body() body: CreateGoalDto) {
-  const id = Number(userId);
-  if (isNaN(id)) throw new BadRequestException('Invalid user ID from token');
+  async create(@GetUser('sub') userId: any, @Body() body: CreateGoalDto) {
+    const id = Number(userId);
+    if (isNaN(id)) throw new BadRequestException('Invalid user ID from token');
 
-  return this.goalsService.create({ ...body, user_id: id });
-}
+    return this.goalsService.create({ ...body, user_id: id });
+  }
 
 
   @Get()

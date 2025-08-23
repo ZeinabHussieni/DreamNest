@@ -8,12 +8,16 @@ import { PlanModule } from './plan/plan.module';
 import { PostModule } from './post/post.module';
 import { ChatModule } from './chat/chat.module';
 import { NotificationModule } from './notification/notification.module';
+import { AutomationModule } from './automation/jobs/automation.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 
 @Module({
   imports: [
+  ScheduleModule.forRoot(),
+  AutomationModule,
   ConfigModule.forRoot({ isGlobal: true }),
-  AuthModule, UserModule, PrismaModule, GoalsModule,PlanModule, PostModule, ChatModule, NotificationModule
+  AuthModule, UserModule, PrismaModule, GoalsModule,PlanModule, PostModule, ChatModule, NotificationModule, AutomationModule
 
 ],
   controllers: [],
