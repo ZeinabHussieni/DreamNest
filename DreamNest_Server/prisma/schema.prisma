@@ -42,7 +42,7 @@ model Goal {
   title            String
   description      String
   help_text        String?   
-  vision_board_url String?  
+  vision_board_filename  String?  
   progress         Float    @default(0) 
   plans     Plan[] 
   user_id          Int

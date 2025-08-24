@@ -40,30 +40,32 @@ export class EmailTemplateService {
     `;
   }
 
-  
   private goalsTable(goals) {
-    return `
-      <table style="width:100%; border-collapse:collapse; margin-top:10px;">
-        <thead>
-          <tr style="background-color: #eaeaf0;">
-            <th style="text-align:left; padding:12px;">Goal</th>
-            <th style="text-align:right; padding:12px;">Progress</th>
+  return `
+    <table style="width:100%; border-collapse:collapse; margin-top:10px;">
+      <thead>
+        <tr style="background-color: #eaeaf0;">
+          <th style="text-align:left; padding:12px; color:#333;">Goal</th>
+          <th style="text-align:right; padding:12px; color:#333;">Progress</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${goals.map(goal => `
+          <tr>
+            <td style="padding:12px; border-bottom:1px solid #eee; color:#6C63FF; font-weight:500;">
+              ${goal.title}
+            </td>
+            <td style="padding:12px; border-bottom:1px solid #eee; text-align:right;">
+              <div style="background:#e0e0e0; border-radius:12px; width:100%; height:16px;">
+                <div style="width:${goal.progress}%; background-color:#6C63FF; height:100%; border-radius:12px;"></div>
+              </div>
+              <span style="font-size:12px;">${goal.progress}%</span>
+            </td>
           </tr>
-        </thead>
-        <tbody>
-          ${goals.map(goal => `
-            <tr>
-              <td style="padding:12px; border-bottom:1px solid #eee;">${goal.title}</td>
-              <td style="padding:12px; border-bottom:1px solid #eee; text-align:right;">
-                <div style="background:#e0e0e0; border-radius:12px; width:100%; height:16px;">
-                  <div style="width:${goal.progress}%; background-color:#6C63FF; height:100%; border-radius:12px;"></div>
-                </div>
-                <span style="font-size:12px;">${goal.progress}%</span>
-              </td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    `;
-  }
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
 }

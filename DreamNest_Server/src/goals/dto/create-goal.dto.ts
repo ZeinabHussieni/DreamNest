@@ -13,6 +13,7 @@ export class CreateGoalDto {
 
   @IsOptional()
   @IsString()
-  vision_board_url?: string;
+vision_board_filename: String
+
 
 }

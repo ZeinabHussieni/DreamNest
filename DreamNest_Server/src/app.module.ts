@@ -15,13 +15,12 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { OpenAIService } from './openai/openai.service';
 import { OpenaiModule } from './openai/openai.module';
 
-
 @Module({
   imports: [
   ScheduleModule.forRoot(),
   AutomationModule,
   ConfigModule.forRoot({ isGlobal: true }),
-  AuthModule, UserModule, PrismaModule, GoalsModule,PlanModule, PostModule, ChatModule, NotificationModule, AutomationModule, DashboardModule, OpenaiModule
+  AuthModule, UserModule, PrismaModule, GoalsModule,PlanModule, PostModule, ChatModule, NotificationModule, AutomationModule, DashboardModule,OpenaiModule
 
 ],
   controllers: [DashboardController],
