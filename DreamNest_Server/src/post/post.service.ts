@@ -1,8 +1,9 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { NotificationService } from 'src/notification/notification.service';
-import { DashboardGateway } from 'src/dashboard/dashboard.gateway'; 
+import { DashboardGateway } from 'src/dashboard/gateway/dashboard.gateway'; 
 import { Post as PrismaPost } from '@prisma/client';
+import { PostResponseDto } from './responseDto/post-response.dto';
 
 
 @Injectable()
@@ -13,7 +14,7 @@ export class PostService {
         private readonly dashboardGateway: DashboardGateway,
     ) {}
 
-    async create(data: { content: string; user_id: number }): Promise<PrismaPost> {
+    async create(data: { content: string; user_id: number }): Promise<PostResponseDto> {
         try {
             const post = await this.prisma.post.create({
                 data: {
@@ -39,7 +40,7 @@ export class PostService {
         }
     }
 
-    async getUserAllPosts(userId: number): Promise<PrismaPost[]>{
+    async getUserAllPosts(userId: number): Promise<PostResponseDto[]>{
         try{
             const posts=await this.prisma.post.findMany({where: {user_id:userId}})
             return posts.map(this.formatPost)
@@ -109,7 +110,7 @@ export class PostService {
     }
     
 
-    private formatPost(post: PrismaPost) {
+    private formatPost(post: PrismaPost): PostResponseDto {
         return {
             id: post.id,
             content: post.content,

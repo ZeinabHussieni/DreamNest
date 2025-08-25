@@ -84,19 +84,7 @@ export class ChatService {
 
 
       const message =  await this.prisma.message.create({ data: { content, senderId, chatRoomId } });
-      const participants = await this.prisma.chatRoomUser.findMany({
-       where: { chatRoomId, userId: { not: senderId } },
-      });
-      for (const p of participants) {
-         await this.notificationService.createNotification({
-         type: 'NEW_MESSAGE',
-         userId: p.userId,       
-         actorId: senderId,      
-         chatRoomId,
-         messageId: message.id,
-         content: `New message from ${senderId}: ${content.slice(0, 50)}`
-        });
-       }
+
      return message;
 
     } catch (error) {

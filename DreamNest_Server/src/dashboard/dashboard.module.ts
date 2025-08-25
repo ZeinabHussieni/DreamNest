@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { DashboardService } from './dashboard.service';
-import { DashboardGateway } from './dashboard.gateway';
+import { DashboardGateway } from './gateway/dashboard.gateway';
 import { DashboardController } from './dashboard.controller'; 
 
 @Module({

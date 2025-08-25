@@ -14,16 +14,19 @@ import { DashboardController } from './dashboard/dashboard.controller';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { OpenAIService } from './openai/openai.service';
 import { OpenaiModule } from './openai/openai.module';
+import { ConnectionsController } from './connections/connections.controller';
+import { ConnectionsService } from './connections/connections.service';
+import { ConnectionsModule } from './connections/connections.module';
 
 @Module({
   imports: [
   ScheduleModule.forRoot(),
   AutomationModule,
   ConfigModule.forRoot({ isGlobal: true }),
-  AuthModule, UserModule, PrismaModule, GoalsModule,PlanModule, PostModule, ChatModule, NotificationModule, AutomationModule, DashboardModule,OpenaiModule
+  AuthModule, UserModule, PrismaModule, GoalsModule,PlanModule, PostModule, ChatModule, NotificationModule, AutomationModule, DashboardModule,OpenaiModule, ConnectionsModule
 
 ],
-  controllers: [DashboardController],
-  providers: [OpenAIService],
+  controllers: [DashboardController, ConnectionsController],
+  providers: [OpenAIService, ConnectionsService],
 })
 export class AppModule {}

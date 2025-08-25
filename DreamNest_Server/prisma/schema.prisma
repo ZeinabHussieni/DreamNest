@@ -33,22 +33,72 @@ model User {
   messageReads     MessageRead[] 
   notifications    Notification[] 
 
+  helps            Help[]
+  helperConnections Connection[] @relation("HelperConnection")
+  seekerConnections Connection[] @relation("SeekerConnection")
+
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
 }
 
 model Goal {
-  id               Int      @id @default(autoincrement())
-  title            String
-  description      String
-  help_text        String?   
-  vision_board_filename  String?  
-  progress         Float    @default(0) 
-  plans     Plan[] 
-  user_id          Int
-  user             User       @relation(fields: [user_id], references: [id])
-  createdAt        DateTime   @default(now())
-  updatedAt        DateTime   @updatedAt
+  id                  Int       @id @default(autoincrement())
+  title               String
+  description         String
+  help_text           String?   
+  vision_board_filename String?  
+  progress            Float     @default(0) 
+  embedding           Json?     
+
+  plans               Plan[] 
+  user_id             Int
+  user                User       @relation(fields: [user_id], references: [id])
+
+
+  connections         Connection[]
+
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+}
+
+model Help {
+  id          Int    @id @default(autoincrement())
+  description String
+  embedding   Json?      
+  user_id     Int
+  user        User   @relation(fields: [user_id], references: [id])
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([user_id])
+}
+
+model Connection {
+  id              Int    @id @default(autoincrement())
+  helper_id       Int   
+  seeker_id       Int   
+  goal_id         Int   
+
+  similarityScore Float   
+  status          ConnectionStatus @default(pending) 
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  helper          User @relation("HelperConnection", fields: [helper_id], references: [id])
+  seeker          User @relation("SeekerConnection", fields: [seeker_id], references: [id])
+  goal            Goal @relation(fields: [goal_id], references: [id])
+
+  @@index([helper_id])
+  @@index([seeker_id])
+  @@index([goal_id])
+}
+
+enum ConnectionStatus {
+  pending
+  accepted
+  rejected
 }
 
 model Plan {

@@ -10,6 +10,7 @@ export class GoalResponseDto {
   progress: number;
   createdAt: Date;
   updatedAt: Date;
+  
 
 
   plans?: PlanResponseDto[];

@@ -1,6 +1,6 @@
 import {WebSocketGateway,WebSocketServer,SubscribeMessage,MessageBody,OnGatewayInit,} from '@nestjs/websockets';
 import { Server } from 'socket.io';
-import { DashboardService } from './dashboard.service';
+import { DashboardService } from '../dashboard.service';
 
 @WebSocketGateway({ namespace: '/dashboard' })
 export class DashboardGateway implements OnGatewayInit {
