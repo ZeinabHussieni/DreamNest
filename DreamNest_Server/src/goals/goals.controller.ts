@@ -7,6 +7,7 @@ import { GoalsService } from './goals.service';
 import { CreateGoalDto } from './dto/create-goal.dto';
 import { GetUser } from '../common/decorators/get-user.decorator';
 import { AccessTokenGuard } from '../auth/guards/access-token.guard';
+import { GoalResponseDto } from './responseDto/goal-response.dto';
 
 @Controller('goals')
 @UseGuards(AccessTokenGuard)
@@ -30,7 +31,7 @@ async create(
   @GetUser('sub') userId: number,
   @Body() body: CreateGoalDto,
   @UploadedFile() file?: Express.Multer.File,
-) {
+) : Promise<GoalResponseDto>{
   return this.goalsService.createGoalWithAI({
     ...body,
     user_id: userId,
@@ -40,12 +41,12 @@ async create(
 
 
   @Get()
-  async getAllByUser(@GetUser('sub') userId: number) {
+  async getAllByUser(@GetUser('sub') userId: number) : Promise<GoalResponseDto[]>{
     return this.goalsService.getAllByUserId(userId);
   }
 
   @Get(':id')
-  async getById(@Param('id', ParseIntPipe) id: number) {
+  async getById(@Param('id', ParseIntPipe) id: number): Promise<GoalResponseDto> {
     return this.goalsService.findById(id);
   }
 
@@ -61,7 +62,7 @@ async create(
   async getByStatus(
     @GetUser('sub') userId: number,
     @Param('status') status: 'completed' | 'in-progress',
-  ) {
+  ): Promise<GoalResponseDto[]> {
     return this.goalsService.getGoalsByStatus(userId, status);
   }
 }

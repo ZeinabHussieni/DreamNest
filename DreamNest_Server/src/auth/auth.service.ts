@@ -1,9 +1,10 @@
-import { Injectable, UnauthorizedException, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, InternalServerErrorException,NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as argon2 from 'argon2';
 import { UserService } from 'src/user/user.service';
 import { User as PrismaUser } from '@prisma/client';
+import { AuthResponseDto } from './responseDto/auth-response.dto';
 
 
 @Injectable()
@@ -44,7 +45,7 @@ export class AuthService {
       return {
         user: this.formatUser(user),
         ...tokens,
-      };
+      } as AuthResponseDto;
     } catch (err) {
       if (err instanceof UnauthorizedException) throw err;
       throw new InternalServerErrorException('Failed to register user');
@@ -64,7 +65,7 @@ export class AuthService {
       return {
         user: this.formatUser(user),
         ...tokens,
-      };
+      } as AuthResponseDto;
     } catch (err) {
       if (err instanceof UnauthorizedException) throw err;
       throw new InternalServerErrorException('Login failed');
@@ -87,14 +88,20 @@ export class AuthService {
   }
 
   async getUser(userId: number) {
-    try {
-      const user = await this.users.findById(userId);
-      return this.formatUser(user);
-    } catch (err) {
-      if (err instanceof UnauthorizedException) throw err;
-      throw new InternalServerErrorException('Failed to fetch user');
+  try {
+    const user = await this.users.findById(userId);
+    if (!user) {
+      throw new NotFoundException(`User with id ${userId} not found`);
     }
+
+    return this.formatUser(user);
+  } catch (err) {
+    if (err instanceof NotFoundException || err instanceof UnauthorizedException) {
+      throw err; // rethrow as-is
+    }
+    throw new InternalServerErrorException('Failed to fetch user');
   }
+}
 
   async logout(userId: number) {
     try {
@@ -111,12 +118,12 @@ export class AuthService {
 
   private formatUser(user: PrismaUser) {
     return {
-      id: user.id,
       firstName: user.firstName,
       lastName: user.lastName,
       userName: user.userName,
       email: user.email,
       profilePicture: user.profilePicture ? `/uploads/${user.profilePicture}` : null,
+      
     };
   }
 

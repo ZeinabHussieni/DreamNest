@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { Goal as PrismaGoal } from '@prisma/client';
 import { OpenAIService } from '../openai/openai.service';
 import { DashboardGateway } from 'src/dashboard/dashboard.gateway';
+import { GoalResponseDto } from './responseDto/goal-response.dto';
 
 @Injectable()
 export class GoalsService {
@@ -13,33 +14,37 @@ export class GoalsService {
   ) {}
 
 
-  async findById(id: number): Promise<PrismaGoal> {
+  async findById(id: number): Promise<GoalResponseDto> {
     try {
       const goal = await this.prisma.goal.findUnique({ where: { id } });
       if (!goal) throw new NotFoundException('Goal not found');
-      return goal;
+      return this.formatGoal(goal);
     } catch (err) {
       if (err instanceof NotFoundException) throw err;
       throw new InternalServerErrorException('Failed to fetch goal');
     }
   }
 
-  async getAllByUserId(userId: number): Promise<PrismaGoal[]> {
+  async getAllByUserId(userId: number): Promise<GoalResponseDto[]>  {
     try {
-      return await this.prisma.goal.findMany({ where: { user_id: userId } });
+      const goal= await this.prisma.goal.findMany({ where: { user_id: userId } });
+      return goal.map((g) => this.formatGoal(g));
     } catch (err) {
       throw new InternalServerErrorException('Failed to fetch goals');
     }
   }
 
-  async getGoalsByStatus(userId: number, status: 'completed' | 'in-progress'): Promise<PrismaGoal[]> {
+  async getGoalsByStatus(userId: number, status: 'completed' | 'in-progress'): Promise<GoalResponseDto[]>{
     try {
-      return await this.prisma.goal.findMany({
+      const goal=  await this.prisma.goal.findMany({
         where: {
           user_id: userId,
-          progress: status === 'completed' ? 100 : { lt: 100 },
+          progress: status === 'completed'
+          ? { gte: 100 } : { gte: 0, lt: 100 } 
         },
+        include: { plans: true },
       });
+     return goal.map((g) => this.formatGoal(g));
     } catch (err) {
       throw new InternalServerErrorException('Failed to fetch goals by status');
     }
@@ -52,7 +57,7 @@ export class GoalsService {
     help_text?: string;
     vision_board_filename?: string;
     user_id: number;
-  }): Promise<PrismaGoal> {
+  }): Promise<GoalResponseDto> {
     try {
     
       const aiPlans = await this.openAIService.generatePlan(data.title, data.description);
@@ -80,7 +85,7 @@ export class GoalsService {
     
       await this.dashboardGateway.emitDashboardUpdate(data.user_id);
 
-      return goal;
+      return this.formatGoal(goal);
     } catch (err) {
       console.error(err);
       throw new BadRequestException('Goal creation with AI failed');
@@ -97,4 +102,26 @@ export class GoalsService {
       throw new NotFoundException('Goal not found');
     }
   }
+
+  //helper for mapping
+  private formatGoal(goal: any): GoalResponseDto {
+  return {
+    id: goal.id,
+    title: goal.title,
+    description: goal.description,
+    help_text: goal.help_text,
+    vision_board_filename: goal.vision_board_filename,
+    progress: goal.progress,
+    createdAt: goal.createdAt,
+    updatedAt: goal.updatedAt,
+    plans: goal.plans?.map((plan: any) => ({
+      id: plan.id,
+      title: plan.title,
+      description: plan.description,
+      due_date: plan.due_date,
+      completed: plan.completed,
+    })),
+  };
+}
+
 }

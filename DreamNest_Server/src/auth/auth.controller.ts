@@ -9,6 +9,7 @@ import { diskStorage } from 'multer';
 import { extname } from 'path';
 import type { Express, Request } from 'express';
 import { GetUser } from 'src/common/decorators/get-user.decorator';
+import { AuthResponseDto } from './responseDto/auth-response.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -30,7 +31,7 @@ export class AuthController {
   async register(
     @Body() dto: RegisterDto,
     @UploadedFile() file?: Express.Multer.File,
-  ) {
+  ): Promise<AuthResponseDto> {
     const result = await this.auth.register(
       dto.firstName,
       dto.lastName,
@@ -46,7 +47,7 @@ export class AuthController {
   //login
   @HttpCode(200)
   @Post('login')
-  async login(@Body() dto: LoginDto) {
+  async login(@Body() dto: LoginDto): Promise<AuthResponseDto>  {
     return this.auth.login(dto.identifier, dto.password);
   }
 
@@ -60,7 +61,7 @@ export class AuthController {
   //current user
   @UseGuards(AccessTokenGuard)
   @Get('me')
-  me(@GetUser('sub') user:  any) {
+  me(@GetUser('sub') user:  any): Promise<AuthResponseDto>  {
     return user;
   }
 

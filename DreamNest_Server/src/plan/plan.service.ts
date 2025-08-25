@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Plan as PrismaPlan } from '@prisma/client';
 import { NotificationService } from 'src/notification/notification.service';
+import { PlanResponseDto } from './responseDto/plan-response.dto';
 
 
 
@@ -12,13 +13,13 @@ export class PlanService {
       private readonly notificationService: NotificationService, 
   ) {}
 
-  async findById(id: number): Promise<PrismaPlan> {
+  async findById(id: number): Promise<PlanResponseDto> {
     const plan = await this.prisma.plan.findUnique({ where: { id } });
     if (!plan) throw new NotFoundException('Plan not found');
     return this.formatPlan(plan);
   }
 
-  async togglePlanDone(id: number): Promise<PrismaPlan> {
+  async togglePlanDone(id: number): Promise<PlanResponseDto>  {
     const plan = await this.prisma.plan.findUnique({
       where: { id },
       include: { goal: true },
@@ -83,7 +84,7 @@ export class PlanService {
 }
 
 
-  async getAllByGoal(goalId: number): Promise<PrismaPlan[]> {
+  async getAllByGoal(goalId: number): Promise<PlanResponseDto[]> {
     const goal = await this.prisma.goal.findUnique({ where: { id: goalId } });
     if (!goal) throw new NotFoundException('Goal not found');
 
@@ -96,16 +97,16 @@ export class PlanService {
   }
 
   // private helper
-  private formatPlan(plan: PrismaPlan) {
-    return {
-      id: plan.id,
-      title: plan.title,
-      description: plan.description,
-      due_date: plan.due_date,
-      completed: plan.completed,
-      goal_id: plan.goal_id,
-      createdAt: plan.createdAt,
-      updatedAt: plan.updatedAt,
-    };
-  }
+  private formatPlan(plan: PrismaPlan): PlanResponseDto {
+  return {
+    id: plan.id,
+    title: plan.title,
+    description: plan.description,
+    due_date: plan.due_date,
+    completed: plan.completed,
+    goal_id: plan.goal_id,
+    createdAt: plan.createdAt,
+    updatedAt: plan.updatedAt,
+  };
+}
 }
