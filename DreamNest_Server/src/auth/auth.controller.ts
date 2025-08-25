@@ -1,13 +1,12 @@
-import {Body, Controller, Get, HttpCode,Post, Query, Req, UseGuards, BadRequestException, UploadedFile, UseInterceptors,} from '@nestjs/common';
+import {Body, Controller, Get, HttpCode,Post, Query, Req, UseGuards, Param, Res,BadRequestException, UploadedFile, UseInterceptors,} from '@nestjs/common';
 import { AuthService } from './auth.service';
+import type { Response } from 'express';
+import { join } from 'path';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { AccessTokenGuard } from './guards/access-token.guard';
 import { RefreshTokenGuard } from './guards/refresh-token.guard';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
-import type { Express, Request } from 'express';
+import type {Request } from 'express';
 import { GetUser } from 'src/common/decorators/get-user.decorator';
 import { AuthResponseDto } from './responseDto/auth-response.dto';
 
@@ -17,20 +16,8 @@ export class AuthController {
 
   //register
   @Post('register')
-  @UseInterceptors(
-    FileInterceptor('profilePicture', {
-      storage: diskStorage({
-        destination: './storage/private/profile',
-        filename: (req, file, cb) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-          cb(null, uniqueSuffix + extname(file.originalname));
-        },
-      }),
-    }),
-  )
   async register(
-    @Body() dto: RegisterDto,
-    @UploadedFile() file?: Express.Multer.File,
+    @Body() dto: RegisterDto
   ): Promise<AuthResponseDto> {
     const result = await this.auth.register(
       dto.firstName,
@@ -38,11 +25,18 @@ export class AuthController {
       dto.userName,
       dto.email,
       dto.password,
-      file?.filename,
+      dto.profilePictureBase64,
     );
 
     return result;
   }
+
+  @Get('profile/:filename')
+  async getProfile(@Param('filename') filename: string, @Res() res: Response) {
+  const filePath = join(process.cwd(), 'storage/private/profile', filename);
+  return res.sendFile(filePath);
+}
+
 
   //login
   @HttpCode(200)

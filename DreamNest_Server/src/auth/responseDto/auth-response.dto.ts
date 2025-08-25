@@ -4,7 +4,7 @@ export class UserResponseDto {
   lastName: string | null;
   userName: string;
   email: string;
-  profilePicture?: string | null;
+  visionBoardBase64?: string; 
 }
 
 export class AuthResponseDto {

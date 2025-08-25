@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsInt } from 'class-validator';
+import { IsString, IsOptional } from 'class-validator';
 
 export class CreateGoalDto {
   @IsString()
@@ -13,7 +13,5 @@ export class CreateGoalDto {
 
   @IsOptional()
   @IsString()
-vision_board_filename: String
-
-
+  visionBoardBase64?: string; 
 }

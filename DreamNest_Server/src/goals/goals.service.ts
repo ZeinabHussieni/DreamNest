@@ -1,5 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { saveBase64Image } from '../common/shared/file.utils';
+import { join } from 'path';
 import { Prisma } from '@prisma/client'; 
 import { OpenAIService } from '../openai/openai.service';
 import { DashboardGateway } from 'src/dashboard/gateway/dashboard.gateway';
@@ -68,11 +70,21 @@ export class GoalsService {
     title: string;
     description: string;
     help_text?: string;
-    vision_board_filename?: string;
+    visionBoardBase64?: string;
     user_id: number;
   }): Promise<GoalResponseDto> {
     try {
       const threshold = 0.4;
+
+     let vision_board_filename: string | undefined;
+
+     if (data.visionBoardBase64) {
+       vision_board_filename = saveBase64Image(
+        data.visionBoardBase64,
+        join(process.cwd(), 'storage/private/visionBoard')
+ 
+       );
+     }
 
       // generate embedding and plas
       const [goalEmbedding, aiPlans] = await Promise.all([
@@ -167,7 +179,7 @@ export class GoalsService {
       const score = this.cosineSimilarity(goalEmbedding, h.embedding as number[]);
       if (score >= threshold) {
         connectionsToCreate.push({
-          helper_id: h.user_id,
+          helper_id: h.user_id, 
           seeker_id: userId,
           goal_id: goal.id,
           similarityScore: score,

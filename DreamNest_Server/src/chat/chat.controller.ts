@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, UseGuards, BadRequestException,Param,Parse
 import { ChatService } from './chat.service';
 import { AccessTokenGuard } from '../auth/guards/access-token.guard';
 import { GetUser } from '../common/decorators/get-user.decorator';
+import { MessageResponseDto } from './responseDto/message-response.dto';
 
 @UseGuards(AccessTokenGuard)
 @Controller('chat')
@@ -28,7 +29,7 @@ export class ChatController {
 
 
   @Get('messages/:chatRoomId')
-  async getMessages(@GetUser('sub') userId: number, @Param('chatRoomId', ParseIntPipe) chatRoomId: number) {
+  async getMessages(@GetUser('sub') userId: number, @Param('chatRoomId', ParseIntPipe) chatRoomId: number): Promise<MessageResponseDto[]>  {
     return this.chatService.getRoomMessages(chatRoomId);
   }
 }

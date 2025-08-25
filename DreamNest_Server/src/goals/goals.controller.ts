@@ -1,8 +1,6 @@
-import { Controller, Get, Post, Param, Body, Delete, ParseIntPipe, UseGuards, BadRequestException, UploadedFile, UseInterceptors } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
-
+import { Controller, Get, Post, Param, Body, Delete, ParseIntPipe, UseGuards, Res } from '@nestjs/common';
+import type { Response } from 'express';
+import { join } from 'path';
 import { GoalsService } from './goals.service';
 import { CreateGoalDto } from './dto/create-goal.dto';
 import { GetUser } from '../common/decorators/get-user.decorator';
@@ -15,30 +13,19 @@ export class GoalsController {
   constructor(private readonly goalsService: GoalsService) {}
 
 
-  @Post('create_goal')
-@UseInterceptors(
-  FileInterceptor('visionBoard', {
-    storage: diskStorage({
-      destination: './storage/private/visionBoard',
-      filename: (_, file, cb) => {
-        const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-        cb(null, uniqueSuffix + extname(file.originalname));
-      },
-    }),
-  }),
-)
-async create(
-  @GetUser('sub') userId: number,
-  @Body() body: CreateGoalDto,
-  @UploadedFile() file?: Express.Multer.File,
-) : Promise<GoalResponseDto>{
-  return this.goalsService.createGoalWithAI({
-    ...body,
-    user_id: userId,
-    vision_board_filename: file?.filename,
-  });
-}
+ @Post('create_goal')
+   async create( @GetUser('sub') userId: number, @Body() body: CreateGoalDto): Promise<GoalResponseDto> {
+     return this.goalsService.createGoalWithAI({
+     ...body,
+     user_id: userId,
+   });
+  }
 
+  @Get('vision-board/file/:filename')
+   async getVisionBoard( @Param('filename') filename: string, @Res() res: Response) {
+   const filePath = join(__dirname, '..', 'storage/private/visionBoard', filename);
+   return res.sendFile(filePath);
+  }
 
   @Get()
   async getAllByUser(@GetUser('sub') userId: number) : Promise<GoalResponseDto[]>{

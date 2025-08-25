@@ -3,8 +3,11 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as argon2 from 'argon2';
 import { UserService } from 'src/user/user.service';
+import { saveBase64Image } from '../common/shared/file.utils';
 import { User as PrismaUser } from '@prisma/client';
 import { AuthResponseDto } from './responseDto/auth-response.dto';
+import { join } from 'path';
+
 
 
 @Injectable()
@@ -23,7 +26,7 @@ export class AuthService {
     userName: string,
     email: string,
     password: string,
-    profilePicture?: string,
+    profilePictureBase64?: string,
   ) {
     try {
       const exists = await this.users.findByEmailOrUsername(email, userName);
@@ -31,13 +34,22 @@ export class AuthService {
 
       const hashedPassword = await argon2.hash(password);
 
+      let profilePictureFilename: string | undefined;
+      if (profilePictureBase64) {
+       profilePictureFilename = saveBase64Image(
+         profilePictureBase64,
+         join(process.cwd(), 'storage/private/profile')
+
+       );
+      }
+
       const user = await this.users.create({
         firstName,
         lastName,
         userName,
         email,
         passwordHash: hashedPassword,
-        profilePicture,
+        profilePicture: profilePictureFilename,
       });
 
       const tokens = await this.generateAndSaveTokens(user);
@@ -97,7 +109,7 @@ export class AuthService {
     return this.formatUser(user);
   } catch (err) {
     if (err instanceof NotFoundException || err instanceof UnauthorizedException) {
-      throw err; // rethrow as-is
+      throw err; 
     }
     throw new InternalServerErrorException('Failed to fetch user');
   }
@@ -114,18 +126,17 @@ export class AuthService {
 
  
   // private helpers
+ private formatUser(user: PrismaUser) {
+  return {
+    id: user.id, 
+    firstName: user.firstName,
+    lastName: user.lastName,
+    userName: user.userName,
+    email: user.email,
+    profilePicture: user.profilePicture
 
-
-  private formatUser(user: PrismaUser) {
-    return {
-      firstName: user.firstName,
-      lastName: user.lastName,
-      userName: user.userName,
-      email: user.email,
-      profilePicture: user.profilePicture ? `/uploads/${user.profilePicture}` : null,
-      
-    };
-  }
+  };
+ }
 
   private async generateAndSaveTokens(user: PrismaUser) {
     const tokens = await this.issueTokens(user.id, user.email);

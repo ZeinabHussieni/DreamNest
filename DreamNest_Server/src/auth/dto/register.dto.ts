@@ -19,4 +19,8 @@ export class RegisterDto {
 
   @IsString()
   userName: string;
+
+  @IsOptional()
+  @IsString()
+  profilePictureBase64?: string; 
 }

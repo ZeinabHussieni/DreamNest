@@ -2,6 +2,7 @@ import { Controller, Get, Patch, Param, ParseIntPipe, UseGuards } from '@nestjs/
 import { ConnectionsService } from './connections.service';
 import { AccessTokenGuard } from '../auth/guards/access-token.guard';
 import { GetUser } from '../common/decorators/get-user.decorator';
+import { ConnectionResponseDto } from './responseDto/connection-response.dto';
 
 @UseGuards(AccessTokenGuard)
 @Controller('connections')
@@ -9,7 +10,7 @@ export class ConnectionsController {
   constructor(private readonly connectionsService: ConnectionsService) {}
 
   @Get()
-  async getUserConnections(@GetUser('sub') userId: number) {
+  async getUserConnections(@GetUser('sub') userId: number):Promise<ConnectionResponseDto[]>  {
     return this.connectionsService.getUserConnections(userId);
   }
 
