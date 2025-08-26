@@ -31,30 +31,27 @@ export class GoalsService {
     }
   }
 
-  async getAllByUserId(userId: number): Promise<GoalResponseDto[]>  {
-    try {
-      const goal= await this.prisma.goal.findMany({ where: { user_id: userId } });
-      return goal.map((g) => this.formatGoal(g));
-    } catch (err) {
-      throw new InternalServerErrorException('Failed to fetch goals');
-    }
-  }
+  async getGoals(userId: number, status?: 'completed' | 'in-progress'): Promise<GoalResponseDto[]> {
+   try {
+     const where: any = { user_id: userId };
 
-  async getGoalsByStatus(userId: number, status: 'completed' | 'in-progress'): Promise<GoalResponseDto[]>{
-    try {
-      const goal=  await this.prisma.goal.findMany({
-        where: {
-          user_id: userId,
-          progress: status === 'completed'
-          ? { gte: 100 } : { gte: 0, lt: 100 } 
-        },
-        include: { plans: true },
-      });
-     return goal.map((g) => this.formatGoal(g));
-    } catch (err) {
-      throw new InternalServerErrorException('Failed to fetch goals by status');
-    }
+     if (status === 'completed') {
+       where.progress = { gte: 100 };
+      } else if (status === 'in-progress') {
+       where.progress = { gte: 0, lt: 100 };
+     }
+
+     const goals = await this.prisma.goal.findMany({
+       where,
+       include: { plans: true },
+     });
+
+    return goals.map((g) => this.formatGoal(g));
+  } catch (err) {
+    throw new InternalServerErrorException('Failed to fetch goals');
   }
+}
+
 
   async deleteById(id: number): Promise<{ success: boolean }> {
     try {
@@ -93,7 +90,9 @@ export class GoalsService {
       ]);
 
       // create goal
-      const goal = await this.createGoalInDB(data, goalEmbedding, aiPlans);
+      const goal = await this.createGoalInDB(
+      { ...data, visionBoardFilename }, goalEmbedding,aiPlans);
+
 
       // create help if provided
       const helpEmbedding = data.helpText

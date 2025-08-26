@@ -21,7 +21,7 @@ export class GoalsController {
    });
   }
 
-  @Get('vision-board/file/:filename')
+  @Get('visionBoard/file/:filename')
    async getVisionBoard( @Param('filename') filename: string, @Res() res: Response) {
    const filePath = join(process.cwd(), 'storage/private/visionBoard', filename);
    return res.sendFile(filePath);
