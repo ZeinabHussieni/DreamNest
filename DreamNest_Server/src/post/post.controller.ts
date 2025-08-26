@@ -10,7 +10,7 @@ import { PostResponseDto } from './responseDto/post-response.dto';
 export class PostController {
     constructor(private readonly postsService:PostService){}
 
-    @Post('create_post')
+    @Post()
     async create(@GetUser('sub') userId:any,@Body() body:CreatePostDto): Promise<PostResponseDto>{
         const id=Number(userId);
         if(isNaN(id)) throw new BadRequestException('Invalid user ID from token');
@@ -18,7 +18,7 @@ export class PostController {
 
     }
 
-    @Get('all')
+    @Get()
      async getAllPost(): Promise<PostResponseDto[]> {
      return this.postsService.getAllPost();
     }

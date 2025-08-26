@@ -69,17 +69,17 @@ export class GoalsService {
    async createGoalWithAI(data: {
     title: string;
     description: string;
-    help_text?: string;
+    helpText?: string;
     visionBoardBase64?: string;
     user_id: number;
   }): Promise<GoalResponseDto> {
     try {
       const threshold = 0.4;
 
-     let vision_board_filename: string | undefined;
+     let visionBoardFilename: string | undefined;
 
      if (data.visionBoardBase64) {
-       vision_board_filename = saveBase64Image(
+       visionBoardFilename = saveBase64Image(
         data.visionBoardBase64,
         join(process.cwd(), 'storage/private/visionBoard')
  
@@ -96,8 +96,8 @@ export class GoalsService {
       const goal = await this.createGoalInDB(data, goalEmbedding, aiPlans);
 
       // create help if provided
-      const helpEmbedding = data.help_text
-        ? await this.createHelp(data.user_id, data.help_text)
+      const helpEmbedding = data.helpText
+        ? await this.createHelp(data.user_id, data.helpText)
         : null;
 
       // create connections: goal → helps / help → other goals
@@ -135,8 +135,8 @@ export class GoalsService {
       data: {
         title: data.title,
         description: data.description,
-        help_text: data.help_text || null,
-        vision_board_filename: data.vision_board_filename || null,
+        helpText: data.helpText || null,
+        visionBoardFilename: data.visionBoardFilename || null,
         embedding: goalEmbedding.length ? goalEmbedding : Prisma.JsonNull,
         user: { connect: { id: data.user_id } },
         plans: { create: aiPlans.map(p => ({ ...p, due_date: new Date(), completed: false })) },
@@ -238,8 +238,8 @@ export class GoalsService {
     id: goal.id,
     title: goal.title,
     description: goal.description,
-    help_text: goal.help_text,
-    vision_board_filename: goal.vision_board_filename,
+    helpText: goal.helpText,
+    visionBoardFilename: goal.visionBoardFilename,
     progress: goal.progress,
     createdAt: goal.createdAt,
     updatedAt: goal.updatedAt,

@@ -10,7 +10,7 @@ export class ChatController {
   constructor(private readonly chatService: ChatService) {}
 
 
-   @Post('create')
+   @Post()
      async createChatRoom(
      @GetUser('sub') currentUserId: number,          
      @Body() data: { otherUserId: number }    

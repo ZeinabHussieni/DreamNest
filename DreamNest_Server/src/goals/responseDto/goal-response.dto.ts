@@ -5,8 +5,8 @@ export class GoalResponseDto {
   id: number;
   title: string;
   description: string;
-  help_text?: string | null;
-  vision_board_filename?: string | null;
+  helpText?: string | null;
+  visionBoardFilename?: string | null;
   progress: number;
   createdAt: Date;
   updatedAt: Date;
