@@ -43,7 +43,7 @@ async sendDailyReports() {
          'We Missed You Today!',
          html,
           );
-          this.logger.log(`No-progress email sent to ${user.email}`);
+          this.logger.log(`No progress email sent to ${user.email}`);
        }
 
     } catch (err) {

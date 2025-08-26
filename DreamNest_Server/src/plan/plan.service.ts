@@ -4,8 +4,6 @@ import { Plan as PrismaPlan } from '@prisma/client';
 import { NotificationService } from 'src/notification/notification.service';
 import { PlanResponseDto } from './responseDto/plan-response.dto';
 
-
-
 @Injectable()
 export class PlanService {
   constructor(
@@ -81,7 +79,7 @@ export class PlanService {
   });
 
   return this.formatPlan(plan);
-}
+ }
 
 
   async getAllByGoal(goalId: number): Promise<PlanResponseDto[]> {

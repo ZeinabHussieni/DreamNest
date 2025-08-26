@@ -2,6 +2,7 @@ import {Controller,Get,Post,Patch,Param,Body,ParseIntPipe,UseGuards,} from '@nes
 import { PlanService } from './plan.service';
 import { CreatePlanDto } from './dto/create-plan.dto';
 import { AccessTokenGuard } from '../auth/guards/access-token.guard';
+import { PlanResponseDto } from './responseDto/plan-response.dto';
 
 @Controller('goals')
 @UseGuards(AccessTokenGuard)
@@ -13,24 +14,24 @@ export class PlanController {
   async create(
     @Param('goalId', ParseIntPipe) goalId: number,
     @Body() body: CreatePlanDto,
-  ) {
+  ): Promise<PlanResponseDto> {
     return this.planService.create(goalId, body);
   }
 
   @Get(':goalId/plans')
-  async getAllByGoal(@Param('goalId', ParseIntPipe) goalId: number) {
+  async getAllByGoal(@Param('goalId', ParseIntPipe) goalId: number) : Promise<PlanResponseDto[]>{
     return this.planService.getAllByGoal(goalId);
   }
 
 
   @Patch('/plans/:planId/toggle')
-  async togglePlanDone(@Param('planId', ParseIntPipe) planId: number) {
+  async togglePlanDone(@Param('planId', ParseIntPipe) planId: number): Promise<PlanResponseDto> {
     return this.planService.togglePlanDone(planId);
   }
 
 
   @Get('/plans/:planId')
-  async getById(@Param('planId', ParseIntPipe) planId: number) {
+  async getById(@Param('planId', ParseIntPipe) planId: number): Promise<PlanResponseDto> {
     return this.planService.findById(planId);
   }
 }
