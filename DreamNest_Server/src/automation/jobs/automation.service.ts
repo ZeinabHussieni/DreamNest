@@ -17,7 +17,7 @@ export class AutomationService {
   ) {}
 
 
-@Cron('0 23 * * *') 
+@Cron('* * * * *') 
 async sendDailyReports() {
   this.logger.log('Starting daily reports automation...');
 

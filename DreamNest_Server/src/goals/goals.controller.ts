@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, Body, Delete, ParseIntPipe, UseGuards, Res } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Delete, ParseIntPipe, UseGuards, Res,Query } from '@nestjs/common';
 import type { Response } from 'express';
 import { join } from 'path';
 import { GoalsService } from './goals.service';
@@ -13,7 +13,7 @@ export class GoalsController {
   constructor(private readonly goalsService: GoalsService) {}
 
 
- @Post('create_goal')
+ @Post()
    async create( @GetUser('sub') userId: number, @Body() body: CreateGoalDto): Promise<GoalResponseDto> {
      return this.goalsService.createGoalWithAI({
      ...body,
@@ -28,10 +28,14 @@ export class GoalsController {
   }
   
 
-  @Get()
-  async getAllByUser(@GetUser('sub') userId: number) : Promise<GoalResponseDto[]>{
-    return this.goalsService.getAllByUserId(userId);
+ @Get()
+  async getGoals(
+  @GetUser('sub') userId: number,
+  @Query('status') status?: 'completed' | 'in-progress', 
+  ): Promise<GoalResponseDto[]> {
+    return this.goalsService.getGoals(userId, status);
   }
+
 
   @Get(':id')
   async getById(@Param('id', ParseIntPipe) id: number): Promise<GoalResponseDto> {
@@ -46,11 +50,5 @@ export class GoalsController {
     return this.goalsService.deleteById(id);
   }
 
-  @Get('status/:status')
-  async getByStatus(
-    @GetUser('sub') userId: number,
-    @Param('status') status: 'completed' | 'in-progress',
-  ): Promise<GoalResponseDto[]> {
-    return this.goalsService.getGoalsByStatus(userId, status);
-  }
+
 }

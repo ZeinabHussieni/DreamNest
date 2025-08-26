@@ -45,14 +45,14 @@ model Goal {
   id                  Int       @id @default(autoincrement())
   title               String
   description         String
-  help_text           String?   
-  vision_board_filename String?  
+  helpText           String?   
+  visionBoardFilename String?  
   progress            Float     @default(0) 
   embedding           Json?     
 
   plans               Plan[] 
-  user_id             Int
-  user                User       @relation(fields: [user_id], references: [id])
+  userId             Int
+  user                User       @relation(fields: [userId], references: [id])
 
 
   connections         Connection[]
@@ -65,13 +65,13 @@ model Help {
   id          Int    @id @default(autoincrement())
   description String
   embedding   Json?      
-  user_id     Int
-  user        User   @relation(fields: [user_id], references: [id])
+  userId     Int
+  user        User   @relation(fields: [userId], references: [id])
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  @@index([user_id])
+  @@index([userId])
 }
 
 model Connection {
@@ -116,8 +116,8 @@ model Plan {
 model Post {
   id        Int        @id @default(autoincrement())
   content   String
-  user_id   Int
-  user      User       @relation(fields: [user_id], references: [id])
+  userId   Int
+  user      User       @relation(fields: [userId], references: [id])
   likes     PostLike[] 
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
@@ -125,13 +125,13 @@ model Post {
 
 model PostLike {
   id          Int      @id @default(autoincrement()) 
-  user_id          Int
+  userId          Int
   post_id          Int
-  user             User       @relation(fields: [user_id], references: [id]) 
+  user             User       @relation(fields: [userId], references: [id]) 
   post             Post       @relation(fields: [post_id], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  @@unique([user_id, post_id])
+  @@unique([userId, post_id])
 }
 
 model ChatRoom {
