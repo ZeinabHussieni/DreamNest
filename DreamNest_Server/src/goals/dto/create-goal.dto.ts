@@ -9,7 +9,7 @@ export class CreateGoalDto {
 
   @IsOptional()
   @IsString()
-  help_text?: string;
+  helpText?: string;
 
   @IsOptional()
   @IsString()
