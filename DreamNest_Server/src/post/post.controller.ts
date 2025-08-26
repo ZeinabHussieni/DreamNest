@@ -3,6 +3,7 @@ import { AccessTokenGuard } from '../auth/guards/access-token.guard';
 import { CreatePostDto } from './dto/create-post.dto';
 import { GetUser } from '../common/decorators/get-user.decorator';
 import { PostService } from './post.service';
+import { PostResponseDto } from './responseDto/post-response.dto';
 
 @Controller('posts')
 @UseGuards(AccessTokenGuard)
@@ -10,7 +11,7 @@ export class PostController {
     constructor(private readonly postsService:PostService){}
 
     @Post('create_post')
-    async create(@GetUser('sub') userId:any,@Body() body:CreatePostDto){
+    async create(@GetUser('sub') userId:any,@Body() body:CreatePostDto): Promise<PostResponseDto>{
         const id=Number(userId);
         if(isNaN(id)) throw new BadRequestException('Invalid user ID from token');
         return this.postsService.create({...body,user_id:id});
@@ -18,12 +19,12 @@ export class PostController {
     }
 
     @Get('all')
-     async getAllPost() {
+     async getAllPost(): Promise<PostResponseDto[]> {
      return this.postsService.getAllPost();
     }
 
    @Get('me')
-     async getUserAllPosts(@GetUser('sub') userId: number) {
+     async getUserAllPosts(@GetUser('sub') userId: number): Promise<PostResponseDto[]> {
       return this.postsService.getUserAllPosts(userId);
     }
 

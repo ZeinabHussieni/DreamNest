@@ -23,9 +23,10 @@ export class GoalsController {
 
   @Get('vision-board/file/:filename')
    async getVisionBoard( @Param('filename') filename: string, @Res() res: Response) {
-   const filePath = join(__dirname, '..', 'storage/private/visionBoard', filename);
+   const filePath = join(process.cwd(), 'storage/private/visionBoard', filename);
    return res.sendFile(filePath);
   }
+  
 
   @Get()
   async getAllByUser(@GetUser('sub') userId: number) : Promise<GoalResponseDto[]>{
