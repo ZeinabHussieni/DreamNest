@@ -57,9 +57,9 @@ export class AuthController {
   @Get('me')
   async me(@GetUser('sub') userId: number) {
   const user = await this.auth.getUser(userId);
-  const { id, firstName, lastName, userName, email, profilePicture } = user;
+  const { id, firstName, lastName, userName, email,coins, profilePicture } = user;
 
-  return { id, firstName, lastName, userName, email, profilePicture };
+  return { id, firstName, lastName, userName, email, coins,profilePicture };
  }
 
 

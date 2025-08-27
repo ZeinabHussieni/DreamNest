@@ -133,6 +133,7 @@ export class AuthService {
     lastName: user.lastName,
     userName: user.userName,
     email: user.email,
+    coins:user.coins,
     profilePicture: user.profilePicture
 
   };

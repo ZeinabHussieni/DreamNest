@@ -12,14 +12,14 @@ const Navbar: React.FC = () => {
   const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   const { isOpen: dropdownOpen, toggleDropdown, dropdownRef } = useDropdown();
-  const { userData, profilePicUrl } = useUserData(isAuthenticated);
+  const { userData,coins, profilePicUrl } = useUserData(isAuthenticated);
 
   const handleLogout = () => {
     logout();
     navigate("/login");
   };
 
-  const coins = userData ?? 0;
+
 
   return (
     <nav className="Navbar">
@@ -61,12 +61,12 @@ const Navbar: React.FC = () => {
               <img src={Notification} alt="Notifications" />
             </a>
 
-            {coins > 0 && (
+          
               <div className="coin-badge">
                 <img src={coinIcon} alt="Coin" className="coin-icon" />
                 <span className="coin-text">{coins}</span>
               </div>
-            )}
+          
 
             <div className="Navbar-profile" ref={dropdownRef} onClick={toggleDropdown}>
               <img

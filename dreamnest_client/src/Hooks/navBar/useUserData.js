@@ -5,6 +5,7 @@ import getUserProfile from "../../Services/auth/getUserProfile";
 const useUserData = (isAuthenticated) => {
   const [userData, setUserData] = useState(null);
   const [profilePicUrl, setProfilePicUrl] = useState(null);
+  const [coins, setCoins] = useState(null);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -23,6 +24,7 @@ const useUserData = (isAuthenticated) => {
 
           const url = URL.createObjectURL(blob);
           setProfilePicUrl(url);
+          setCoins(user.coins)
         }
       } catch (err) {
         console.error("Error fetching user or profile picture:", err);
@@ -37,7 +39,7 @@ const useUserData = (isAuthenticated) => {
     };
   }, [isAuthenticated]);
 
-  return { userData, profilePicUrl };
+  return { userData, coins,profilePicUrl };
 };
 
 export default useUserData;
