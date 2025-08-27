@@ -1,0 +1,23 @@
+.page-wrapper {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex-grow: 1;
+  padding: 2rem;
+}
+
+@media (max-width: 830px) {
+  .main-content {
+    margin-left: 140px;
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 500px) {
+  .main-content {
+    margin-left: 0px;
+    padding: 0px;
+  }
+}
