@@ -1,75 +1,48 @@
-import { useState, useRef, useEffect } from "react";
+import { useActionState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import registerService from "../../Services/auth/registerService";
 import { useAuth } from "../../Context/AuthContext";
 
-const useRegister = (initialForm = {
-  firstName: "",
-  lastName: "",
-  userName: "",
-  profilePictureBase64: "", 
-  email: "",
-  password: ""
- }) => {
-  const [form, setForm] = useState(initialForm);
-  const [loading, setLoading] = useState(false);
+const useRegister = () => {
   const navigate = useNavigate();
-  const [message, setMessage] = useState({ type: "", text: "" });
-  const timeoutRef = useRef(null);
   const { login } = useAuth();
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleImageChange = (file) => {
-  if (!file) {
-    setForm(prev => ({ ...prev, profilePictureBase64: null }));
-    return;
-  }
-
-  const reader = new FileReader();
-  reader.onloadend = () => {
-    const dataUrl = reader.result ;
-    setForm(prev => ({ ...prev, profilePictureBase64: dataUrl }));
-  };
-  reader.readAsDataURL(file);
- };
-
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+  const registerAction = async (prevState, formData) => {
     try {
+
+      const form = {
+        firstName: formData.get("firstName"),
+        lastName: formData.get("lastName") ,
+        userName: formData.get("userName"),
+        profilePictureBase64: formData.get("profilePictureBase64") ,
+        email: formData.get("email"),
+        password: formData.get("password"),
+      };
+
       const token = await registerService(form);
       login(token);
-      toast.success("Registration successful!")
+      toast.success("Registration successful!");
+      navigate("/homePage");
 
-      timeoutRef.current = setTimeout(() => {
-        setMessage({ type: "", text: "" });
-        navigate("/homePage");
-      }, 700);
+      return { success: true, error: null };
     } catch (error) {
       toast.error(error?.response?.data?.message || "Failed to register");
       console.error("Register error:", error);
-      timeoutRef.current = setTimeout(() => setMessage({ type: "", text: "" }), 3000);
-    } finally {
-      setLoading(false);
+      return { success: false, error: error?.message || "Registration failed" };
     }
   };
 
-  const resetForm = () => setForm(initialForm);
+  const [state, action, isPending] = useActionState(registerAction, {
+    success: false,
+    error: null,
+  });
 
   return {
-    form,
-    handleChange,
-    handleSubmit,
-    loading,
-    resetForm,handleImageChange
+    action,
+    state,
+    loading: isPending,
   };
 };
-
 
 export default useRegister;

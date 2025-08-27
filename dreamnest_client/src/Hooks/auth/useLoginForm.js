@@ -1,58 +1,46 @@
-import { useState, useRef, useEffect } from "react";
+import { useActionState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import loginService from "../../Services/auth/loginService";
 import { useAuth } from "../../Context/AuthContext";
 
-const useLogin = (initialForm = {
-  identifier: "",
-  password: ""
- }) => {
-  const [form, setForm] = useState(initialForm);
-  const [loading, setLoading] = useState(false);
+const useLogin = () => {
   const navigate = useNavigate();
-  const [message, setMessage] = useState({ type: "", text: "" });
-  const timeoutRef = useRef(null);
   const { login } = useAuth();
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
-  };
-
-
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+ 
+  const loginAction = async (prevState, formData) => {
     try {
+      const form = {
+        identifier: formData.get("identifier"),
+        password: formData.get("password"),
+      };
+
       const token = await loginService(form);
       login(token);
-      toast.success("Login successful!")
+      toast.success("Login successful!");
 
-      timeoutRef.current = setTimeout(() => {
-        setMessage({ type: "", text: "" });
-        navigate("/homePage");
-      }, 700);
+      navigate("/homePage");
+      return { success: true, error: null };
+
     } catch (error) {
       toast.error(error?.response?.data?.message || "Failed to login");
       console.error("Login error:", error);
-      timeoutRef.current = setTimeout(() => setMessage({ type: "", text: "" }), 3000);
-    } finally {
-      setLoading(false);
+      return { success: false, error: error?.message || "Login failed" };
     }
   };
 
-  const resetForm = () => setForm(initialForm);
+
+  const [state, action, isPending] = useActionState(loginAction, {
+    success: false,
+    error: null,
+  });
 
   return {
-    form,
-    handleChange,
-    handleSubmit,
-    loading,
-    resetForm
+    action,  
+    state,  
+    loading: isPending,
   };
 };
-
 
 export default useLogin;

@@ -7,8 +7,6 @@ type InputProps = {
   hint: string;
   placeholder?: string;
   required?: boolean;
-  value: string;
-  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
 };
 
 const Input: React.FC<InputProps> = ({
@@ -17,8 +15,6 @@ const Input: React.FC<InputProps> = ({
   hint,
   placeholder,
   required,
-  value,
-  onChange,
  }) => {
   return (
     <div className="input-group-auth">
@@ -33,8 +29,6 @@ const Input: React.FC<InputProps> = ({
         placeholder={placeholder}
         required={required}
         className="primary-input-auth"
-        value={value}
-        onChange={onChange}
       />
     </div>
   );

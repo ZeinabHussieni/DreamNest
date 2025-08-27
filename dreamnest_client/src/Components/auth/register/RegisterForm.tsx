@@ -5,16 +5,13 @@ import useRegister from "../../../Hooks/auth/useRegisterForm";
 import ImageInput from "../../shared/imageInput/ImageInput";
 
 const RegisterForm: React.FC = () => {
-  const { form, handleChange, handleSubmit, handleImageChange,loading } = useRegister();
+  const { action, loading } = useRegister();
 
 
-  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    handleSubmit(e);
-  };
+
 
   return (
-    <form className="register-form" onSubmit={onSubmit}>
+    <form className="register-form" action={action}>
       <h2 className="form-title">Create an account</h2>
 
       <div className="name-row firstlast">
@@ -22,15 +19,11 @@ const RegisterForm: React.FC = () => {
           name="firstName"
           hint="First Name"
           placeholder="John"
-          value={form.firstName}
-          onChange={handleChange}
         />
         <Input
           name="lastName"
           hint="Last Name"
           placeholder="Doe"
-          value={form.lastName}
-          onChange={handleChange}
         />
       </div>
 
@@ -39,14 +32,11 @@ const RegisterForm: React.FC = () => {
           name="userName"
           hint="Username"
           placeholder="john.doe"
-          value={form.userName}
-          onChange={handleChange}
         />
 
         <ImageInput
          name="profilePictureBase64"
          hint="Upload your profile"
-         onChange={handleImageChange}
         />
 
         </div>
@@ -57,8 +47,6 @@ const RegisterForm: React.FC = () => {
           name="email"
           hint="Email"
           placeholder="john@example.com"
-          value={form.email}
-          onChange={handleChange}
         />
 
         <Input
@@ -66,8 +54,6 @@ const RegisterForm: React.FC = () => {
           name="password"
           hint="Password"
           placeholder="Enter your password"
-          value={form.password}
-          onChange={handleChange}
         />
       </div>
 

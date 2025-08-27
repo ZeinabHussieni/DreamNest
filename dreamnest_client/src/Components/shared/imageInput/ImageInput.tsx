@@ -5,16 +5,29 @@ import "./imageInput.css";
 type ImageInputProps = {
   name: string;
   hint: string;
-  onChange: (file: File | null) => void; 
 };
 
-const ImageInput: React.FC<ImageInputProps> = ({ name, hint, onChange }) => {
+const ImageInput: React.FC<ImageInputProps> = ({ name, hint }) => {
   const [fileName, setFileName] = useState<string>("");
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
-    setFileName(file ? file.name : "");
-    onChange(file);
+    if (file) {
+      setFileName(file.name);
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const hiddenInput = document.getElementById(
+          `${name}-hidden`
+        ) as HTMLInputElement;
+        if (hiddenInput) {
+          hiddenInput.value = reader.result as string;
+        }
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setFileName("");
+    }
   };
 
   return (
@@ -35,9 +48,10 @@ const ImageInput: React.FC<ImageInputProps> = ({ name, hint, onChange }) => {
         onChange={handleFileChange}
         style={{ display: "none" }}
       />
+
+      <input id={`${name}-hidden`} type="hidden" name={name} />
     </div>
   );
 };
-
 
 export default ImageInput;
