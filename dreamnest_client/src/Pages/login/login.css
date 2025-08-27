@@ -1,0 +1,23 @@
+.form-title-login{
+  font-size: 30px;
+  font-weight: 600;
+  margin-right: 300px;
+  color: #1f1f1f;
+}
+.login-form {
+  width: 360px;
+  margin-top: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.button-login{
+  margin-top: 15px;
+  margin-left: 150px;
+}
+
+@media (max-width: 754px) {
+  .button-login {
+    margin-right: 200px;
+  }
+}
