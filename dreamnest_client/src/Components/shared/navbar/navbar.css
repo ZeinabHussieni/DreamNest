@@ -61,8 +61,8 @@
 }
 
 .pro-pic {
-  width: 47px;
-  height: 47px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
   object-fit: cover;
   transition: transform 0.2s ease;
@@ -262,8 +262,8 @@
 }
 
 .coin-icon {
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
 }
 
 .coin-text {

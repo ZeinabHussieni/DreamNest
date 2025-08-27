@@ -20,8 +20,10 @@ const useRegister = () => {
         password: formData.get("password"),
       };
 
-      const token = await registerService(form);
-      login(token);
+      const response  = await registerService(form);
+      const { accessToken, user } = response.data;
+      login(accessToken,user);
+
       toast.success("Registration successful!");
       navigate("/homePage");
 

@@ -1,30 +1,32 @@
-import React from 'react';
+import React from "react";
 import { Link, useNavigate } from "react-router-dom"; 
 import Logo from "../../../Assets/Images/Final logo.png";
 import Notification from "../../../Assets/Icons/notification.svg";
 import coinIcon from "../../../Assets/Icons/coins.svg";
 import ThemeToggle from "../../themeToggle/ThemeToggle"; 
 import { useAuth } from "../../../Context/AuthContext";
-import useDropdown from "../../../Hooks/navBar/useDropdown"; 
+import useDropdown from "../../../Hooks/navBar/useDropdown.js"; 
+import useUserData from "../../../Hooks/navBar/useUserData";
 import "./navbar.css";
-
 const Navbar: React.FC = () => {
-  const { isAuthenticated, logout, role } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
-
   const { isOpen: dropdownOpen, toggleDropdown, dropdownRef } = useDropdown();
+  const { userData, profilePicUrl } = useUserData(isAuthenticated);
 
   const handleLogout = () => {
     logout();
     navigate("/login");
   };
 
+  const coins = userData ?? 0;
+
   return (
-    <nav className='Navbar'>
-      <div className='Navbar-logo'>
+    <nav className="Navbar">
+      <div className="Navbar-logo">
         <img src={Logo} alt="Logo" className="logo-size" />
-        <div className='title'>
-          <h2 className='dreamNest'>
+        <div className="title">
+          <h2 className="dreamNest">
             <Link to="/homePage" className="dreamNest-link">DreamNest</Link>
           </h2>
         </div>
@@ -45,7 +47,7 @@ const Navbar: React.FC = () => {
         </div>
       )}
 
-      <div className='left'>
+      <div className="left">
         <ThemeToggle />
 
         {!isAuthenticated ? (
@@ -59,18 +61,16 @@ const Navbar: React.FC = () => {
               <img src={Notification} alt="Notifications" />
             </a>
 
-            <div className="coin-badge">
-              <img src={coinIcon} alt="Coin" className="coin-icon" />
-              <span className="coin-text">1204</span>
-            </div>
+            {coins > 0 && (
+              <div className="coin-badge">
+                <img src={coinIcon} alt="Coin" className="coin-icon" />
+                <span className="coin-text">{coins}</span>
+              </div>
+            )}
 
-            <div 
-              className="Navbar-profile" 
-              ref={dropdownRef}
-              onClick={toggleDropdown} 
-            >
+            <div className="Navbar-profile" ref={dropdownRef} onClick={toggleDropdown}>
               <img
-                src="https://static.vecteezy.com/system/resources/previews/027/448/973/large_2x/avatar-account-icon-default-social-media-profile-photo-vector.jpg"
+                src={profilePicUrl || "/default-profile.png"}
                 alt="Profile"
                 className="pro-pic"
               />

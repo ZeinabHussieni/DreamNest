@@ -16,8 +16,10 @@ const useLogin = () => {
         password: formData.get("password"),
       };
 
-      const token = await loginService(form);
-      login(token);
+      const response = await loginService(form);
+      const { accessToken, user } = response.data;
+      login(accessToken, user);
+
       toast.success("Login successful!");
 
       navigate("/homePage");
