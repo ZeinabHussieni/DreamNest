@@ -31,11 +31,12 @@ export class AuthController {
     return result;
   }
 
+  @UseGuards(AccessTokenGuard)
   @Get('profile/:filename')
   async getProfile(@Param('filename') filename: string, @Res() res: Response) {
-  const filePath = join(process.cwd(), 'storage/private/profile', filename);
-  return res.sendFile(filePath);
-}
+    const filePath = join(process.cwd(), 'storage/private/profile', filename);
+    return res.sendFile(filePath);
+  }
 
 
   //login
@@ -52,12 +53,15 @@ export class AuthController {
     return this.auth.logout(userId.sub);
   }
   
-  //current user
   @UseGuards(AccessTokenGuard)
   @Get('me')
-  me(@GetUser('sub') user:  any): Promise<AuthResponseDto>  {
-    return user;
-  }
+  async me(@GetUser('sub') userId: number) {
+  const user = await this.auth.getUser(userId);
+  const { id, firstName, lastName, userName, email, profilePicture } = user;
+
+  return { id, firstName, lastName, userName, email, profilePicture };
+ }
+
 
   //user by id
   @Get('getUser')
