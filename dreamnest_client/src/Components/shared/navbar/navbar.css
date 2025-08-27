@@ -1,0 +1,290 @@
+.Navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.3rem;
+  background-color: var(--nav-bg);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  height: 87px;
+}
+
+.Navbar-logo {
+  display: flex;
+  align-items: center;
+  border-radius: 50px;
+}
+
+.Navbar-logo h2 {
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin-left: 20px;
+}
+
+.icon-btn {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  margin: 0 10px;
+}
+
+.icon-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.logo-size {
+  border-radius: 100px;
+  width: 60px;
+  height: 60px;
+  margin-left: 40px;
+}
+
+.right-section {
+  display: flex;
+  align-items: center;
+}
+
+.Navbar-icon {
+  width: 50px;
+}
+
+.Navbar-profile {
+  position: relative;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.pro-pic {
+  width: 47px;
+  height: 47px;
+  border-radius: 50%;
+  object-fit: cover;
+  transition: transform 0.2s ease;
+}
+
+.pro-pic:hover {
+  transform: scale(1.05);
+}
+
+.dropdown {
+  position: absolute;
+  top: 50px;
+  right: 0;
+  border: 1px solid #ccc;
+  background-color:#e6e5e5 ;
+  border-radius: 5px;
+  padding: 0.6rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+}
+
+.dropdown li {
+  list-style: none;
+  font-size: 15px;
+}
+
+.dropdown a {
+  text-decoration: none;
+  color: var(--main-color);
+  padding: 0.3rem;
+  display: block;
+  transition: background-color 0.2s;
+}
+
+.dropdown a:hover {
+  color: #8f6da3;
+}
+
+.navbar-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-left: 400px;
+}
+
+.nav-btn {
+  padding: 6px 12px;
+  font-size: 10px;
+  border: none;
+  background: none;
+  color: var(--main-color);
+  border-radius: 6px;
+  position: relative;
+  transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+.nav-btn:hover {
+  color: #F2EAF7;
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.nav-btn::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  width: 0;
+  height: 2px;
+  background-color: #F2EAF7;
+  transition: width 0.3s ease;
+}
+
+.nav-btn:hover::after {
+  width: 100%;
+}
+
+.left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-left: auto;
+  margin-right: 40px;
+}
+
+.btn {
+  padding: 6px 25px;
+  font-size: 21px;
+  text-decoration: none;
+  color: var(--soft-color);
+  border: none;
+  background: none;
+  border-radius: 6px;
+  transition: color 0.3s, background-color 0.3s;
+  position: relative;
+  font-weight: 546;
+}
+
+.btn:hover::after {
+  width: 100%;
+}
+
+.login-btn {
+  color: var(--soft-color);
+}
+
+.login-btn:hover {
+  color: #F2EAF7;
+}
+
+.register-btn {
+  color: var(--soft-color);
+}
+
+.register-btn:hover {
+  color: #F2EAF7;
+}
+
+.dropdown-managment {
+  position: relative;
+  display: inline-block;
+}
+
+.styled-dropdown {
+  display: none;
+  position: absolute;
+  top: 110%;
+  left: 0;
+  background-color: #e6e5e5;
+  min-width: 200px;
+  border-radius: 8px;
+  padding: 0.5rem 0;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  z-index: 100;
+  animation: fadeIn 0.2s ease-in-out;
+  border: 1px solid #f0f0f0;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.styled-dropdown a {
+  color: black;
+  padding: 12px 20px;
+  text-decoration: none;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  font-size: 19px;
+  text-align: center;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.styled-dropdown a:hover {
+  background-color: #f9f9f9;
+  color: #8f6da3;
+}
+
+.dropdown-managment:hover .styled-dropdown {
+  display: block;
+}
+
+.dreamNest {
+  font-size: 32px;
+  font-weight: 700;
+  color: white;
+}
+
+.dreamNest-link {
+  color: var(--main-color);
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.coin-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #FFF6C5;
+  padding: 8px 16px;
+  border-radius: 18px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.coin-badge:hover {
+  background-color: #f3e8a8;
+}
+
+.coin-icon {
+  width: 30px;
+  height: 30px;
+}
+
+.coin-text {
+  color: black;
+}
+
+@media (max-width: 390px) {
+  .Navbar-animation {
+    display: none;
+  }
+
+  .Navbar-logo h2 {
+    font-size: 1.5rem;
+  }
+
+  .Navbar-icon {
+    width: 30px;
+  }
+
+  .pro-pic {
+    width: 40px;
+    height: 40px;
+  }
+}
