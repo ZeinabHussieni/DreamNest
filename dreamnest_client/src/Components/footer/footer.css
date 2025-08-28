@@ -1,0 +1,170 @@
+.footer {
+  background-color: #6653AC; 
+  color: #fff;
+  padding: 50px 20px;
+    margin-left: -35px;
+  margin-right:-35px;
+  margin-bottom:-35px;
+  padding-left: 9rem;
+
+}
+
+.footer-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  max-width: 1200px;
+  margin: auto;
+   gap: 100px;
+
+}
+
+
+
+.footer-middle{
+    margin-right: -280px;
+}
+.footer-left,
+.footer-middle,
+.footer-right {
+  flex: 1;
+ 
+  min-width: 250px;
+  
+}
+
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-right: 3rem;
+}
+
+.footer-logo-img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid white;
+}
+
+.footer-logo h2 {
+  font-size: 29px;
+  font-weight: bold;
+}
+
+
+.footer-desc {
+  margin: 15px 0;
+  line-height: 1.6;
+  font-size: 18px;
+}
+
+
+.footer-socials {
+  display: flex;
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.footer-socials a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: var(--soft-bg); 
+  color: #6653AC; 
+  font-size: 18px;
+  transition: all 0.3s ease;
+}
+
+.footer-socials a:hover {
+  background-color: #fff;
+  color: #6653AC;
+}
+
+
+.footer-middle h3,
+.footer-right h3 {
+  margin-bottom: 15px;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.footer-middle ul {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-middle li {
+  margin-bottom: 10px;
+}
+
+.footer-middle a {
+  color: #fff;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.footer-middle a:hover {
+  color: #ddd;
+}
+
+
+.footer-right p {
+  margin: 8px 0;
+}
+
+.footer-right a {
+  color: #fff;
+  text-decoration: underline;
+}
+
+@media (max-width: 1049px) {
+    .footer-desc{
+        font-size: 16px;
+    }
+    .footer-logo h2{
+        font-size: 20px;
+    }
+    .footer-left{
+        margin-left: -80px;
+    }
+ .footer-middle{
+    font-size: 16px;
+    margin-right: 5px;
+
+ }
+}
+@media (max-width: 827px) {
+  .footer{
+    margin-left: -140px;
+  }
+    .footer-left{
+        margin-left: -20px;
+    }
+      .footer-desc{
+        font-size: 15px;
+    }
+    .footer-logo h2{
+        font-size: 18px;
+    }
+    .footer-right h3{
+    font-size: 18px;
+    }
+ .footer-middle h3{
+    font-size: 16px;
+
+
+ }
+}
+@media (max-width: 765px) {
+.footer{
+    display: none;
+}
+
+}
