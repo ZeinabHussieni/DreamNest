@@ -22,7 +22,7 @@ const useLogin = () => {
 
       toast.success("Login successful!");
 
-      navigate("/homePage");
+      navigate("/");
       return { success: true, error: null };
 
     } catch (error) {

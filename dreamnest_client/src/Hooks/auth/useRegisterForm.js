@@ -25,7 +25,7 @@ const useRegister = () => {
       login(accessToken,user);
 
       toast.success("Registration successful!");
-      navigate("/homePage");
+      navigate("/");
 
       return { success: true, error: null };
     } catch (error) {

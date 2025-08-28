@@ -2,13 +2,13 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.3rem 1rem;
+  padding: 0.3rem 1rem 0.6rem;
   background-color: var(--nav-bg);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
   position: sticky;
   top: 0;
+  height: 87px;
   z-index: 1000;
-  height: auto;
   flex-wrap: nowrap;
 }
 
@@ -16,12 +16,20 @@
   display: flex;
   align-items: center;
   border-radius: 50px;
+  margin-left: 0;
 }
 
 .Navbar-logo h2 {
   font-size: 1.3rem;
   font-weight: bold;
   margin-left: 20px;
+}
+
+.logo-size {
+  border-radius: 100px;
+  width: 60px;
+  height: 60px;
+  margin-left: 40px;
 }
 
 .icon-btn {
@@ -38,22 +46,11 @@
   object-fit: contain;
 }
 
-.logo-size {
-  border-radius: 100px;
-  width: 60px;
-  height: 60px;
-  margin-left: 40px;
-}
-
 .right-section {
   display: flex;
   align-items: center;
   gap: 1rem;
   flex-shrink: 0;
-}
-
-.Navbar-icon {
-  width: 50px;
 }
 
 .Navbar-profile {
@@ -169,51 +166,32 @@
   width: 100%;
 }
 
-.login-btn {
+.login-btn, .register-btn {
   color: var(--soft-color);
 }
 
-.login-btn:hover {
-  color: #F2EAF7;
-}
-
-.register-btn {
-  color: var(--soft-color);
-}
-
-.register-btn:hover {
+.login-btn:hover, .register-btn:hover {
   color: #F2EAF7;
 }
 
 .dropdown-managment {
   position: relative;
   display: inline-block;
+  z-index: 1000;
 }
 
 .styled-dropdown {
   display: none;
   position: absolute;
-  top: 110%;
+  top: 100%;
   left: 0;
-  background-color: #e6e5e5;
-  min-width: 200px;
+  background-color: #fff;
   border-radius: 8px;
+  min-width: 180px;
   padding: 0.5rem 0;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-  z-index: 100;
-  animation: fadeIn 0.2s ease-in-out;
-  border: 1px solid #f0f0f0;
-}
-
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
-    transform: translateY(-5px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  transition: all 0.3s ease;
+  overflow: hidden;
 }
 
 .styled-dropdown a {
@@ -235,6 +213,12 @@
 
 .dropdown-managment:hover .styled-dropdown {
   display: block;
+  animation: dropdownSlide 0.3s ease forwards;
+}
+
+@keyframes dropdownSlide {
+  0% { opacity: 0; transform: translateY(-10px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
 .dreamNest {
@@ -266,108 +250,124 @@
   background-color: #f3e8a8;
 }
 
-.coin-icon {
-  width: 26px;
-  height: 26px;
+.coin-icon { width: 26px; height: 26px; }
+.coin-text { color: black; }
+
+.desktop-links { display: flex; gap: 1rem; }
+
+.mobile-menu {
+  position: absolute;
+  top: 70px;
+  right: 10px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  min-width: 180px;
+  overflow: hidden;
+  animation: slideDown 0.3s ease forwards;
+  z-index: 2000;
 }
 
-.coin-text {
-  color: black;
+@keyframes slideDown {
+  0% { opacity: 0; transform: translateY(-10px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
+.mobile-submenu {
+  display: flex;
+  flex-direction: column;
+}
+
+.mobile-submenu > span {
+  padding: 12px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--main-color);
+}
+
+.submenu-links {
+  display: none;
+  flex-direction: column;
+  padding-left: 12px;
+}
+
+.mobile-submenu:hover .submenu-links {
+  display: flex;
+}
+
+.mobile-menu a {
+  padding: 0.5rem 0.8rem;
+  text-decoration: none;
+  color: var(--main-color);
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 6px;
+  transition: background 0.2s ease;
+}
+
+.mobile-menu a:hover {
+  background: rgba(0,0,0,0.05);
+}
+
+.mobile-menu-btn {
+  display: none;
+  color: white;
+}
+
+/* Responsive breakpoints */
 @media (max-width: 1280px) {
-  .Navbar {
-    height: 65px;
-  }
-  .Navbar-logo h2 {
-    font-size: 1.2rem;
-  }
-  .btn {
-    font-size: 1rem;
-    padding: 5px 12px;
-  }
-  .navbar-links {
-    margin-left: 70px;
-  }
-  .pro-pic {
-    width: 50px;
-    height: 50px;
-  }
-  .coin-badge {
-    padding: 5px 10px;
-  }
+  .Navbar-logo h2 { font-size: 1.2rem; }
+  .btn { font-size: 1rem; padding: 5px 12px; }
+  .navbar-links { margin-left: 20px; }
+  .pro-pic { width: 50px; height: 50px; }
+  .coin-badge { padding: 5px 10px; }
 }
 
-@media (max-width: 990px) {
-  .navbar-links {
-    gap: 0.6rem;
-  }
-  .btn {
-    font-size: 0.8rem;
-    padding: 4px 10px;
-  }
-  .Navbar-logo h2 {
-    font-size: 1rem;
-  }
-  .logo-size {
-    width: 45px;
-    height: 45px;
-  }
-  .coin-badge {
-    gap: 4px;
-    padding: 4px 8px;
-  }
-  .icon-btn {
-    width: 24px;
-    height: 24px;
-  }
-  .Navbar-logo {
-    margin-left: -20px;
-  }
+@media (max-width: 1306px) {
+  .Navbar-logo h2 { font-size: 1rem; }
+  .logo-size { width: 45px; height: 45px; }
+}
+
+@media (max-width: 1009px) {
+  .navbar-links { gap: 0.6rem; }
+  .btn { font-size: 0.8rem; padding: 4px 10px; }
+  .Navbar-logo h2 { font-size: 0.9rem; }
+  .logo-size { width: 45px; height: 45px; }
+  .coin-badge { gap: 4px; padding: 4px 8px; }
+  .icon-btn { width: 24px; height: 24px; }
+  .Navbar-logo { margin-left: -20px; }
 }
 
 @media (max-width: 665px) {
-  .Navbar {
-    padding: 0.3rem 0.6rem;
-  }
-  .navbar-links {
-    margin-left: -7px;
-  }
-  .Navbar-logo h2 {
-    display: none;
-  }
-  .logo-size {
-    width: 40px;
-    height: 40px;
-  }
-  .pro-pic {
-    width: 40px;
-    height: 40px;
-  }
-  .btn {
-    font-size: 0.75rem;
-    padding: 3px 8px;
-  }
-  .coin-badge {
-    padding: 3px 6px;
-    font-size: 0.75rem;
-  }
+  .Navbar { width: 650px; }
+  .navbar-links { margin-left: -7px; }
+  .Navbar-logo h2 { display: none; }
+  .logo-size { width: 40px; height: 40px; }
+  .pro-pic { width: 40px; height: 40px; }
+  .btn { font-size: 0.75rem; padding: 3px 8px; }
+  .coin-badge { padding: 3px 6px; font-size: 0.75rem; }
+}
+
+@media (max-width: 590px) {
+  .Navbar { width: 680px; }
 }
 
 @media (max-width: 450px) {
-  .logo-size {
-    display: none;
-  }
-  .pro-pic {
-    width: 35px;
-    height: 35px;
-  }
-  .btn {
-    font-size: 0.7rem;
-    padding: 2px 6px;
-  }
-  .coin-badge {
-    gap: 3px;
-    padding: 2px 5px;
+  .pro-pic { width: 35px; height: 35px; }
+  .btn { font-size: 0.7rem; padding: 2px 6px; }
+  .coin-badge { gap: 3px; padding: 2px 5px; }
+}
+
+@media (max-width: 930px) {
+  .desktop-links { display: none; }
+  .mobile-menu-btn {
+    display: block;
+    font-size: 1rem;
+    cursor: pointer;
+    color: white;
+    margin-left: 1rem;
   }
 }
