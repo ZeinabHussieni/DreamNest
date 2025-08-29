@@ -5,41 +5,41 @@ import getUserProfile from "../../Services/auth/getUserProfile";
 const useUserData = (isAuthenticated) => {
   const [userData, setUserData] = useState(null);
   const [profilePicUrl, setProfilePicUrl] = useState(null);
-  const [coins, setCoins] = useState(null);
+  const [coins, setCoins] = useState(0);
 
   useEffect(() => {
     if (!isAuthenticated) return;
+    let cancelled = false;
+    let objectUrl;
 
-    let isMounted = true;
-
-    const fetchUser = async () => {
+    (async () => {
       try {
         const user = await getUserService();
-        if (!isMounted) return;
+        if (cancelled || !user) return;
+
         setUserData(user);
+        setCoins(Number(user.coins) || 0); 
 
         if (user.profilePicture) {
           const blob = await getUserProfile(user.profilePicture);
-          if (!isMounted) return;
-
-          const url = URL.createObjectURL(blob);
-          setProfilePicUrl(url);
-          setCoins(user.coins)
+          if (cancelled) return;
+          objectUrl = URL.createObjectURL(blob);
+          setProfilePicUrl(objectUrl);
+        } else {
+          setProfilePicUrl(null);
         }
       } catch (err) {
-        console.error("Error fetching user or profile picture:", err);
+        console.error("Error fetching user/profile:", err);
       }
-    };
-
-    fetchUser();
+    })();
 
     return () => {
-      isMounted = false;
-      if (profilePicUrl) URL.revokeObjectURL(profilePicUrl);
+      cancelled = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
   }, [isAuthenticated]);
 
-  return { userData, coins,profilePicUrl };
+  return { userData, coins, profilePicUrl };
 };
 
 export default useUserData;

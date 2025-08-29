@@ -4,7 +4,7 @@ import RegisterForm from "../Pages/register/Register";
 import LoginForm from "../Pages/login/Login";
 import AppLayout from "../Components/shared/layout/AppLayout";
 import HomePage from "../Pages/homePage/HomePage";
-
+import UserGoals from "../Pages/userGoals/UserGoals";
 
 const AppRoutes: React.FC = () => {
   return (
@@ -16,6 +16,7 @@ const AppRoutes: React.FC = () => {
   
       <Route element={<AppLayout />}>
       <Route path="/" element={<HomePage />} />
+      <Route path="/userGoals" element={<UserGoals />} />
 
   
       </Route>

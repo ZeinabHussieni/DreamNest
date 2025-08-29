@@ -3,21 +3,27 @@
   min-height: 100vh;
 }
 
-.main-content {
-  flex-grow: 1;
-  padding: 2rem;
+.main-content{
+  width: 100%;
+  min-width: 0;                
+  padding-block: clamp(12px, 2vw, 32px);
+  padding-inline: clamp(12px, 4vw, 32px);
 }
 
-@media (max-width: 830px) {
-  .main-content {
-    margin-left: 140px;
-    padding: 1rem;
-  }
+
+.main-content .container{
+  box-sizing: border-box;      
+  width: 100%;
+  max-width: 1900px;
+  margin-inline: auto;             
 }
 
-@media (max-width: 500px) {
-  .main-content {
-    margin-left: 0px;
-    padding: 0px;
-  }
+
+img, video, canvas, svg{
+  max-width: 100%;
+  height: auto;
+}
+
+html, body{
+  overflow-x: hidden;
 }

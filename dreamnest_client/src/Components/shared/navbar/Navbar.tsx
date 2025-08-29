@@ -27,7 +27,7 @@ const Navbar: React.FC = () => {
         <img src={Logo} alt="Logo" className="logo-size" />
         <div className="title">
           <h2 className="dreamNest">
-            <Link to="/homePage" className="dreamNest-link">DreamNest</Link>
+            <Link to="/" className="dreamNest-link">DreamNest</Link>
           </h2>
         </div>
       </div>
@@ -35,7 +35,7 @@ const Navbar: React.FC = () => {
       {isAuthenticated && (
         <>
           <div className="navbar-links desktop-links">
-            <a href="/goals" className="btn nav-btn">Your Goals</a>
+            <a href="/userGoals" className="btn nav-btn">Your Goals</a>
             <div className="dropdown-managment">
               <button className="btn nav-btn">Community</button>
               <div className="dropdown-content styled-dropdown">

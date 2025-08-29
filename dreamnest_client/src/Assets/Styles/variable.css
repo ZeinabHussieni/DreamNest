@@ -5,8 +5,13 @@
   --soft-bg: #F2EAF7;
   --soft-color: #ffffff;
   --button-bg:  #49368F;
- 
-
+  --border:  #eadff7;
+  --muted:   #746b84;
+   --text:    #1f1b2d;
+    --track:   #ffffff;
+  --purple:  #6f56c5;
+  --purple-2:#7e63d4;
+  --danger:  #ea5a55;
 }
 
 body.dark {

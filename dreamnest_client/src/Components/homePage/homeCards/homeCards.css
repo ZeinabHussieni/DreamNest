@@ -83,12 +83,10 @@
 }
 
 @media (max-width: 825px) {
-  .features-container {
-    margin-left: -80px;
-  }
+
   .image-steps img {
-    max-width: 100%;
-    width: 500px;
+    max-width: 90%;
+
   }
   .section-title {
     font-size: 26px;
@@ -108,27 +106,57 @@
 @media (max-width: 630px) {
   .features-section {
     gap: 1rem;
-    margin-right: -320px;
+
   }
   .feature-card {
-    width: 28%;
+    width: 68%;
   }
+
+.section-title {
+  font-size: 1.2rem;
+}
+
+.feature-card {
+
+  width: 200px;
+  padding: 1.1rem 0.8rem;
+
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.feature-image {
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+  margin-bottom: 1rem;
+}
+
+.feature-title {
+  font-size: 1rem;
+
+}
+
+.feature-description {
+  font-size: 0.85rem;
+  color: var(--main-color);
+  line-height: 1.4;
+}
 }
 
 @media (max-width: 495px) {
   .feature-card {
-    width: 110%;
-    margin: 0 11rem;
+    width: 80%;
   }
   .section-title {
-    margin-left: 9rem;
+  
     font-size: 23px;
   }
   .features-container {
     padding: 2rem 2%;
   }
-  .image-steps {
-    margin-left: -13rem;
-    width: 1200px;
-  }
+
 }

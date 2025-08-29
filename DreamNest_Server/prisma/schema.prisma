@@ -51,8 +51,8 @@ model Goal {
   embedding           Json?     
 
   plans               Plan[] 
-  userId             Int
-  user                User       @relation(fields: [userId], references: [id])
+  user_id               Int
+  user                User       @relation(fields: [user_id], references: [id])
 
 
   connections         Connection[]
@@ -65,13 +65,13 @@ model Help {
   id          Int    @id @default(autoincrement())
   description String
   embedding   Json?      
-  userId     Int
-  user        User   @relation(fields: [userId], references: [id])
+  user_id       Int
+  user        User   @relation(fields: [user_id], references: [id])
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  @@index([userId])
+  @@index([user_id])
 }
 
 model Connection {
@@ -88,7 +88,7 @@ model Connection {
 
   helper          User @relation("HelperConnection", fields: [helper_id], references: [id])
   seeker          User @relation("SeekerConnection", fields: [seeker_id], references: [id])
-  goal            Goal @relation(fields: [goal_id], references: [id])
+  goal   Goal @relation(fields: [goal_id], references: [id], onDelete: Cascade)
 
   @@index([helper_id])
   @@index([seeker_id])
@@ -108,7 +108,7 @@ model Plan {
   due_date    DateTime
   completed   Boolean 
   goal_id     Int
-  goal        Goal     @relation(fields: [goal_id], references: [id])
+  goal        Goal     @relation(fields: [goal_id], references: [id], onDelete: Cascade) 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -116,8 +116,8 @@ model Plan {
 model Post {
   id        Int        @id @default(autoincrement())
   content   String
-  userId   Int
-  user      User       @relation(fields: [userId], references: [id])
+  user_id     Int
+  user      User       @relation(fields: [user_id], references: [id])
   likes     PostLike[] 
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
@@ -125,13 +125,13 @@ model Post {
 
 model PostLike {
   id          Int      @id @default(autoincrement()) 
-  userId          Int
+  user_id            Int
   post_id          Int
-  user             User       @relation(fields: [userId], references: [id]) 
+  user             User       @relation(fields: [user_id], references: [id]) 
   post             Post       @relation(fields: [post_id], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  @@unique([userId, post_id])
+  @@unique([user_id, post_id])
 }
 
 model ChatRoom {
@@ -145,7 +145,7 @@ model ChatRoom {
 
 model ChatRoomUser {
   id        Int      @id @default(autoincrement()) 
-  userId    Int
+  userId      Int
   chatRoomId Int
 
   user      User     @relation(fields: [userId], references: [id])
@@ -171,7 +171,7 @@ model Message {
 
 model MessageRead {
   id        Int      @id @default(autoincrement())
-  userId    Int
+  userId      Int
   messageId Int
   readAt    DateTime @default(now())
 
@@ -196,6 +196,7 @@ model Notification {
   content    String   
   read       Boolean  @default(false)
   createdAt  DateTime @default(now())
+
 
   user       User     @relation(fields: [userId], references: [id])
 }
