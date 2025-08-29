@@ -25,7 +25,7 @@ const Footer: React.FC = () => {
             <a href="#"><SiTiktok /></a>
           </div>
         </div>
-\
+
         <div className="footer-middle">
           <h3>Other Pages</h3>
           <ul>
