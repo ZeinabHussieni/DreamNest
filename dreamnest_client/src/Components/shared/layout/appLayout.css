@@ -4,7 +4,6 @@
 }
 
 .main-content{
-  width: 100%;
   min-width: 0;                
   padding-block: clamp(12px, 2vw, 32px);
   padding-inline: clamp(12px, 4vw, 32px);

@@ -41,7 +41,7 @@ const UserGoals: React.FC = () => {
           >Completed</button>
         </div>
 
-        <button className="ug-create" onClick={() => nav("/goals/create")}>
+        <button className="ug-create" onClick={() => nav("/createGoalPage")}>
           Create Goal
         </button>
       </header>

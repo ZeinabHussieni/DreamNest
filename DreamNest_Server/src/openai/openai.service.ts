@@ -15,31 +15,38 @@ export class OpenAIService {
 
 
   async generatePlan(goalTitle: string, goalDescription: string) {
-    const prompt = `
-You are an expert productivity and goal-planning assistant. 
-A user wants to achieve the following goal:
+const todayISO = new Date().toISOString().slice(0,10);
 
+const prompt = `
+You are an expert productivity and goal-planning assistant.
+
+Today's date: ${todayISO}
+
+A user wants to achieve this goal:
 Title: "${goalTitle}"
 Description: "${goalDescription}"
 
-Your task:
-- Break this goal into 3-5 actionable, specific, and realistic steps.
-- Each step should have a short, clear title and a detailed description explaining what to do.
-- Make the steps motivational and easy to follow.
-- Output ONLY valid JSON, no extra text.
+Instructions:
+- Return 3–5 actionable steps tailored to the goal.
+- Each step MUST include only these fields:
+  - "title": short, specific, and imperative.
+  - "description": 2–5 sentences with clear, motivational guidance (what to do, how to do it, and a tiny success tip).
+  - "due_date": an ISO 8601 date (YYYY-MM-DD). If the exact date isn’t obvious, choose a realistic plan with steps spaced ~7–14 days apart from TODAY, gradually increasing difficulty.
 
-JSON format:
+Style:
+- Be concise, friendly, and practical.
+- Make each step self-contained and measurable.
+
+STRICT OUTPUT:
+- Output ONLY a valid JSON array. No markdown, no extra text, no trailing commas.
+
+Example format (illustrative):
 [
-  {
-    "title": "Step 1: ...",
-    "description": "Detailed instruction for this step..."
-  },
-  {
-    "title": "Step 2: ...",
-    "description": "Detailed instruction for this step..."
-  }
+  { "title": "Step 1: …", "description": "…", "due_date": "${todayISO}" },
+  { "title": "Step 2: …", "description": "…", "due_date": "2025-09-15" }
 ]
 `;
+
 
     try {
       const completion = await this.openai.chat.completions.create({

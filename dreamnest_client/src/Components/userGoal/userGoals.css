@@ -169,6 +169,22 @@
   transform:translateY(1px);
 }
 
+.ug-tab.active,
+.ug-tab[aria-selected="true"]{
+  background: var(--nav-bg); 
+  color: #fff;             
+  box-shadow: 0 2px 0 rgba(0,0,0,.06);
+  filter: none;             
+}
+
+.ug-tab:not(.active):hover,
+.ug-tab[aria-selected="false"]:hover{
+  filter: brightness(.96);
+}
+
+
+.ug-tab.active:active{ transform: translateY(1px); }
+
 .ug-create{
   grid-column:3;
   justify-self:end;

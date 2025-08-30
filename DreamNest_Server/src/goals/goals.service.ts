@@ -122,27 +122,48 @@ export class GoalsService {
   private async generateHelpEmbedding(helpText: string): Promise<number[]> {
     return this.openAIService.generateEmbedding(helpText);
   }
-
+// keep this sync (not async)
+private toDateSafe(input: unknown, offsetDays = 0): Date {
+  const MS_DAY = 24 * 60 * 60 * 1000;
+  const base = new Date();
+  base.setHours(0, 0, 0, 0);                    // normalize to start-of-day
+  const fallback = new Date(base.getTime() + offsetDays * MS_DAY);
+  if (!input) return fallback;
+  const d = new Date(String(input));            // handles "YYYY-MM-DD" from the model
+  return isNaN(d.getTime()) ? fallback : d;
+}
 
   // data helpers
-  private async createGoalInDB(
-    data: any,
-    goalEmbedding: number[],
-    aiPlans: any[],
-  ) {
-    return this.prisma.goal.create({
-      data: {
-        title: data.title,
-        description: data.description,
-        helpText: data.helpText || null,
-        visionBoardFilename: data.visionBoardFilename || null,
-        embedding: goalEmbedding.length ? goalEmbedding : Prisma.JsonNull,
-        user: { connect: { id: data.user_id } },
-        plans: { create: aiPlans.map(p => ({ ...p, due_date: new Date(), completed: false })) },
+// use the AI-provided due_date when available
+private async createGoalInDB(
+  data: any,
+  goalEmbedding: number[],
+  aiPlans: any[],
+) {
+  const steps = (Array.isArray(aiPlans) ? aiPlans : []).slice(0, 5);
+
+  return this.prisma.goal.create({
+    data: {
+      title: data.title,
+      description: data.description,
+      helpText: data.helpText || null,
+      visionBoardFilename: data.visionBoardFilename || null,
+      embedding: goalEmbedding.length ? goalEmbedding : Prisma.JsonNull,
+      user: { connect: { id: data.user_id } },
+      plans: {
+        create: steps.map((p, i) => ({
+          title: String(p?.title ?? `Step ${i + 1}`),
+          description: String(p?.description ?? ""),
+          // ✅ use model's date or fall back to today + i*7 days
+          due_date: this.toDateSafe(p?.due_date, i * 7),
+          completed: Boolean(p?.completed ?? false),
+        })),
       },
-      include: { plans: true },
-    });
-  }
+    },
+    include: { plans: true },
+  });
+}
+
 
   private async createHelp(userId: number, helpText: string): Promise<number[]> {
     const helpEmbedding = await this.generateHelpEmbedding(helpText);
