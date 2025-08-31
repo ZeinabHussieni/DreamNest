@@ -17,28 +17,29 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log(`Client disconnected: ${client.id}`);
   }
 
-  // this listen to "joinRoom" event
   @SubscribeMessage('joinRoom')
-  async handleJoinRoom(
-    @MessageBody() data: { chatRoomId: number },
+    async handleJoinRoom(
+    @MessageBody() data: { chatRoomId: number; userId: number }, 
     @ConnectedSocket() client: Socket,
-  ) {
-    client.join(`room-${data.chatRoomId}`);
-    console.log(`Client ${client.id} joined room ${data.chatRoomId}`);
+   ) {
+     const isMember = await this.chatService.isParticipant(data.chatRoomId, data.userId);
+     if (!isMember) {
+       client.emit('error', 'Not a participant of this room');
+       return;
+      }
+      client.join(`room-${data.chatRoomId}`);
   }
 
-  // this listen to "sendMessage" event
   @SubscribeMessage('sendMessage')
-  async handleMessage(
+    async handleMessage(
     @MessageBody() data: { chatRoomId: number; senderId: number; content: string },
-  ) {
-    const message = await this.chatService.createMessage(
-      data.chatRoomId,
-      data.senderId,
-      data.content,
+   ) {
+     const message = await this.chatService.createMessage(
+     data.chatRoomId,
+     data.senderId,
+     data.content,
     );
-
-    // to emit message to everyone in the room
-    this.server.to(`room-${data.chatRoomId}`).emit('newMessage', message);
+     this.server.to(`room-${data.chatRoomId}`).emit('newMessage', message);
   }
+
 }

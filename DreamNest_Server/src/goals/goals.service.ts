@@ -122,39 +122,38 @@ export class GoalsService {
   private async generateHelpEmbedding(helpText: string): Promise<number[]> {
     return this.openAIService.generateEmbedding(helpText);
   }
-// keep this sync (not async)
-private toDateSafe(input: unknown, offsetDays = 0): Date {
-  const MS_DAY = 24 * 60 * 60 * 1000;
-  const base = new Date();
-  base.setHours(0, 0, 0, 0);                    // normalize to start-of-day
-  const fallback = new Date(base.getTime() + offsetDays * MS_DAY);
-  if (!input) return fallback;
-  const d = new Date(String(input));            // handles "YYYY-MM-DD" from the model
-  return isNaN(d.getTime()) ? fallback : d;
-}
+  
+  //fot due date
+  private toDateSafe(input: unknown, offsetDays = 0): Date {
+    const MS_DAY = 24 * 60 * 60 * 1000;
+    const base = new Date();
+    base.setHours(0, 0, 0, 0);                  
+    const fallback = new Date(base.getTime() + offsetDays * MS_DAY);
+    if (!input) return fallback;
+     const d = new Date(String(input));           
+     return isNaN(d.getTime()) ? fallback : d;
+  }
 
-  // data helpers
-// use the AI-provided due_date when available
-private async createGoalInDB(
-  data: any,
-  goalEmbedding: number[],
-  aiPlans: any[],
-) {
-  const steps = (Array.isArray(aiPlans) ? aiPlans : []).slice(0, 5);
 
-  return this.prisma.goal.create({
-    data: {
-      title: data.title,
-      description: data.description,
-      helpText: data.helpText || null,
-      visionBoardFilename: data.visionBoardFilename || null,
-      embedding: goalEmbedding.length ? goalEmbedding : Prisma.JsonNull,
-      user: { connect: { id: data.user_id } },
-      plans: {
-        create: steps.map((p, i) => ({
+  private async createGoalInDB(
+    data: any,
+    goalEmbedding: number[],
+    aiPlans: any[],
+  ) {
+    const steps = (Array.isArray(aiPlans) ? aiPlans : []).slice(0, 5);
+
+    return this.prisma.goal.create({
+      data: {
+       title: data.title,
+       description: data.description,
+       helpText: data.helpText || null,
+       visionBoardFilename: data.visionBoardFilename || null,
+       embedding: goalEmbedding.length ? goalEmbedding : Prisma.JsonNull,
+       user: { connect: { id: data.user_id } },
+       plans: {
+         create: steps.map((p, i) => ({
           title: String(p?.title ?? `Step ${i + 1}`),
           description: String(p?.description ?? ""),
-          // ✅ use model's date or fall back to today + i*7 days
           due_date: this.toDateSafe(p?.due_date, i * 7),
           completed: Boolean(p?.completed ?? false),
         })),
@@ -162,7 +161,7 @@ private async createGoalInDB(
     },
     include: { plans: true },
   });
-}
+  }
 
 
   private async createHelp(userId: number, helpText: string): Promise<number[]> {
@@ -177,71 +176,86 @@ private async createGoalInDB(
     return helpEmbedding;
   }
 
+private async createConnections(
+  userId: number,
+  goal: any,
+  goalEmbedding: number[],
+  helpEmbedding: number[] | null,
+  threshold: number,
+) {
+  const helps = await this.prisma.help.findMany({
+    where: { embedding: { not: Prisma.JsonNull } },
+    include: { user: true },
+  });
 
-  // connections
-  private async createConnections(
-    userId: number,
-    goal: any,
-    goalEmbedding: number[],
-    helpEmbedding: number[] | null,
-    threshold: number,
-  ) {
-    const helps = await this.prisma.help.findMany({
-      where: { embedding: { not: Prisma.JsonNull } },
-      include: { user: true },
+  const connectionsToCreate: any[] = [];
+
+  // 1) People who can help me with THIS goal
+  helps.forEach(h => {
+    if (!h.embedding || h.user_id === userId) return; // avoid self
+    const score = this.cosineSimilarity(goalEmbedding, h.embedding as number[]);
+    if (score >= threshold) {
+      connectionsToCreate.push({
+        helper_id: h.user_id,
+        seeker_id: userId,
+        goal_id: goal.id,
+        similarityScore: score,
+        status: 'pending',
+        helperDecision: 'pending',
+        seekerDecision: 'pending',
+      });
+    }
+  });
+
+  // 2) If I can help others, match my help against OTHER users’ goals
+  if (helpEmbedding) {
+    const otherGoals = await this.prisma.goal.findMany({
+      where: { embedding: { not: Prisma.JsonNull }, user_id: { not: userId } },
+      select: { id: true, user_id: true, embedding: true },
     });
 
-    const connectionsToCreate: any[] = [];
-
-    // goal to helps
-    helps.forEach(h => {
-      if (!h.embedding) return;
-      const score = this.cosineSimilarity(goalEmbedding, h.embedding as number[]);
+    otherGoals.forEach(g => {
+      const score = this.cosineSimilarity(helpEmbedding, g.embedding as number[]);
       if (score >= threshold) {
         connectionsToCreate.push({
-          helper_id: h.user_id, 
-          seeker_id: userId,
-          goal_id: goal.id,
+          helper_id: userId,
+          seeker_id: g.user_id,
+          goal_id: g.id,
           similarityScore: score,
           status: 'pending',
+          helperDecision: 'pending',
+          seekerDecision: 'pending',
         });
       }
     });
+  }
 
-    // help to other goals
-    if (helpEmbedding) {
-      const otherGoals = await this.prisma.goal.findMany({
-        where: { embedding: { not: Prisma.JsonNull }, user_id: { not: userId } },
-      });
-      otherGoals.forEach(g => {
-        const score = this.cosineSimilarity(helpEmbedding, g.embedding as number[]);
-        if (score >= threshold) {
-          connectionsToCreate.push({
-            helper_id: userId,
-            seeker_id: g.user_id,
-            goal_id: g.id,
-            similarityScore: score,
-            status: 'pending',
-          });
-        }
-      });
-    }
+  if (connectionsToCreate.length) {
+    await this.prisma.connection.createMany({
+      data: connectionsToCreate,
+      skipDuplicates: true, 
+    });
 
-    // insert connections
-    if (connectionsToCreate.length > 0) {
-      await this.prisma.connection.createMany({ data: connectionsToCreate });
-    }
-
-     for (const conn of connectionsToCreate) {
+    // Notify BOTH sides
+    for (const c of connectionsToCreate) {
       await this.notificationService.createNotification({
         type: 'NEW_CONNECTION',
-        userId: conn.seeker_id,        
-        actorId: conn.helper_id,       
-        goalId: conn.goal_id,
-        content: `You have a new connection request from user ${conn.helper_id} for goal ${conn.goal_id}`,
+        userId: c.seeker_id,
+        actorId: c.helper_id,
+        goalId: c.goal_id,
+        content: `Someone may help with your goal.`,
+      });
+      await this.notificationService.createNotification({
+        type: 'NEW_CONNECTION',
+        userId: c.helper_id,
+        actorId: c.seeker_id,
+        goalId: c.goal_id,
+        content: `You may help someone with their goal.`,
       });
     }
   }
+}
+
 
   // similarity
   private cosineSimilarity(a: number[], b: number[]): number {

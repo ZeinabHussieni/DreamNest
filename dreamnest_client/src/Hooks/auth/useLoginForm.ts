@@ -9,7 +9,7 @@ type User = {
   email?: string;
   username?: string;
 
-  [k: string]: unknown;
+  [k: string]: unknown;// to let extra fields through without errors
 };
 
 type LoginState = {
@@ -17,7 +17,7 @@ type LoginState = {
   error: string | null;
 };
 
-type LoginResponse = {
+type LoginResponse = { //what axois should give us 
   data: {
     accessToken: string;
     user: User;

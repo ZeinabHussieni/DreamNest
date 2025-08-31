@@ -8,7 +8,7 @@ type User = {
   [k: string]: unknown;
 };
 
-type CoinsEventDetail = { value?: number; delta?: number };
+type CoinsEventDetail = { value: number }; 
 const COINS_EVENT = "coins:update";
 
 export default function useUserData(isAuthenticated: boolean) {
@@ -16,6 +16,7 @@ export default function useUserData(isAuthenticated: boolean) {
   const [profilePicUrl, setProfilePicUrl] = useState<string | null>(null);
   const [coins, setCoins] = useState<number>(0);
 
+ 
   useEffect(() => {
     if (!isAuthenticated) return;
     let cancelled = false;
@@ -48,24 +49,14 @@ export default function useUserData(isAuthenticated: boolean) {
     };
   }, [isAuthenticated]);
 
+  
   useEffect(() => {
     if (!isAuthenticated) return;
 
-    
     const listener = (ev: Event) => {
       const e = ev as CustomEvent<CoinsEventDetail>;
-      const value =
-        typeof e.detail?.value === "number" ? e.detail.value : undefined;
-      const delta =
-        typeof e.detail?.delta === "number" ? e.detail.delta : undefined;
-
-      if (value !== undefined) {
-        setCoins(value);
-        return;
-      }
-      if (delta !== undefined) {
-        setCoins((prev) => prev + delta);
-      }
+      const value = e.detail?.value;
+      if (typeof value === "number") setCoins(value); 
     };
 
     window.addEventListener(COINS_EVENT, listener);

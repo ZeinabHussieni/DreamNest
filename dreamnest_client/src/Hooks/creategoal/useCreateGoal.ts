@@ -9,16 +9,18 @@ export default function useCreateGoal() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+ 
+    const form = e.currentTarget; 
     setLoading(true);
 
     try {
-      const fd = new FormData(e.currentTarget);
+      const fd = new FormData(form);
 
       const payload = {
         title: String(fd.get("title") || "").trim(),
         description: String(fd.get("description") || "").trim(),
-        helpText: (String(fd.get("helpText") || "").trim() || undefined) as string | undefined,
-        visionBoardBase64: (String(fd.get("visionBoardBase64") || "") || undefined) as string | undefined,
+        helpText: ((String(fd.get("helpText") || "").trim()) || undefined) as string | undefined,
+        visionBoardBase64: ((String(fd.get("visionBoardBase64") || "")) || undefined) as string | undefined,
       };
 
       if (!payload.title || !payload.description) {
@@ -28,13 +30,14 @@ export default function useCreateGoal() {
       await createGoal(payload as any);
 
       toast.success("Goal created successfully!");
-      e.currentTarget.reset();
-      setTimeout(() => navigate("/userGoals"), 100);
-    } catch (err: unknown) {
-      const anyErr = err as any;
+
+      if (form && typeof form.reset === "function") form.reset();
+      navigate("/userGoals");
+
+    } catch (err: any) {
       const msg =
-        anyErr?.response?.data?.message ||
-        anyErr?.message ||
+        err?.response?.data?.message ||
+        err?.message ||
         "Failed to create goal. Please check inputs.";
       toast.error(msg);
       console.error(err);

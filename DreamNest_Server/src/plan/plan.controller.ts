@@ -20,13 +20,14 @@ export class PlanController {
     return this.planService.create(goalId, body);
   }
 
-   @UseGuards(AccessTokenGuard)
-    @Get('visionBoard/:filename')
-    async getVisionBoard(@Param('filename') filename: string, @Res() res: Response) {
-      const filePath = join(process.cwd(), 'storage/private/visionBoard', filename);
-      return res.sendFile(filePath);
-    }
-  
+
+  @UseGuards(AccessTokenGuard)
+  @Get('visionBoard/:filename')
+  async getProfile(@Param('filename') filename: string, @Res() res: Response) {
+    const filePath = join(process.cwd(), 'storage/private/visionBoard', filename);
+    return res.sendFile(filePath);
+  }
+
 
   @Get(':goalId/plans')
   async getAllByGoal(@Param('goalId', ParseIntPipe) goalId: number) : Promise<PlanResponseDto[]>{

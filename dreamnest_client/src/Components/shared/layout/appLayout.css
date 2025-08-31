@@ -18,7 +18,7 @@
 }
 
 
-img, video, canvas, svg{
+ video, canvas, svg{
   max-width: 100%;
   height: auto;
 }

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import {getGoalById,getGoalPlans,togglePlanDone,} from "../../Services/goalDetails/goalDetailsService";
+import { getGoalById, getGoalPlans, togglePlanDone } from "../../Services/goalDetails/goalDetailsService";
 import visionBoardBlobFetch from "../../Services/goalDetails/goalDetailsService";
-import getUserService from "../../Services/auth/getUserService"; 
+import getUserService from "../../Services/auth/getUserService";
 
 export type Goal = {
   id: number;
@@ -64,7 +64,7 @@ export default function useGoalDetails(goalId: number): UseGoalDetailsResult {
     if (Number.isFinite(goalId)) void reload();
   }, [goalId]);
 
-
+  // protected image object URL
   useEffect(() => {
     let cancelled = false;
     let objectUrl: string | undefined;
@@ -91,7 +91,7 @@ export default function useGoalDetails(goalId: number): UseGoalDetailsResult {
     };
   }, [goal?.visionBoardFilename]);
 
-  const deadline = useMemo(() => {
+  const deadline = useMemo(() => {//it cache the result of a calculation
     const latest = plans.reduce<number>((max, pl) => {
       const t = new Date(pl?.due_date || 0).getTime();
       return Number.isNaN(t) ? max : Math.max(max, t);
@@ -110,7 +110,7 @@ export default function useGoalDetails(goalId: number): UseGoalDetailsResult {
   };
 
   const onTogglePlan = async (planId: number) => {
-   
+
     setPlans(prev => {
       const next = prev.map(p => (p.id === planId ? { ...p, completed: !p.completed } : p));
       setGoal(g => (g ? { ...g, progress: calcProgress(next) } : g));
@@ -124,15 +124,9 @@ export default function useGoalDetails(goalId: number): UseGoalDetailsResult {
         setGoal(g => (g ? { ...g, progress: Number(res.progress) } : g));
       }
 
-  
-      try {
-        const me = await getUserService();
-        const coinsVal = Number(me?.coins) || 0;
-        window.dispatchEvent(new CustomEvent(COINS_EVENT, { detail: { value: coinsVal } }));
-      } catch (e) {
-    
-        console.error("Failed to refresh coins after toggle", e);
-      }
+      const me = await getUserService();
+      const coinsVal = Number(me?.coins) || 0;
+      window.dispatchEvent(new CustomEvent(COINS_EVENT, { detail: { value: coinsVal } }));
     } catch {
  
       setPlans(prev => {

@@ -13,12 +13,15 @@
   --track: #ffffff;
 
   --purple: #6f56c5;      
-  --purple-2: #a48bff;    
+  --purple-2: #a48bff; 
+  --empty-req:#f6f1ff;  
 
   --danger: #ea5a55;
+  --header-bg:#F1DAFF;
 
   --mark-done-bg: #ebe6ff;
   --mark-done-color: #4b3e88;
+  --connection:#e9e6ef;
 }
 
 
@@ -26,11 +29,12 @@ body.dark {
   --nav-bg: #4C3A85;
   --main-bg: #121212;
   --soft-bg: #1E1B26;
-  --button-bg: #7A66D0;
-
+  --button-bg: #1E1B26;
+ --header-bg:#1E1B26;
   --text: #E6E6E6;
   --muted: #b7b2c6;
   --border: #2a2536;
+    --connection:#1E1B26;
 
   --track: #1b1624;
 

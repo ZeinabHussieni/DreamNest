@@ -7,6 +7,9 @@ import HomePage from "../Pages/homePage/HomePage";
 import UserGoals from "../Pages/userGoals/UserGoals";
 import CreateGoal from "../Pages/createGoalPage/createGoalPage";
 import GoalDetailsPage from "../Pages/goalsDetailsPage/GoalDetailsPage";
+import Connections from "../Pages/connections/connections";
+import ChatPage from "../Pages/chatPage/chatPage";
+
 
 const AppRoutes: React.FC = () => {
   return (
@@ -21,7 +24,9 @@ const AppRoutes: React.FC = () => {
       <Route path="/userGoals" element={<UserGoals />} />
       <Route path="/createGoalPage" element={<CreateGoal />} />
       <Route path="/goals/:id" element={<GoalDetailsPage />} />
-
+      <Route path="/connections" element={<Connections />} />
+      <Route path="/chats" element={<ChatPage />} />
+      
 
   
       </Route>

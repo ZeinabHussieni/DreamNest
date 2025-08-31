@@ -43,7 +43,13 @@ const Navbar: React.FC = () => {
                 <a href="/myposts">My Posts</a>
               </div>
             </div>
-            <a href="/chats" className="btn nav-btn">Chats</a>
+             <div className="dropdown-managment">
+              <button className="btn nav-btn">Connections</button>
+              <div className="dropdown-content styled-dropdown">
+                <a href="/chats">Chats</a>
+                <a href="/connections">Requests</a>
+              </div>
+            </div>
             <a href="/dashboard" className="btn nav-btn">My Dashboard</a>
           </div>
 
@@ -61,7 +67,13 @@ const Navbar: React.FC = () => {
                   <a href="/myposts">My Posts</a>
                 </div>
               </div>
-              <a href="/chats">Chats</a>
+              <div className="mobile-submenu">
+                <span>Connections ▾</span>
+                <div className="submenu-links">
+                  <a href="/chats">Chats</a>
+                  <a href="/connections">Friend Requests</a>
+                </div>
+              </div>
               <a href="/dashboard">My Dashboard</a>
             </div>
           )}

@@ -74,26 +74,40 @@ model Help {
   @@index([user_id])
 }
 
+enum ConnectionDecision {
+  pending
+  accepted
+  rejected
+}
+
 model Connection {
-  id              Int    @id @default(autoincrement())
-  helper_id       Int   
-  seeker_id       Int   
-  goal_id         Int   
+  id              Int                 @id @default(autoincrement())
+  helper_id       Int
+  seeker_id       Int
+  goal_id         Int
+  similarityScore Float
+  status          ConnectionStatus    @default(pending)
 
-  similarityScore Float   
-  status          ConnectionStatus @default(pending) 
+  helperDecision  ConnectionDecision  @default(pending)
+  seekerDecision  ConnectionDecision  @default(pending)
 
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  chatRoomId      Int?
+  chatRoom        ChatRoom?           @relation("ConnectionChatRoom", fields: [chatRoomId], references: [id])
+
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
 
   helper          User @relation("HelperConnection", fields: [helper_id], references: [id])
   seeker          User @relation("SeekerConnection", fields: [seeker_id], references: [id])
-  goal   Goal @relation(fields: [goal_id], references: [id], onDelete: Cascade)
+  goal            Goal @relation(fields: [goal_id], references: [id], onDelete: Cascade)
 
   @@index([helper_id])
   @@index([seeker_id])
   @@index([goal_id])
+  @@unique([helper_id, seeker_id, goal_id])
 }
+
+
 
 enum ConnectionStatus {
   pending
@@ -135,14 +149,15 @@ model PostLike {
 }
 
 model ChatRoom {
-  id            Int            @id @default(autoincrement()) 
+  id            Int            @id @default(autoincrement())
   createdAt     DateTime       @default(now())
-  name        String?   
+  name          String?
 
-  participants  ChatRoomUser[] 
-  messages      Message[] 
+  participants  ChatRoomUser[]
+  messages      Message[]
+
+  connections   Connection[]   @relation("ConnectionChatRoom")
 }
-
 model ChatRoomUser {
   id        Int      @id @default(autoincrement()) 
   userId      Int
