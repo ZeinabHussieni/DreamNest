@@ -1,8 +1,8 @@
 import api from "../axios/axios";
 
-const loginService = async (data) => {
+export default async function loginService(data){
   const response = await api.post("/auth/login", data); 
   return response.data; 
 };
 
-export default loginService;
+

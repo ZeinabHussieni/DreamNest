@@ -1,22 +1,19 @@
-import React, { useState } from "react";
+import React from "react";
 import Button from "../../Components/shared/button/Button";
 import FormInput from "../../Components/shared/input/Input";
 import ImageInput from "../../Components/shared/imageInput/ImageInput";
+import useCreateGoal from "../../Hooks/creategoal/useCreateGoal";
 import "./createGoal.css";
 
 const CreateGoal: React.FC = () => {
-  const [loading, setLoading] = useState(false);
+   const { loading, handleSubmit } = useCreateGoal();
 
   return (
-    <form className="create-form">
+    <form className="create-form" onSubmit={handleSubmit}>
       <h2 className="create-title">Create Your Goal</h2>
 
       <div className="create-first-row">
-        <FormInput
-          name="title"
-          label="Title"
-          placeholder="Learn Python"
-        />
+        <FormInput name="title" label="Title" placeholder="Learn Python" />
 
         <ImageInput
           name="visionBoardBase64"

@@ -5,7 +5,7 @@ import Notification from "../../../Assets/Icons/notification.svg";
 import coinIcon from "../../../Assets/Icons/coins.svg";
 import ThemeToggle from "../../themeToggle/ThemeToggle"; 
 import { useAuth } from "../../../Context/AuthContext";
-import useDropdown from "../../../Hooks/navBar/useDropdown.js"; 
+import useDropdown from "../../../Hooks/navBar/useDropdown"; 
 import useUserData from "../../../Hooks/navBar/useUserData";
 import "./navbar.css";
 

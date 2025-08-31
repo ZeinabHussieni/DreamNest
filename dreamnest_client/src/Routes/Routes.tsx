@@ -6,6 +6,7 @@ import AppLayout from "../Components/shared/layout/AppLayout";
 import HomePage from "../Pages/homePage/HomePage";
 import UserGoals from "../Pages/userGoals/UserGoals";
 import CreateGoal from "../Pages/createGoalPage/createGoalPage";
+import GoalDetailsPage from "../Pages/goalsDetailsPage/GoalDetailsPage";
 
 const AppRoutes: React.FC = () => {
   return (
@@ -19,6 +20,7 @@ const AppRoutes: React.FC = () => {
       <Route path="/" element={<HomePage />} />
       <Route path="/userGoals" element={<UserGoals />} />
       <Route path="/createGoalPage" element={<CreateGoal />} />
+      <Route path="/goals/:id" element={<GoalDetailsPage />} />
 
 
   

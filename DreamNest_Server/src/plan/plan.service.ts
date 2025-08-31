@@ -47,21 +47,27 @@ export class PlanService {
     return plans.map(this.formatPlan);
   }
 
+
   async togglePlanDone(id: number): Promise<PlanResponseDto> {
-  const plan = await this.getPlanById(id);
-  const updatedPlan = await this.togglePlanCompleted(plan);
-  await this.updateGoalProgress(plan);
-  await this.sendGoalProgressNotification(plan);
+    const plan = await this.getPlanById(id);
+    const wasCompleted = plan.completed;            
 
-  if (updatedPlan.completed) {
-  const coinsReward = 15;
-  await this.rewardUserCoins(plan.goal.user.id, coinsReward); 
-  await this.sendPlanCompletedNotification(updatedPlan, coinsReward, plan.goal.user.id);
- }
+   const updatedPlan = await this.togglePlanCompleted(plan);
 
+   await this.updateGoalProgress(plan);
+   await this.sendGoalProgressNotification(plan);
+
+   if (!wasCompleted && updatedPlan.completed) {
+    const coinsReward = 15;
+    await this.rewardUserCoins(plan.goal.user.id, coinsReward);
+    await this.sendPlanCompletedNotification(updatedPlan, coinsReward, plan.goal.user.id);
+   } else if (wasCompleted && !updatedPlan.completed) {
+    await this.rewardUserCoins(plan.goal.user.id, -15);
+  }
 
   return this.formatPlan(updatedPlan);
 }
+
 
  private async getPlanById(id: number) {
     const plan = await this.prisma.plan.findUnique({

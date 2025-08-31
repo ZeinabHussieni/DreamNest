@@ -1,11 +1,19 @@
 import { useActionState } from "react";
 import Swal from "sweetalert2";
 import { deleteGoal } from "../../Services/goalDetails/goalDetailsService";
+import type { Goal } from "../goalDetails/useGoalDetails";
 
-const initial = { lastDeletedId: null, error: null };
+type State = { lastDeletedId: number | null; error: string | null };
 
-export default function useDeleteGoalAction({ setGoals, reload }) {
-  const action = async (prev, formData) => {
+type Props = {
+  setGoals: React.Dispatch<React.SetStateAction<Goal[]>>;
+  reload?: () => void | Promise<void>;
+};
+
+const initial: State = { lastDeletedId: null, error: null };
+
+export default function useDeleteGoal({ setGoals, reload }: Props) {
+  const action = async (prev: State, formData: FormData): Promise<State> => {
     try {
       const id = Number(formData.get("id"));
       if (!id) return prev;
@@ -24,7 +32,7 @@ export default function useDeleteGoalAction({ setGoals, reload }) {
       });
       if (!isConfirmed) return prev;
 
-    
+     
       setGoals(prevGoals => prevGoals.filter(g => g.id !== id));
 
       await deleteGoal(id);
@@ -38,9 +46,9 @@ export default function useDeleteGoalAction({ setGoals, reload }) {
       });
 
       return { lastDeletedId: id, error: null };
-    } catch (e) {
- 
-      reload?.();
+    } catch (e: any) {
+    
+      await reload?.();
       await Swal.fire({
         title: "Failed",
         text: e?.response?.data?.message || "Failed to delete goal",
@@ -50,6 +58,6 @@ export default function useDeleteGoalAction({ setGoals, reload }) {
     }
   };
 
-  const [state, submit, pending] = useActionState(action, initial);
+  const [state, submit, pending] = useActionState<State, FormData>(action, initial);
   return { state, deleteAction: submit, deleting: pending };
 }

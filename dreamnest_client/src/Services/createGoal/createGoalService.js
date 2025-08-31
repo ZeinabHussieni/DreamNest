@@ -1,8 +1,6 @@
 import api from "../axios/axios";
 
-const createGoalService = async (data) => {
-  const response = await api.post("/goals", data); 
-  return response.data; 
-};
-
-export default createGoalService;
+export default async function createGoal(data) {
+  const res = await api.post("/goals", data);
+  return res.data;
+}

@@ -1,6 +1,8 @@
-import {Controller,Get,Post,Patch,Param,Body,ParseIntPipe,UseGuards,} from '@nestjs/common';
+import {Controller,Get,Post,Patch,Res,Param,Body,ParseIntPipe,UseGuards,} from '@nestjs/common';
 import { PlanService } from './plan.service';
 import { CreatePlanDto } from './dto/create-plan.dto';
+import type { Response } from 'express';
+import { join } from 'path';
 import { AccessTokenGuard } from '../auth/guards/access-token.guard';
 import { PlanResponseDto } from './responseDto/plan-response.dto';
 
@@ -17,6 +19,14 @@ export class PlanController {
   ): Promise<PlanResponseDto> {
     return this.planService.create(goalId, body);
   }
+
+   @UseGuards(AccessTokenGuard)
+    @Get('visionBoard/:filename')
+    async getVisionBoard(@Param('filename') filename: string, @Res() res: Response) {
+      const filePath = join(process.cwd(), 'storage/private/visionBoard', filename);
+      return res.sendFile(filePath);
+    }
+  
 
   @Get(':goalId/plans')
   async getAllByGoal(@Param('goalId', ParseIntPipe) goalId: number) : Promise<PlanResponseDto[]>{

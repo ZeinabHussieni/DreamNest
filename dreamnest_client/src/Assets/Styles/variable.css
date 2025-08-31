@@ -1,30 +1,49 @@
 :root {
-
   --nav-bg: #6653AC;
   --main-bg: #ffffff;
   --soft-bg: #F2EAF7;
   --soft-color: #ffffff;
-  --button-bg:  #49368F;
-  --border:  #eadff7;
-  --muted:   #746b84;
-   --text:    #1f1b2d;
-    --track:   #ffffff;
-  --purple:  #6f56c5;
-  --purple-2:#7e63d4;
-  --danger:  #ea5a55;
+
+  --button-bg: #49368F;
+
+  --border: #eadff7;
+  --text: #1f1b2d;
+  --muted: #746b84;
+
+  --track: #ffffff;
+
+  --purple: #6f56c5;      
+  --purple-2: #a48bff;    
+
+  --danger: #ea5a55;
+
+  --mark-done-bg: #ebe6ff;
+  --mark-done-color: #4b3e88;
 }
+
 
 body.dark {
-  --nav-bg: #4C3A85;  
-  --main-bg: #121212;  
-  --soft-bg: #1E1B26;  
-  --button-bg: #7A66D0; 
-  --main-color: #E6E6E6;
+  --nav-bg: #4C3A85;
+  --main-bg: #121212;
+  --soft-bg: #1E1B26;
+  --button-bg: #7A66D0;
+
+  --text: #E6E6E6;
+  --muted: #b7b2c6;
+  --border: #2a2536;
+
+  --track: #1b1624;
+
+  --purple: #8a74e0;
+  --purple-2: #b8a6ff;
+
+  --danger: #ff6b64;
+
+  --mark-done-bg: #2a2440;
+  --mark-done-color: #c7baff;
 }
-
-
 
 body {
   background-color: var(--main-bg);
-  color: var(--main-color);
+  color: var(--text);
 }
