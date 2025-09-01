@@ -65,7 +65,11 @@
   background: var(--header-bg);
   margin-top: -30px;
   margin-right: -32px;
+  position: sticky;
+  top: var(--topbar-h);  
+  z-index: 6000;       
 }
+
 
 .chat-body {
   overflow: auto;

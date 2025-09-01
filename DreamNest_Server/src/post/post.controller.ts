@@ -18,14 +18,14 @@ export class PostController {
 
     }
 
-    @Get()
-     async getAllPost(): Promise<PostResponseDto[]> {
-     return this.postsService.getAllPost();
+   @Get()
+     async getAllPost(@GetUser('sub') userId: number): Promise<PostResponseDto[]> {
+     return this.postsService.getAllPost(userId);
     }
 
-   @Get('me')
-     async getUserAllPosts(@GetUser('sub') userId: number): Promise<PostResponseDto[]> {
-      return this.postsService.getUserAllPosts(userId);
+    @Get('me')
+      async getUserAllPosts(@GetUser('sub') userId: number): Promise<PostResponseDto[]> {
+     return this.postsService.getUserAllPosts(userId, userId);
     }
 
   @Delete(':id')

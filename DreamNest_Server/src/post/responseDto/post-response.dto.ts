@@ -4,4 +4,9 @@ export class PostResponseDto {
   user_id: number;
   createdAt: Date;
   updatedAt: Date;
+
+
+  user?: { id: number; userName: string; profilePicture?: string | null };
+
+
 }

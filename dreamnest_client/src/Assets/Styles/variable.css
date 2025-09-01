@@ -3,7 +3,7 @@
   --main-bg: #ffffff;
   --soft-bg: #F2EAF7;
   --soft-color: #ffffff;
-
+  --topbar-h: 80px; 
   --button-bg: #49368F;
 
   --border: #eadff7;
@@ -22,12 +22,13 @@
   --mark-done-bg: #ebe6ff;
   --mark-done-color: #4b3e88;
   --connection:#e9e6ef;
+  --grey:#DDDDDD;
 }
 
 
 body.dark {
   --nav-bg: #4C3A85;
-  --main-bg: #121212;
+  --main-bg: #121212; 
   --soft-bg: #1E1B26;
   --button-bg: #1E1B26;
  --header-bg:#1E1B26;

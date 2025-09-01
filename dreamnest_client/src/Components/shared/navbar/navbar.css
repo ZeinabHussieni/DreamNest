@@ -8,7 +8,7 @@
   position: sticky;
   top: 0;
   height: 87px;
-  z-index: 1000;
+  z-index: 9000;
   flex-wrap: nowrap;
 }
 
@@ -177,7 +177,7 @@
 .dropdown-managment {
   position: relative;
   display: inline-block;
-  z-index: 1000;
+   z-index: 1;  
 }
 
 .styled-dropdown {
@@ -187,11 +187,12 @@
   left: 0;
   background-color: #fff;
   border-radius: 8px;
+    z-index: 2;  
   min-width: 180px;
   padding: 0.5rem 0;
   box-shadow: 0 8px 20px rgba(0,0,0,0.15);
   transition: all 0.3s ease;
-  overflow: hidden;
+   overflow: visible;
 }
 
 .styled-dropdown a {

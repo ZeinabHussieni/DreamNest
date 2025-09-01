@@ -1,0 +1,157 @@
+.feed-wrap {
+  padding-inline: clamp(8px, 3vw, 24px);
+}
+
+.feed-title {
+  font-size: clamp(22px, 2.4vw, 32px);
+  margin: 18px 0 16px;
+  color: var(--text);
+}
+
+/* Composer */
+.composer {
+  background: var(--grey);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 10px;
+  margin-bottom: 20px;
+}
+.composer-title {
+  font-weight: 600;
+  color: var(--muted);
+  padding: 6px 8px 4px;
+}
+.composer-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 6px 8px 8px;
+}
+.composer-input {
+  border: 0;
+  border-top: 1px solid #fff;
+  background: transparent;
+  padding: 10px 8px;
+  outline: none;
+  color: var(--text);
+}
+
+.composer-btn {
+  border: 0;
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: var(--purple);
+  color: var(--soft-bg);
+  font-weight: 600;
+  cursor: pointer;
+}
+.composer-btn:disabled {
+  opacity: .7;
+  cursor: default;
+}
+
+/* Grid */
+.feed-grid {
+  list-style: none;
+  margin: 18px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 22px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+.post-card {
+  display: flex;
+  flex-direction: column;
+  height: 220px;                 
+  overflow: hidden;              
+}
+
+.post-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 6px 0 4px;
+  -webkit-line-clamp: 2;         
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.post-sub {
+  margin: 0 0 10px;
+  color: var(--muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 4;       
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.post-foot { margin-top: auto; }  
+/* Card */
+.post-card {
+  background: var(--soft-bg);               
+  border-radius: 18px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+.post-head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.post-user {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.post-avatar {
+  width: 49px;
+  height: 48px;
+  border-radius: 50%;
+}
+.post-name {
+  font-weight: 600;
+}
+.heart {
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  line-height: 0;
+}
+
+.heart-icon {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+.post-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 6px 0 4px;
+}
+.post-sub {
+  margin: 0 0 10px;
+  color: var(--muted);
+}
+.post-foot {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+}
+.btn-delete {
+  border: 0;
+  background: var(--danger);
+  color: var(--main-bg);
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 12px;
+}
+.like-count {
+  justify-self: end;
+  color: var(--muted);
+}
