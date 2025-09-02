@@ -1,10 +1,14 @@
-import { Injectable, InternalServerErrorException, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Notification as PrismaNotification } from '@prisma/client';
+import { NotificationGateway } from './gateway/notification.gateway'; 
 
 @Injectable()
 export class NotificationService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly notifGateway: NotificationGateway, 
+  ) {}
 
   async createNotification(data: {
     type: string;
@@ -25,6 +29,24 @@ export class NotificationService {
     }
   }
 
+
+  async createAndPush(data: {
+    type: string;
+    userId: number;
+    actorId?: number;
+    goalId?: number;
+    planId?: number;
+    postId?: number;
+    chatRoomId?: number;
+    messageId?: number;
+    content: string;
+  }): Promise<PrismaNotification> {
+    const row = await this.createNotification(data);
+
+    this.notifGateway.pushNotification(data.userId, row);
+    return row;
+  }
+
   async getUserNotifications(userId: number): Promise<PrismaNotification[]> {
     try {
       return await this.prisma.notification.findMany({
@@ -39,16 +61,13 @@ export class NotificationService {
 
   async markAsRead(notificationId: number): Promise<PrismaNotification> {
     try {
-      const notification = await this.prisma.notification.update({
+      return await this.prisma.notification.update({
         where: { id: notificationId },
         data: { read: true },
       });
-      return notification;
     } catch (error: any) {
       console.error('Error marking notification as read:', error);
-      if (error.code === 'P2025') {
-        throw new NotFoundException('Notification not found');
-      }
+      if (error.code === 'P2025') throw new NotFoundException('Notification not found');
       throw new InternalServerErrorException('Failed to mark notification as read');
     }
   }

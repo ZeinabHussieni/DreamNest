@@ -72,6 +72,17 @@
   transform: scale(1.05);
 }
 
+.community-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px; 
+}
+
+.community-btn .drop-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
 
 .dropdown {
   position: absolute;

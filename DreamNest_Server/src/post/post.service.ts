@@ -141,7 +141,7 @@ export class PostService {
                select: { userName: true },
               });
 
-            await this.notificationService.createNotification({
+            await this.notificationService.createAndPush({
             type: 'LIKE_POST',
             userId: post.user_id,     
             actorId: userId,          

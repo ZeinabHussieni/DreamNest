@@ -108,7 +108,7 @@ export class PlanService {
    const completedPlans = goalPlans.filter(p => p.completed).length;
    const progress = totalPlans > 0 ? (completedPlans / totalPlans) * 100 : 0;
 
-   return this.notificationService.createNotification({
+   return this.notificationService.createAndPush({
      type: 'GOAL_PROGRESS',
      userId: plan.goal.user_id,
      goalId: plan.goal_id,
@@ -124,7 +124,7 @@ export class PlanService {
  }
 
  private async sendPlanCompletedNotification(plan: any, coins: number, userId: number) {
-  return this.notificationService.createNotification({
+  return this.notificationService.createAndPush({
     type: 'PLAN_COMPLETED',
     userId: userId,
     planId: plan.id,

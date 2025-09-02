@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getChatRooms, getRoomMessages, ChatRoom, Message } from "../../Services/chat/chatService";
-import { getSocket } from "../../Services/socket/socket";
+import { getChatSocket } from "../../Services/socket/socket";
 import { toast } from "react-toastify";
 
 export default function useChat(currentUserId: number) {
@@ -9,7 +9,7 @@ export default function useChat(currentUserId: number) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loadingRooms, setLoadingRooms] = useState(true);
   const [loadingMsgs, setLoadingMsgs] = useState(false);
-  const socketRef = useRef(getSocket());
+  const socketRef = useRef(getChatSocket());
 
   const loadRooms = async () => {
     try {

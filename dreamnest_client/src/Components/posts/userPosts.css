@@ -94,8 +94,7 @@
 .post-title {
   font-size: 18px;
   font-weight: 700;
-  margin: 6px 0 4px;
-  -webkit-line-clamp: 2;         
+  margin: 6px 0 4px;       
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -103,8 +102,7 @@
 .post-sub {
   margin: 0 0 10px;
   color: var(--muted);
-  display: -webkit-box;
-  -webkit-line-clamp: 4;       
+  display: -webkit-box;    
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

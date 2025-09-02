@@ -2,7 +2,7 @@ import {WebSocketGateway,SubscribeMessage,MessageBody,ConnectedSocket,OnGatewayC
 import { Socket, Server } from 'socket.io';
 import { ChatService } from '../chat.service';
 
-@WebSocketGateway({ cors: true }) 
+@WebSocketGateway({ namespace: '/chat', cors: { origin: true, credentials: true } })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
@@ -23,10 +23,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
    ) {
      const isMember = await this.chatService.isParticipant(data.chatRoomId, data.userId);
-     if (!isMember) {
-       client.emit('error', 'Not a participant of this room');
+    if (!isMember) {
+        client.emit('chat:joinError', 'Not a participant of this room'); 
        return;
-      }
+    }
       client.join(`room-${data.chatRoomId}`);
   }
 

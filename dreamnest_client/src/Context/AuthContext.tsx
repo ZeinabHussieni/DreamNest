@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { refreshSocketsAfterAuthChange } from "../Services/socket/socket";
 
 
 type AuthContextType = {
@@ -24,6 +25,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setToken(newToken);
     setUser(newUser);
     setIsAuthenticated(true);
+    refreshSocketsAfterAuthChange();
   };
 
   const logout = () => {
@@ -32,6 +34,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setToken(null);
     setUser(null);
     setIsAuthenticated(false);
+    refreshSocketsAfterAuthChange();
   };
 
   return (

@@ -8,6 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { AuthProvider } from './Context/AuthContext';
 import { BrowserRouter } from "react-router-dom";
 import { ThemeProvider } from './Context/ThemeContext';
+import { NotificationProvider } from "./Context/NotificationsContext";
 import AppLayout from "./AppLayout";
 
 const root = ReactDOM.createRoot(
@@ -18,11 +19,13 @@ root.render(
     <BrowserRouter>
     <ToastContainer/>
     <ThemeProvider>
+
   <React.StrictMode>
-    {/* <AppLayout> */}
+    <NotificationProvider>
+  <AppLayout> 
             <App />
-          {/* </AppLayout> */}
-    
+          </AppLayout> 
+    </NotificationProvider>
   </React.StrictMode>
   </ThemeProvider>
   </BrowserRouter>

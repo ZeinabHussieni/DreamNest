@@ -2,12 +2,13 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom"; 
 import Logo from "../../../Assets/Images/Final logo.png";
 import Notification from "../../../Assets/Icons/notification.svg";
+import drop from "../../../Assets/Icons/dropdown.svg";
 import coinIcon from "../../../Assets/Icons/coins.svg";
 import ThemeToggle from "../../themeToggle/ThemeToggle"; 
 import { useAuth } from "../../../Context/AuthContext";
 import useDropdown from "../../../Hooks/navBar/useDropdown"; 
 import useUserData from "../../../Hooks/navBar/useUserData";
-// import NotificationBell from "../../../Components/notifications/NotificationBell";
+import NotificationBell from "../../../Components/notifications/NotificationBell";
 import "./navbar.css";
 
 const Navbar: React.FC = () => {
@@ -38,14 +39,21 @@ const Navbar: React.FC = () => {
           <div className="navbar-links desktop-links">
             <a href="/userGoals" className="btn nav-btn">Your Goals</a>
             <div className="dropdown-managment">
-              <button className="btn nav-btn">Community</button>
+            <button className="btn nav-btn community-btn">
+              Community
+             <img src={drop} alt="drop" className="drop-icon" />
+            </button>
               <div className="dropdown-content styled-dropdown">
                 <a href="/posts">Posts</a>
                 <a href="/myposts">My Posts</a>
               </div>
             </div>
              <div className="dropdown-managment">
-              <button className="btn nav-btn">Connections</button>
+
+              <button className="btn nav-btn community-btn">
+                Connections
+                <img src={drop} alt="drop" className="drop-icon" />
+                </button>
               <div className="dropdown-content styled-dropdown">
                 <a href="/chats">Chats</a>
                 <a href="/connections">Requests</a>
@@ -91,7 +99,7 @@ const Navbar: React.FC = () => {
         ) : (
           <>
 
-          {/* <NotificationBell/> */}
+           <NotificationBell/> 
            
             <div className="coin-badge">
               <img src={coinIcon} alt="Coin" className="coin-icon" />

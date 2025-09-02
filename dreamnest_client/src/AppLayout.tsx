@@ -1,19 +1,15 @@
 import React from "react";
-// import { NotificationsProvider } from "./Context/NotificationsContext";
-import { useAuth } from "./Context/AuthContext";
 
-type Props = { children: React.ReactNode };
+type Props = {
+  children: React.ReactNode;
+};
 
-export default function AppLayout({ children }: Props) {
-  const { user } = useAuth() as any;
-  const userId = user?.id ? Number(user.id) : null;
-
-  const getToken = () => localStorage.getItem("accessToken") || "";
-
+const AppLayout: React.FC<Props> = ({ children }) => {
   return (
-    // <NotificationsProvider getToken={getToken} userId={userId}>
-    //   {children}
-    // </NotificationsProvider>
-    <></>
+    <div className="app-shell">
+      <main>{children}</main>
+    </div>
   );
-}
+};
+
+export default AppLayout;
