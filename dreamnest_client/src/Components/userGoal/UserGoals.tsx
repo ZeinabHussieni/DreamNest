@@ -4,6 +4,7 @@ import useGoalsList from "../../Hooks/userGoals/useGoalsList";
 import useDeleteGoal from "../../Hooks/userGoals/useDeleteGoal";
 import UserGoalCard from "./UserGoalCard";
 import "./userGoals.css";
+import image  from "../../Assets/Images/empty2.png";
 
 const UserGoals: React.FC = () => {
   const nav = useNavigate();
@@ -45,18 +46,27 @@ const UserGoals: React.FC = () => {
           Create Goal
         </button>
       </header>
+      
 
-      {loading && <p>Loading goals…</p>}
-      {error && <p className="error">{error}</p>}
+     {loading && <p>Loading goals…</p>}
+     {error && <p className="error">{error}</p>}
 
-      {!loading && !error && (
-        <div className="goals-container">
-          {goals.map((goal: any) => (
-            <UserGoalCard key={goal.id} goal={goal} deleteAction={deleteAction} />
-          ))}
-        </div>
-      )}
-    </section>
+     {!loading && !error && (
+     <div className="goals-container">
+       {goals.length === 0 ? (
+      <div className="no-posts">
+        <img src={image} alt="Welcome" />
+        <p className="muted">No goals yet. Create your first goal</p>
+      </div>
+       ) : (
+        goals.map((goal: any) => (
+        <UserGoalCard key={goal.id} goal={goal} deleteAction={deleteAction} />
+      ))
+     )}
+    </div>
+    )}
+
+  </section>
   );
 };
 

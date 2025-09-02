@@ -27,13 +27,11 @@ const AppRoutes: React.FC = () => {
       <Route path="/createGoalPage" element={<CreateGoal />} />
       <Route path="/goals/:id" element={<GoalDetailsPage />} />
       <Route path="/connections" element={<Connections />} />
-      <Route path="/chats" element={<ChatPage />} />
       <Route path="/myposts" element={<UserPosts />} />
       <Route path="/posts" element={<CommunityPosts />} />
       
-
-  
       </Route>
+       <Route path="/chats" element={<ChatPage />} />
     </Routes>
   );
 };

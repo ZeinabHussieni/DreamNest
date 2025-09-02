@@ -9,7 +9,7 @@ export default function useChat(currentUserId: number) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loadingRooms, setLoadingRooms] = useState(true);
   const [loadingMsgs, setLoadingMsgs] = useState(false);
-  const socketRef = useRef(getSocket());//holds a single socket connection instance so it doesn’t reconnect on every render
+  const socketRef = useRef(getSocket());
 
   const loadRooms = async () => {
     try {

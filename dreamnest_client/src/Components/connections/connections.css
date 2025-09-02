@@ -43,7 +43,8 @@
 }
 .req-sub { 
     color: var(--muted);
-    font-size: 14px;
+    font-size: 17px;
+
 }
 .req-actions {
  display: flex;
@@ -55,7 +56,7 @@
    border-radius: 12px;
    padding: 8px 16px; 
    cursor: pointer; 
-   font-weight: 400;
+   font-weight: 700;
    font-size: 17px; 
 }
 .btnn.confirm { 

@@ -4,30 +4,35 @@ import {
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost) {
-    const ctx = host.switchToHttp(); //swtich to http req and res
+    const ctx = host.switchToHttp();
     const res = ctx.getResponse();
     const req = ctx.getRequest();
 
-    // default values for unexpected errors
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
-    let message: any = 'Internal server error';
     let errorName = 'Error';
+    let message: any = 'Internal server error';
+    let errors: Record<string, string> | undefined;
 
     if (exception instanceof HttpException) {
       status = exception.getStatus();
-      const response = exception.getResponse();
       errorName = exception.name;
+      const response = exception.getResponse();
 
       if (typeof response === 'string') {
-        message = response; //simple error message
+        message = response;
       } else if (Array.isArray((response as any)?.message)) {
-        message = (response as any).message; //validation error
+        message = (response as any).message;
       } else if (typeof response === 'object' && response) {
-        message = (response as any).message || message; //other nested objects
+        const obj = response as any;
+        message = obj.message || message;
+    
+        if (obj.errors && typeof obj.errors === 'object') {
+          errors = obj.errors;
+        }
       }
     } else if (exception instanceof Error) {
       errorName = exception.name;
-      message = exception.message || message; //unexpexted error
+      message = exception.message || message;
     }
 
     res.status(status).json({
@@ -38,6 +43,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       error: {
         name: errorName,
         message,
+        ...(errors ? { errors } : {}), 
       },
     });
   }

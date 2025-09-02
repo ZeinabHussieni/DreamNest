@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import loginService from "../../Services/auth/loginService";
 import { useAuth } from "../../Context/AuthContext";
-
+import { useState } from "react";
 type User = {
   id?: number;
   email?: string;
@@ -11,6 +11,8 @@ type User = {
 
   [k: string]: unknown;// to let extra fields through without errors
 };
+type FieldErrors = Partial<Record<"identifier" | "password", string>>;
+
 
 type LoginState = {
   success: boolean;
@@ -29,6 +31,7 @@ export default function useLogin() {
 
 
   const { login } = useAuth() as { login: (token: string, user: User) => void };
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   const loginAction = async (
     _prevState: LoginState,
@@ -48,15 +51,11 @@ export default function useLogin() {
       navigate("/");
 
       return { success: true, error: null };
-    } catch (error: unknown) {
-      const message =
-        (error as { response?: { data?: { message?: string } } }).response?.data?.message ||
-        (error as Error).message ||
-        "Failed to login";
-
+    } catch (e: any) {
+     const message: string = e?.message || "Failed to login";
+      const errors: FieldErrors = e?.errors || {};
+      setFieldErrors(errors);
       toast.error(message);
-      console.error("Login error:", error);
-
       return { success: false, error: message };
     }
   };
@@ -70,5 +69,6 @@ export default function useLogin() {
     action,         
     state,         
     loading: isPending,
+    fieldErrors 
   };
 }

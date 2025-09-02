@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState} from "react";
 import { createPost, deletePost, getMyPosts, toggleLike, Post } from "../../Services/posts/postsService";
 import {toast} from "react-toastify";
+import Swal from "sweetalert2";
 
 export default function useMyPosts(){
     const [items, setItems]=useState<Post[]>([]);
@@ -54,20 +55,48 @@ export default function useMyPosts(){
     };
 
    const remove = async (id: number) => {
-      const snapshot = items;
-      setItems(prev => prev.filter(p => p.id !== id));
-      try {
-         await deletePost(id);
-         setLikeMap(prev => {
-         const { [id]: _, ...rest } = prev;
-         return rest;
-        });
-         toast.success("Post deleted");
-        } catch (e:any) {
-          setItems(snapshot);
-         toast.error(e?.response?.data?.message || "Failed to delete");
-        }
-    };
+
+    const { isConfirmed } = await Swal.fire({
+    title: "Delete this post?",
+    text: "This action cannot be undone.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Delete",
+    cancelButtonText: "Cancel",
+    confirmButtonColor: "#e0524c",
+    cancelButtonColor: "#6f56c5",
+    reverseButtons: true,
+    focusCancel: true,
+    width:400
+    });
+    if (!isConfirmed) return;
+
+    const snapshot = items;
+    setItems(prev => prev.filter(p => p.id !== id));
+
+   try {
+     await deletePost(id);
+     setLikeMap(prev => {
+       const { [id]: _discard, ...rest } = prev;
+       return rest;
+     });
+
+     await Swal.fire({
+       title: "Deleted",
+       text: "Post removed successfully.",
+       icon: "success",
+       timer: 1200,
+       showConfirmButton: false,
+     });
+    } catch (e: any) {
+     setItems(snapshot);
+     await Swal.fire({
+       title: "Failed",
+       text: e?.response?.data?.message || "Failed to delete",
+       icon: "error",
+     });
+    }
+  };
 
   const like = async (id: number) => {
     try {
@@ -79,8 +108,8 @@ export default function useMyPosts(){
     }
   };
 
-    const state=useMemo(()=>({items,loading,publishing,likeMap}),[items,loading,publishing,likeMap]);
-    return {...state,publish,remove,like,reload:load};
+  const state=useMemo(()=>({items,loading,publishing,likeMap}),[items,loading,publishing,likeMap]);
+  return {...state,publish,remove,like,reload:load};
 
 
 }

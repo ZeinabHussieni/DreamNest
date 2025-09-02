@@ -10,7 +10,7 @@
 
 /* Composer */
 .composer {
-  background: var(--grey);
+  background: var(--soft-bg);
   border: 1px solid var(--border);
   border-radius: 14px;
   padding: 10px;
@@ -20,6 +20,7 @@
   font-weight: 600;
   color: var(--muted);
   padding: 6px 8px 4px;
+  font-size: 18px;
 }
 .composer-row {
   display: grid;
@@ -35,7 +36,29 @@
   padding: 10px 8px;
   outline: none;
   color: var(--text);
+  font-size: 16px;
 }
+.no-posts {
+  display: flex;
+  justify-content: center;   
+  align-items: center;      
+  gap: 16px;                
+  height: 60vh;           
+  text-align: left;         
+}
+
+.no-posts img {
+  width: 400px;  
+  height: 400px;
+  object-fit: contain;
+}
+
+.no-posts p {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 500;
+}
+
 
 .composer-btn {
   border: 0;
@@ -45,6 +68,7 @@
   color: var(--soft-bg);
   font-weight: 600;
   cursor: pointer;
+  font-size: 16px;
 }
 .composer-btn:disabled {
   opacity: .7;
@@ -148,6 +172,7 @@
   padding: 6px 10px;
   border-radius: 8px;
   font-weight: 600;
+  font-size: 16px;
   cursor: pointer;
   margin-top: 12px;
 }

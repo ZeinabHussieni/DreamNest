@@ -1,23 +1,22 @@
-import React, { FormEvent, ChangeEvent } from "react";
+import React from "react";
 import Button from "../../shared/button/Button";
 import Input from "../../shared/authInput/AuthInput";
 import useLogin from "../../../Hooks/auth/useLoginForm";
 
-
 const Login: React.FC = () => {
-  const { action,loading } = useLogin();
-
+  const { action, loading, fieldErrors } = useLogin();
 
   return (
-    <form className="login-form" action={action}>
+    <form className="login-form" action={action} noValidate>
       <h2 className="form-title-login">Login</h2>
 
       <div className="Second">
-
         <Input
           name="identifier"
           hint="UserName or Email"
           placeholder="john@example.com"
+          error={fieldErrors.identifier}
+          aria-invalid={!!fieldErrors.identifier}
         />
 
         <Input
@@ -25,13 +24,13 @@ const Login: React.FC = () => {
           name="password"
           hint="Password"
           placeholder="Enter your password"
+          error={fieldErrors.password}
+          aria-invalid={!!fieldErrors.password}
         />
       </div>
 
       <div className="button-login">
-        <Button
-          text={loading ? "Login..." : "Login"}
-        />
+        <Button text={loading ? "Login..." : "Login"} />
       </div>
     </form>
   );

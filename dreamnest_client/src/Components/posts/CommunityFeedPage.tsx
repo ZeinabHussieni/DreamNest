@@ -1,7 +1,7 @@
 import React from "react";
 import useCommunityPosts from "../../Hooks/posts/useCommunityPosts";
 import PostCard from "../../Components/posts/PostCard";
-
+import image  from "../../Assets/Images/empty2.png";
 
 const CommunityFeedPage: React.FC = () => {
   const { items, loading, likeMap, like } = useCommunityPosts();
@@ -13,7 +13,12 @@ const CommunityFeedPage: React.FC = () => {
       {loading ? (
         <p className="muted">Loading…</p>
       ) : items.length === 0 ? (
-        <p className="muted">No posts yet.</p>
+        
+      <div className="no-posts">
+       <img src={image} alt="Welcome" />
+         <p className="muted">No posts yet.</p>
+     </div>
+      
       ) : (
         <ul className="feed-grid">
           {items.map((p) => {

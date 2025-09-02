@@ -1,4 +1,4 @@
-import React, { ChangeEvent } from "react";
+import React from "react";
 import "./authInput.css";
 
 type InputProps = {
@@ -7,6 +7,7 @@ type InputProps = {
   hint: string;
   placeholder?: string;
   required?: boolean;
+  error?: string; 
 };
 
 const Input: React.FC<InputProps> = ({
@@ -15,9 +16,10 @@ const Input: React.FC<InputProps> = ({
   hint,
   placeholder,
   required,
- }) => {
+  error,
+}) => {
   return (
-    <div className="input-group-auth">
+    <div className={`input-group-auth ${error ? "has-error" : ""}`}>
       <label className="auth-label authLabel" htmlFor={name}>
         {hint}
       </label>
@@ -28,8 +30,12 @@ const Input: React.FC<InputProps> = ({
         name={name}
         placeholder={placeholder}
         required={required}
-        className="primary-input-auth"
+        className={`primary-input-auth ${error ? "input-error" : ""}`}
+        aria-invalid={!!error}
       />
+
+  
+      {error && <small className="input-error-text">{error}</small>}
     </div>
   );
 };

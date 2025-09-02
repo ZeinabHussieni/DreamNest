@@ -7,6 +7,7 @@ import ThemeToggle from "../../themeToggle/ThemeToggle";
 import { useAuth } from "../../../Context/AuthContext";
 import useDropdown from "../../../Hooks/navBar/useDropdown"; 
 import useUserData from "../../../Hooks/navBar/useUserData";
+// import NotificationBell from "../../../Components/notifications/NotificationBell";
 import "./navbar.css";
 
 const Navbar: React.FC = () => {
@@ -89,9 +90,9 @@ const Navbar: React.FC = () => {
           </>
         ) : (
           <>
-            <a className="icon-btn">
-              <img src={Notification} alt="Notifications" />
-            </a>
+
+          {/* <NotificationBell/> */}
+           
             <div className="coin-badge">
               <img src={coinIcon} alt="Coin" className="coin-icon" />
               <span className="coin-text">{coins}</span>

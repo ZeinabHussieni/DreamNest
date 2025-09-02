@@ -26,7 +26,16 @@
   background: #fff;
   margin-top: 1rem;
 }
+.input-error {
+  border-color: var(--danger) !important;
+}
 
+.input-error-text {
+  color: var(--danger);
+  font-size: 12px;
+  margin-bottom: -20px;
+  display: block;
+}
 @media (max-width: 768px) {
 
   .primary-input-auth {

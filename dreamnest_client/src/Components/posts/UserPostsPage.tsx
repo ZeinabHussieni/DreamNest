@@ -4,6 +4,7 @@ import PostCard from "../../Components/posts/PostCard";
 import PostComposer from "../../Components/posts/PostComposer";
 import "./userPosts.css";
 import { useAuth } from "../../Context/AuthContext";
+import image  from "../../Assets/Images/empty2.png";
 
 const UserPostsPage: React.FC = () => {
   const { user } = useAuth() as any; 
@@ -18,7 +19,14 @@ const UserPostsPage: React.FC = () => {
       {loading ? (
         <p className="muted">Loading…</p>
       ) : items.length === 0 ? (
-        <p className="muted">No posts yet. Share your first thought ✨</p>
+
+      <div className="no-posts">
+       <img src={image} alt="Welcome" />
+       <p className="muted">
+         No posts yet. Share your first thought 
+       </p>
+     </div>
+   
       ) : (
         <ul className="feed-grid">
           {items.map((p) => {

@@ -29,6 +29,7 @@ export default function useDeleteGoal({ setGoals, reload }: Props) {
         cancelButtonColor: "#6f56c5",
         reverseButtons: true,
         focusCancel: true,
+        width:400
       });
       if (!isConfirmed) return prev;
 

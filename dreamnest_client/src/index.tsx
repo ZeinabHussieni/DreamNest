@@ -8,7 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { AuthProvider } from './Context/AuthContext';
 import { BrowserRouter } from "react-router-dom";
 import { ThemeProvider } from './Context/ThemeContext';
-
+import AppLayout from "./AppLayout";
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -19,7 +19,9 @@ root.render(
     <ToastContainer/>
     <ThemeProvider>
   <React.StrictMode>
-    <App />
+    {/* <AppLayout> */}
+            <App />
+          {/* </AppLayout> */}
     
   </React.StrictMode>
   </ThemeProvider>

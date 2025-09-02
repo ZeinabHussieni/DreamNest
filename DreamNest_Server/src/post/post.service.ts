@@ -136,28 +136,29 @@ export class PostService {
                },
               });
               liked = true;
-              await this.notificationService.createNotification({
-              type: 'LIKE_POST',
-              userId: post.user_id,      
-              actorId: userId,          
-              postId: postId,
-              content: `${post.user.userName} liked your post`,
-           });
+             const actor = await this.prisma.user.findUnique({
+               where: { id: userId },
+               select: { userName: true },
+              });
 
-            }
-
-           const likeCount = await this.prisma.postLike.count({ where: { post_id: postId } });
-           
-
-           return { liked, likeCount };
-       } catch (err) {
+            await this.notificationService.createNotification({
+            type: 'LIKE_POST',
+            userId: post.user_id,     
+            actorId: userId,          
+            postId,
+            content: `${actor?.userName ?? 'Someone'} liked your post`,
+         });
+       }
+       const likeCount = await this.prisma.postLike.count({ where: { post_id: postId } });
+       return { liked, likeCount };
+      } catch (err) {
         console.error(err);
         throw new BadRequestException('Failed to toggle like');
       }
-    }
+  }
     
 
-      private formatPost(post: PostWithUser): PostResponseDto {
+  private formatPost(post: PostWithUser): PostResponseDto {
     return {
       id: post.id,
       content: post.content,

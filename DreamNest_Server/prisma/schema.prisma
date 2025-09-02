@@ -201,21 +201,20 @@ model MessageRead {
 
 model Notification {
   id         Int      @id @default(autoincrement())
-  type       String   
-  userId     Int     
-  actorId    Int?     
+  type       String
+  userId     Int
+  actorId    Int?
   goalId     Int?
   planId     Int?
   postId     Int?
   chatRoomId Int?
   messageId  Int?
-  content    String   
+  content    String
   read       Boolean  @default(false)
   createdAt  DateTime @default(now())
 
-
   user       User     @relation(fields: [userId], references: [id])
+
+  @@index([userId, read, createdAt])
+  @@index([createdAt])
 }
-
-
-

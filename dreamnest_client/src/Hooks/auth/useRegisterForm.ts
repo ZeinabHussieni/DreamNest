@@ -3,12 +3,19 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import registerService from "../../Services/auth/registerService";
 import { useAuth } from "../../Context/AuthContext";
+import { useState } from "react";
 
 type State = { success: boolean; error: string | null };
 
 export default function useRegisterForm() {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+
+  type FieldErrors = Partial<Record<
+  "firstName" | "lastName" | "userName" | "email" | "password" | "profilePictureBase64",
+  string
+>>;
 
   const registerAction = async (_prev: State, formData: FormData): Promise<State> => {
     try {
@@ -29,10 +36,12 @@ export default function useRegisterForm() {
       navigate("/");
 
       return { success: true, error: null };
-    } catch (error: any) {
-      toast.error(error?.response?.data?.message || "Failed to register");
-      console.error("Register error:", error);
-      return { success: false, error: error?.message || "Registration failed" };
+    } catch (e: any) {
+      const message: string = e?.message || "Registration failed";
+      const errors: FieldErrors = e?.errors || {};
+      setFieldErrors(errors);
+      toast.error(message);
+      return { success: false, error: message };
     }
   };
 
@@ -41,5 +50,5 @@ export default function useRegisterForm() {
     error: null,
   });
 
-  return { action, state, loading: isPending };
+  return { action, state, loading: isPending,fieldErrors  };
 }
