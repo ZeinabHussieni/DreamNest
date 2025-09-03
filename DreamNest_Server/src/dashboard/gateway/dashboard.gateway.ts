@@ -1,27 +1,50 @@
-import {WebSocketGateway,WebSocketServer,SubscribeMessage,MessageBody,OnGatewayInit,} from '@nestjs/websockets';
-import { Server } from 'socket.io';
-import { DashboardService } from '../dashboard.service';
+import {WebSocketGateway,WebSocketServer,SubscribeMessage,MessageBody,ConnectedSocket,OnGatewayInit,OnGatewayConnection,} from "@nestjs/websockets";
+import { Server, Socket } from "socket.io";
+import { DashboardService } from "../dashboard.service";
 
-@WebSocketGateway({ namespace: '/dashboard' })
-export class DashboardGateway implements OnGatewayInit {
+@WebSocketGateway({
+  namespace: "/dashboard",
+  cors: { origin: true, credentials: true }, 
+})
+export class DashboardGateway implements OnGatewayInit, OnGatewayConnection {
   @WebSocketServer() server: Server;
 
   constructor(private readonly dashboardService: DashboardService) {}
 
-  afterInit(server: Server) {
-    console.log('Dashboard WebSocket initialized');
+  afterInit() {
+    console.log("Dashboard WebSocket initialized");
   }
 
+  handleConnection(client: Socket) {
  
-  @SubscribeMessage('getDashboard')
-  async handleGetDashboard(@MessageBody() userId: number) {
-    const dashboard = await this.dashboardService.getUserDashboard(userId);
-    return { event: 'dashboardData', data: dashboard };
+    const userId = Number(client.handshake.auth?.userId);
+    if (Number.isFinite(userId)) {
+      client.join(`user-${userId}`);
+    }
+  }
+
+
+  @SubscribeMessage("getDashboard")
+  async handleGetDashboard(
+    @MessageBody() body: { userId?: number },
+    @ConnectedSocket() client: Socket
+  ) {
+    const uid =
+      Number(body?.userId) ||
+      Number(client.handshake.auth?.userId);
+
+    if (!Number.isFinite(uid)) {
+      client.emit("dashboard:error", "Invalid or missing userId");
+      return;
+    }
+
+    const dashboard = await this.dashboardService.getUserDashboard(uid);
+    client.emit("dashboardData", dashboard); 
   }
 
 
   async emitDashboardUpdate(userId: number) {
     const dashboard = await this.dashboardService.getUserDashboard(userId);
-    this.server.to(`user_${userId}`).emit('dashboardUpdate', dashboard);
+    this.server.to(`user-${userId}`).emit("dashboardUpdate", dashboard);
   }
 }

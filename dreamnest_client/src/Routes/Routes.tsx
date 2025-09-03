@@ -11,6 +11,7 @@ import Connections from "../Pages/connections/connections";
 import ChatPage from "../Pages/chatPage/chatPage";
 import UserPosts from "../Pages/userPosts/UserPosts";
 import CommunityPosts from "../Pages/communityPosts/CommunityPosts";
+import DashboardPage from "../Pages/dashboard/Dashboard";
 
 
 const AppRoutes: React.FC = () => {
@@ -29,6 +30,7 @@ const AppRoutes: React.FC = () => {
       <Route path="/connections" element={<Connections />} />
       <Route path="/myposts" element={<UserPosts />} />
       <Route path="/posts" element={<CommunityPosts />} />
+      <Route path="/dashboard" element={<DashboardPage />} />
       
       </Route>
        <Route path="/chats" element={<ChatPage />} />

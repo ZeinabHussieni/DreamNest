@@ -58,6 +58,7 @@ async function bootstrap() {
       'http://localhost:5174',
     ],
     credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization'], 
   });
   await app.listen(3000);
 }

@@ -9,7 +9,6 @@ import { AuthProvider } from './Context/AuthContext';
 import { BrowserRouter } from "react-router-dom";
 import { ThemeProvider } from './Context/ThemeContext';
 import { NotificationProvider } from "./Context/NotificationsContext";
-import AppLayout from "./AppLayout";
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -22,9 +21,9 @@ root.render(
 
   <React.StrictMode>
     <NotificationProvider>
-  <AppLayout> 
+      
             <App />
-          </AppLayout> 
+       
     </NotificationProvider>
   </React.StrictMode>
   </ThemeProvider>

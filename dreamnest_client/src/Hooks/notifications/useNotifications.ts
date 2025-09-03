@@ -1,82 +1,83 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useAuth } from "../../Context/AuthContext";
 import { getNotifSocket } from "../../Services/socket/socket";
-import {fetchNotifications,markRead,markAllRead,NotificationDto,} from "../../Services/socket/notificationsSocket";
+import {fetchNotifications,markRead as apiMarkRead,markAllRead as apiMarkAllRead,NotificationDto,} from "../../Services/socket/notificationsSocket";
 
 export default function useNotifications() {
+  const { isAuthenticated } = useAuth();
   const [items, setItems] = useState<NotificationDto[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let didCancel = false;
+    let socket: ReturnType<typeof getNotifSocket> | null = null;
 
-    (async () => {
+    async function boot() {
+      if (!isAuthenticated) {
+        setItems([]);
+        setLoading(false);
+        return;
+      }
+
+   
       try {
         const initial = await fetchNotifications();
         if (!didCancel) setItems(initial);
+      } catch {
+        if (!didCancel) setItems([]);
       } finally {
         if (!didCancel) setLoading(false);
       }
 
-   
-      const s = getNotifSocket();
+    
+      socket = getNotifSocket();
       const onNew = (n: NotificationDto) => {
-        if (!didCancel) setItems((prev) => [n, ...prev]);
+        if (didCancel) return;
+        setItems(prev => (prev.some(x => x.id === n.id) ? prev : [n, ...prev]));
       };
 
-    
-      s.off("newNotification", onNew);
-      s.on("newNotification", onNew);
+      socket.off("newNotification", onNew);
+      socket.on("newNotification", onNew);
+    }
 
-    
-      return () => {
-        s.off("newNotification", onNew);
-      };
-    })();
+    boot();
+
 
     return () => {
       didCancel = true;
+      if (socket) {
+        socket.removeAllListeners?.("newNotification");
+      }
     };
-  }, []);
+  }, [isAuthenticated]);
 
   const unreadCount = useMemo(
-    () => items.filter((n) => !n.read).length,
+    () => items.filter(n => !n.read).length,
     [items]
   );
 
-  async function handleMarkRead(id: number) {
-    const idx = items.findIndex((n) => n.id === id);
-    if (idx === -1 || items[idx].read) return;
-
-   
-    setItems((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
-
+  const markOneRead = useCallback(async (id: number) => {
+    setItems(prev => prev.map(n => (n.id === id ? { ...n, read: true } : n)));
     try {
-      await markRead(id);
+      await apiMarkRead(id);
     } catch {
-
-      setItems((prev) => prev.map((n) => (n.id === id ? { ...n, read: false } : n)));
+      setItems(prev => prev.map(n => (n.id === id ? { ...n, read: false } : n)));
     }
-  }
+  }, []);
 
-  async function handleMarkAllRead() {
-    const ids = items.filter((n) => !n.read).map((n) => n.id);
+  const markAllRead = useCallback(async () => {
+    const ids = items.filter(n => !n.read).map(n => n.id);
     if (!ids.length) return;
-
-
-    setItems((prev) => prev.map((n) => (n.read ? n : { ...n, read: true })));
-
+    setItems(prev => prev.map(n => (n.read ? n : { ...n, read: true })));
     try {
-      await markAllRead(ids);
+      await apiMarkAllRead(ids);
     } catch {
-  
     }
-  }
+  }, [items]);
 
-  return {
-    items,
-    loading,
-    unreadCount,
-    markRead: handleMarkRead,
-    markAllRead: handleMarkAllRead,
-  } as const;
+  const activateItem = useCallback((id: number) => {
+    markOneRead(id);
+  }, [markOneRead]);
+
+  return { items, loading, unreadCount, activateItem, markAllRead } as const;
 }

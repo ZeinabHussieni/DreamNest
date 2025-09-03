@@ -1,5 +1,6 @@
 .notif-wrapper {
   position: relative;
+  
 }
 
 .notif-button {
@@ -50,13 +51,27 @@
   right: 0;
   top: calc(100% + 10px);
   width: 360px;
-  max-height: 70vh;
+  max-height: 90vh;
   overflow: auto;
   background: white;
   border: 1px solid rgba(0,0,0,0.06);
   border-radius: 14px;
   box-shadow: 0 12px 28px rgba(0,0,0,0.15);
   z-index: 10000;
+  
+}
+
+.notif-dropdown {
+  max-height: 90vh;
+  overflow: auto;
+  -ms-overflow-style: none; 
+  scrollbar-width: none;   
+  overscroll-behavior: contain; 
+  -webkit-overflow-scrolling: touch; 
+}
+.notif-dropdown::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
 
 .notif-header {
@@ -67,6 +82,12 @@
   border-bottom: 1px solid rgba(0,0,0,0.06);
   font-weight: 600;
   color: var(--button-bg);
+}
+.notif-header {
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 1;
 }
 
 .mark-all {

@@ -1,0 +1,196 @@
+.card {
+  padding: 18px;
+  transition: box-shadow .2s ease, transform .08s ease;
+  will-change: box-shadow, transform;
+}
+
+.card:hover {
+  box-shadow: 0 14px 30px rgba(0,0,0,.08);
+  transform: translateY(-1px);
+}
+
+.dash {
+  padding: 16px;
+  display: grid;
+  gap: 18px;
+  margin: 0 60px;
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(220px, 1fr));
+  gap: 18px;
+}
+
+.metric-card {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 12px;
+  padding: 20px;
+  align-items: center;
+  border-radius: 20px;
+  height: 120px;
+  background-color: var(--soft-bg);
+}
+
+.metric-icon {
+  width: 40px;
+  height: 40px;
+}
+
+.metric-title {
+  font-weight: 700;
+  color: var(--text);
+  font-size: 20px;
+  margin-left: 10px;
+}
+
+.metric-sub {
+  color: var(--muted);
+  font-size: 18px;
+  margin-top: 41px;
+  margin-left: 10px;
+}
+
+.metric-img {
+  width: 60px;
+  height: 60px;
+  display: block;
+  object-fit: contain;
+  margin-right: 20px;
+  margin-top: -43px;
+}
+
+.chart-card {
+  border-radius: 20px;
+  padding: 16px 18px;
+  border-radius: 27px;
+  background-color: var(--soft-bg);
+}
+
+.chart-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.chart-title {
+  font-weight: 800;
+  font-size: 18px;
+  margin-top: 9px;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.donut-wrap {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  gap: 12px;
+  align-items: center;
+}
+
+.donut-legend {
+  display: grid;
+  gap: 8px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.legend-bullet {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.ring-card {
+  display: grid;
+  place-items: center;
+}
+
+.ring {
+  position: relative;
+  width: 160px;
+  height: 160px;
+}
+
+.ring-svg {
+  transform: rotate(-90deg);
+}
+
+.ring-bg {
+  stroke: var(--grey);
+}
+
+.ring-fg {
+  stroke: var(--button-bg);
+  transition: stroke-dasharray 0.4s ease;
+}
+
+.ring-center {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+
+.ring-value {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.ring-label {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.dash-grid-cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(220px, 1fr));
+  gap: 18px;
+}
+
+.dash-grid-charts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+@media (max-width: 1200px) {
+  .dash-grid-cards {
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
+  }
+  .dash-grid-charts {
+    grid-template-columns: repeat(2, minmax(280px, 1fr));
+  }
+}
+
+@media (max-width: 1100px) {
+  .chart-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .metric-grid {
+    grid-template-columns: 1fr;
+  }
+  .donut-wrap {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .dash-grid-cards,
+  .dash-grid-charts {
+    grid-template-columns: 1fr;
+  }
+}
