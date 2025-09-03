@@ -31,7 +31,6 @@ const Input: React.FC<InputProps> = ({
         placeholder={placeholder}
         required={required}
         className={`primary-input-auth ${error ? "input-error" : ""}`}
-        aria-invalid={!!error}
       />
 
   

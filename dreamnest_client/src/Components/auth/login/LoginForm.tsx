@@ -16,7 +16,6 @@ const Login: React.FC = () => {
           hint="UserName or Email"
           placeholder="john@example.com"
           error={fieldErrors.identifier}
-          aria-invalid={!!fieldErrors.identifier}
         />
 
         <Input
@@ -25,7 +24,6 @@ const Login: React.FC = () => {
           hint="Password"
           placeholder="Enter your password"
           error={fieldErrors.password}
-          aria-invalid={!!fieldErrors.password}
         />
       </div>
 

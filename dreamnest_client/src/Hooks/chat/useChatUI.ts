@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ChatRoom, Message } from "../../Services/chat/chatService";
 
 type Args = {
@@ -10,7 +10,13 @@ type Args = {
   send: (text: string) => void;
 };
 
-export default function useChatUI({userId,rooms,activeRoom,loadingMsgs,messages,send,
+export default function useChatUI({
+  userId,
+  rooms,
+  activeRoom,
+  loadingMsgs,
+  messages,
+  send,
 }: Args) {
 
   const [text, setText] = useState("");
@@ -20,7 +26,6 @@ export default function useChatUI({userId,rooms,activeRoom,loadingMsgs,messages,
 
   const bodyRef = useRef<HTMLDivElement | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
-  const firstLoadRef = useRef(true);
 
 
   const getOtherUser = useCallback(
@@ -50,31 +55,17 @@ export default function useChatUI({userId,rooms,activeRoom,loadingMsgs,messages,
 
 
   useEffect(() => {
-    if (!bodyRef.current || loadingMsgs) return;
-    const behavior: ScrollBehavior = firstLoadRef.current ? "auto" : "smooth";
-    bottomRef.current?.scrollIntoView({ behavior, block: "end" });
-    if (firstLoadRef.current) firstLoadRef.current = false;
+    if (loadingMsgs) return;
+    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages, loadingMsgs]);
 
-
-  useEffect(() => {
-    firstLoadRef.current = true;
-  }, [activeRoom?.id]);
-
-
+ 
   useEffect(() => {
     if (!mobileOpen) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setMobileOpen(false);
-    };
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setMobileOpen(false);
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [mobileOpen]);
-
-
-  useEffect(() => {
-    if (mobileOpen) setMobileOpen(false);
-  }, [activeRoom?.id, mobileOpen]);
 
 
   const onSubmit = (e: React.FormEvent) => {
@@ -86,14 +77,20 @@ export default function useChatUI({userId,rooms,activeRoom,loadingMsgs,messages,
   };
 
   return {
-
+  
     text, setText,
     search, setSearch,
     mobileOpen, setMobileOpen,
+
+  
     filteredRooms,
     activeOther,
+
+ 
     bodyRef,
     bottomRef,
+
+   
     getOtherUser,
     onSubmit,
   };

@@ -36,8 +36,6 @@ const PostCard: React.FC<Props> = ({
 
         <button
           className={`heart ${liked ? "active" : ""}`}
-          aria-pressed={liked}
-          aria-label={liked ? "Unlike" : "Like"}
           onClick={() => onLike?.(id)}
         >
           {liked ? (

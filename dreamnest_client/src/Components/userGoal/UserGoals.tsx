@@ -24,7 +24,7 @@ const UserGoals: React.FC = () => {
     <section className="goals-section">
       {/* mini navbar */}
       <header className="ug-header">
-        <div className="ug-tabs" role="tablist" aria-label="Goal filters">
+        <div className="ug-tabs" role="tablist">
           <button
             type="button"
             className={`ug-tab ${tab === "overview" ? "active" : ""}`}
@@ -54,7 +54,7 @@ const UserGoals: React.FC = () => {
      {!loading && !error && (
      <div className="goals-container">
        {goals.length === 0 ? (
-      <div className="no-posts">
+      <div className="no-posts goal-post">
         <img src={image} alt="Welcome" />
         <p className="muted">No goals yet. Create your first goal</p>
       </div>

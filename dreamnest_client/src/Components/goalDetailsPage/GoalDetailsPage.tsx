@@ -14,7 +14,7 @@ const fmt = (d?: string | Date | null) => {
 const GoalDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const goalId = Number(id);
-  const { goal, plans, imageUrl, deadlineLabel, loading, error, onTogglePlan } =
+  const { goal, plans, imageUrl, deadlineLabel, loading, error, onTogglePlan,isLocked } =
     useGoalDetails(goalId);
 
   if (!Number.isFinite(goalId)) return <div className="gd-page"><p className="gd-error">Invalid goal id.</p></div>;
@@ -39,11 +39,11 @@ const GoalDetailsPage: React.FC = () => {
       </div>
 
       <div className="gd-timeline">
-        <div className="gd-line" aria-hidden />
+        <div className="gd-line" />
         <ol className="gd-list">
           {plans.map(p => (
             <li key={p.id} className="gd-item">
-              <span className={`gd-dot ${p.completed ? "done" : ""}`} aria-hidden />
+              <span className={`gd-dot ${p.completed ? "done" : ""}`} />
               <div className="gd-card">
                 <div className="gd-card-row">
                   <h3 className="gd-card-title">{p.title}</h3>
@@ -58,12 +58,13 @@ const GoalDetailsPage: React.FC = () => {
                     <span>Due: {fmt(p.due_date) || "—"}</span>
                   </div>
                   <button
-                    className={`mark-btn ${p.completed ? "is-done" : ""}`}
-                    onClick={() => onTogglePlan(p.id)}
-                    aria-pressed={p.completed}
+                   className={`mark-btn ${p.completed ? "is-done" : ""}`}
+                   onClick={() => onTogglePlan(p.id)}
+                   disabled={!p.completed && isLocked(p.id)}
+                   title={!p.completed && isLocked(p.id) ? "Complete previous steps first" : undefined}
                   >
-                    {p.completed ? "Marked as Done" : "Mark as Done"}
-                  </button>
+                    {p.completed ? "Marked as Done" : isLocked(p.id) ? "Locked" : "Mark as Done"}
+                 </button>
                 </div>
               </div>
             </li>

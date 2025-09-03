@@ -175,6 +175,16 @@
   padding: 15px 20px;
   text-decoration: none;
 }
+.gd-item.locked .mark-btn:not(.is-done) {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.gd-lock-note {
+  font-size: 12px;
+  color: #888;
+  margin-left: 8px;
+}
+
 
 @media (max-width: 900px) {
   .gd-hero img { 

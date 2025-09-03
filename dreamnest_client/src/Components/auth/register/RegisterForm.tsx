@@ -17,14 +17,12 @@ const RegisterForm: React.FC = () => {
           hint="First Name"
           placeholder="John"
           error={fieldErrors.firstName}
-          aria-invalid={!!fieldErrors.firstName}
         />
         <Input
           name="lastName"
           hint="Last Name"
           placeholder="Doe"
           error={fieldErrors.lastName}
-          aria-invalid={!!fieldErrors.lastName}
         />
       </div>
 
@@ -34,7 +32,6 @@ const RegisterForm: React.FC = () => {
           hint="Username"
           placeholder="john.doe"
           error={fieldErrors.userName}
-          aria-invalid={!!fieldErrors.userName}
         />
 
         <ImageInput
@@ -50,7 +47,6 @@ const RegisterForm: React.FC = () => {
           hint="Email"
           placeholder="john@example.com"
           error={fieldErrors.email}
-          aria-invalid={!!fieldErrors.email}
         />
         <Input
           type="password"
@@ -58,7 +54,6 @@ const RegisterForm: React.FC = () => {
           hint="Password"
           placeholder="Enter your password"
           error={fieldErrors.password}
-          aria-invalid={!!fieldErrors.password}
         />
       </div>
 

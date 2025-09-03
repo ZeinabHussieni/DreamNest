@@ -28,7 +28,7 @@ function timeAgo(iso: string) {
 }
 
 const BellIcon: React.FC<{ active?: boolean }> = ({ active }) => (
-  <svg className={`bell-icon ${active ? "active" : ""}`} viewBox="0 0 24 24" aria-hidden>
+  <svg className={`bell-icon ${active ? "active" : ""}`} viewBox="0 0 24 24">
     <path d="M12 22a2 2 0 0 0 2-2H10a2 2 0 0 0 2 2Zm7-6V11a7 7 0 1 0-14 0v5l-2 2v1h20v-1l-2-2Z" />
   </svg>
 );
@@ -76,21 +76,18 @@ const NotificationBell: React.FC = () => {
       <button
         type="button"
         className="notif-button"
-        aria-label="Notifications"
-        aria-expanded={open}
-        aria-haspopup="menu"
         onClick={toggleOpen}
       >
         <BellIcon active={open} />
         {unreadCount > 0 && (
-          <span className="notif-badge" aria-label={`${unreadCount} unread`}>
+          <span className="notif-badge">
             {unreadCount}
           </span>
         )}
       </button>
 
       {open && (
-        <div className="notif-dropdown" role="menu" aria-label="Notifications menu">
+        <div className="notif-dropdown" role="menu">
           <div className="notif-header">
             <span>Notifications</span>
             <button className="mark-all" onClick={markAllRead} disabled={unreadCount === 0}>

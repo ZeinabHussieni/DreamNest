@@ -1,14 +1,12 @@
 import React from "react";
 import useConnections from "../../Hooks/connections/useConnections";
 import "./connections.css";
-import { useAuth } from "../../Context/AuthContext"; // assumes you already have this
+import { useAuth } from "../../Context/AuthContext"; 
 import Avatar from "../shared/avatar/Avatar";
-
-const avatar = (url?: string | null) =>
-  url ? url : "https://via.placeholder.com/64?text=%20"; // fallback
+import image  from "../../Assets/Images/empty2.png";
 
 const ConnectionsPage: React.FC = () => {
-  const { user } = useAuth() as any; // { user: { id, userName, ... } }
+  const { user } = useAuth() as any; 
   const userId = Number(user?.id);
   const { connections, loading, error, onAccept, onReject } = useConnections(userId);
 
@@ -21,7 +19,8 @@ const ConnectionsPage: React.FC = () => {
       <h1 className="req-title">Friends requests</h1>
 
       {connections.length === 0 && (
-        <div className="req-empty">No requests right now ✨</div>
+         <div className="no-posts">
+        <img src={image} alt="Welcome" /><p className="muted">No requests right now</p></div>
       )}
 
       <ul className="req-list">
@@ -34,7 +33,7 @@ const ConnectionsPage: React.FC = () => {
 
           return (
             <li key={c.id} className="req-card">
-       <Avatar filename={other.profilePicture} className="req-avatar" />
+               <Avatar filename={other.profilePicture} className="req-avatar" />
               <div className="req-info">
                 <div className="req-name">{other.userName}</div>
                 <div className="req-sub">{line}</div>

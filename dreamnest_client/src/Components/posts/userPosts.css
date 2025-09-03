@@ -43,9 +43,10 @@
   justify-content: center;   
   align-items: center;      
   gap: 16px;                
-  height: 60vh;           
+  height: 60vh;          
   text-align: left;         
 }
+
 
 .no-posts img {
   width: 400px;  

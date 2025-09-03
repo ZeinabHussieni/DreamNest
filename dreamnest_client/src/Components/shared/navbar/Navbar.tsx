@@ -1,14 +1,13 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom"; 
+import { NavLink, useNavigate } from "react-router-dom";
 import Logo from "../../../Assets/Images/Final logo.png";
-import Notification from "../../../Assets/Icons/notification.svg";
 import drop from "../../../Assets/Icons/dropdown.svg";
 import coinIcon from "../../../Assets/Icons/coins.svg";
-import ThemeToggle from "../../themeToggle/ThemeToggle"; 
+import ThemeToggle from "../../themeToggle/ThemeToggle";
 import { useAuth } from "../../../Context/AuthContext";
-import useDropdown from "../../../Hooks/navBar/useDropdown"; 
+import useDropdown from "../../../Hooks/navBar/useDropdown";
 import useUserData from "../../../Hooks/navBar/useUserData";
-import NotificationBell from "../../../Components/notifications/NotificationBell";
+import NotificationBell from "../../notifications/NotificationBell";
 import "./navbar.css";
 
 const Navbar: React.FC = () => {
@@ -23,67 +22,81 @@ const Navbar: React.FC = () => {
     navigate("/login");
   };
 
+  const closeMobile = () => setIsMobileMenuOpen(false);
+
   return (
     <nav className="Navbar">
       <div className="Navbar-logo">
         <img src={Logo} alt="Logo" className="logo-size" />
         <div className="title">
           <h2 className="dreamNest">
-            <Link to="/" className="dreamNest-link">DreamNest</Link>
+            <NavLink to="/" className="dreamNest-link">DreamNest</NavLink>
           </h2>
         </div>
       </div>
-      
+
       {isAuthenticated && (
         <>
+          {/* Desktop links */}
           <div className="navbar-links desktop-links">
-            <a href="/userGoals" className="btn nav-btn">Your Goals</a>
+            <NavLink to="/userGoals" className="btn nav-btn">Your Goals</NavLink>
+
             <div className="dropdown-managment">
-            <button className="btn nav-btn community-btn">
-              Community
-             <img src={drop} alt="drop" className="drop-icon" />
-            </button>
+              <button className="btn nav-btn community-btn" type="button">
+                Community <img src={drop} alt="drop" className="drop-icon" />
+              </button>
               <div className="dropdown-content styled-dropdown">
-                <a href="/posts">Posts</a>
-                <a href="/myposts">My Posts</a>
+                <NavLink to="/posts">Posts</NavLink>
+                <NavLink to="/myposts">My Posts</NavLink>
               </div>
             </div>
-             <div className="dropdown-managment">
 
-              <button className="btn nav-btn community-btn">
-                Connections
-                <img src={drop} alt="drop" className="drop-icon" />
-                </button>
+            <div className="dropdown-managment">
+              <button className="btn nav-btn community-btn" type="button">
+                Connections <img src={drop} alt="drop" className="drop-icon" />
+              </button>
               <div className="dropdown-content styled-dropdown">
-                <a href="/chats">Chats</a>
-                <a href="/connections">Requests</a>
+                <NavLink to="/chats">Chats</NavLink>
+                <NavLink to="/connections">Requests</NavLink>
               </div>
             </div>
-            <a href="/dashboard" className="btn nav-btn">My Dashboard</a>
+
+            <NavLink to="/dashboard" className="btn nav-btn">My Dashboard</NavLink>
           </div>
 
-          <div className="mobile-menu-btn" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+          {/* Mobile menu button */}
+          <button
+            className="mobile-menu-btn"
+            type="button"
+            onClick={() => setIsMobileMenuOpen(v => !v)}
+            aria-controls="mobile-menu"
+            aria-expanded={isMobileMenuOpen}
+          >
             ☰
-          </div>
+          </button>
 
+          {/* Mobile menu */}
           {isMobileMenuOpen && (
-            <div className="mobile-menu">
-              <a href="/goals">Your Goals</a>
+            <div id="mobile-menu" className="mobile-menu">
+              <NavLink to="/userGoals" onClick={closeMobile}>Your Goals</NavLink>
+
               <div className="mobile-submenu">
                 <span>Community ▾</span>
                 <div className="submenu-links">
-                  <a href="/posts">Posts</a>
-                  <a href="/myposts">My Posts</a>
+                  <NavLink to="/posts" onClick={closeMobile}>Posts</NavLink>
+                  <NavLink to="/myposts" onClick={closeMobile}>My Posts</NavLink>
                 </div>
               </div>
+
               <div className="mobile-submenu">
                 <span>Connections ▾</span>
                 <div className="submenu-links">
-                  <a href="/chats">Chats</a>
-                  <a href="/connections">Friend Requests</a>
+                  <NavLink to="/chats" onClick={closeMobile}>Chats</NavLink>
+                  <NavLink to="/connections" onClick={closeMobile}>Friend Requests</NavLink>
                 </div>
               </div>
-              <a href="/dashboard">My Dashboard</a>
+
+              <NavLink to="/dashboard" onClick={closeMobile}>My Dashboard</NavLink>
             </div>
           )}
         </>
@@ -93,23 +106,33 @@ const Navbar: React.FC = () => {
         <ThemeToggle />
         {!isAuthenticated ? (
           <>
-            <a href="/login" className="btn nav-btn login-btn">Login</a>
-            <a href="/register" className="btn nav-btn register-btn">Register</a>
+            <NavLink to="/login" className="btn nav-btn login-btn">Login</NavLink>
+            <NavLink to="/register" className="btn nav-btn register-btn">Register</NavLink>
           </>
         ) : (
           <>
+            <NotificationBell />
 
-           <NotificationBell/> 
-           
             <div className="coin-badge">
               <img src={coinIcon} alt="Coin" className="coin-icon" />
               <span className="coin-text">{coins}</span>
             </div>
-            <div className="Navbar-profile" ref={dropdownRef} onClick={toggleProfileDropdown}>
+
+            <div
+              className="Navbar-profile"
+              ref={dropdownRef}
+              onClick={toggleProfileDropdown}
+              role="button"
+              tabIndex={0}
+            >
               <img src={profilePicUrl || "/default-profile.png"} alt="Profile" className="pro-pic" />
               {profileDropdownOpen && (
                 <ul className="dropdown">
-                  <li><a onClick={handleLogout}>Logout</a></li>
+                  <li>
+                    <button type="button" onClick={handleLogout} className="dropdown-btn">
+                      Logout
+                    </button>
+                  </li>
                 </ul>
               )}
             </div>

@@ -40,14 +40,9 @@ const UserGoalCard: React.FC<Props> = ({ goal, deleteAction }) => {
     <div className="goal-card">
       <div className="goal-date-card">{formatDate(goal.createdAt)}</div>
       <h3 className="goal-title-card">{goal.title}</h3>
-
-      <div className="goal-label">Progress</div>
       <div
         className="goal-progress"
         role="progressbar"
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={pct}
       >
         <div className="progress-track">
           <div className="progress-fill" style={{ width: `${pct}%` }} />

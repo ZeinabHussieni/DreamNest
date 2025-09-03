@@ -8,6 +8,9 @@
   justify-content:center;
 }
 
+.goal-post{
+    width: 1100px; 
+}
 .goal-card{
   background:var(--soft-bg);
   border:1px solid var(--border);
@@ -169,16 +172,14 @@
   transform:translateY(1px);
 }
 
-.ug-tab.active,
-.ug-tab[aria-selected="true"]{
+.ug-tab.active{
   background: var(--nav-bg); 
   color: #fff;             
   box-shadow: 0 2px 0 rgba(0,0,0,.06);
   filter: none;             
 }
 
-.ug-tab:not(.active):hover,
-.ug-tab[aria-selected="false"]:hover{
+.ug-tab:not(.active):hover{
   filter: brightness(.96);
 }
 

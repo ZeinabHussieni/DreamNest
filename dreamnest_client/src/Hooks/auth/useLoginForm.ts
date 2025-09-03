@@ -1,36 +1,35 @@
 import { useActionState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import loginService from "../../Services/auth/loginService";
+import loginService, {
+  type LoginPayload,
+  type LoginResult,
+} from "../../Services/auth/loginService";
 import { useAuth } from "../../Context/AuthContext";
 import { useState } from "react";
+
 type User = {
   id?: number;
   email?: string;
-  username?: string;
-
-  [k: string]: unknown;// to let extra fields through without errors
+  username?: string; 
+  [k: string]: unknown;
 };
-type FieldErrors = Partial<Record<"identifier" | "password", string>>;
 
+type FieldErrors = Partial<Record<"identifier" | "password", string>>;
 
 type LoginState = {
   success: boolean;
   error: string | null;
 };
 
-type LoginResponse = { //what axois should give us 
-  data: {
-    accessToken: string;
-    user: User;
-  };
-};
-
 export default function useLogin() {
   const navigate = useNavigate();
 
 
-  const { login } = useAuth() as { login: (token: string, user: User) => void };
+  const { login } = useAuth() as {
+    login: (token: string, user: User, refreshToken?: string) => void;
+  };
+
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   const loginAction = async (
@@ -38,21 +37,29 @@ export default function useLogin() {
     formData: FormData
   ): Promise<LoginState> => {
     try {
-      const form = {
+      const form: LoginPayload = {
         identifier: String(formData.get("identifier") ?? ""),
         password: String(formData.get("password") ?? ""),
       };
 
-      const response = (await loginService(form)) as LoginResponse;
-      const { accessToken, user } = response.data;
+      const result: LoginResult = await loginService(form);
+      const { accessToken, refreshToken, user } = result;
 
-      login(accessToken, user);
+     const mappedUser: User = {
+     ...user,
+     id: user.id,
+     email: user.email,
+     username: user.userName ?? "", 
+     };
+
+
+      login(accessToken, mappedUser, refreshToken);
       toast.success("Login successful!");
       navigate("/");
 
       return { success: true, error: null };
     } catch (e: any) {
-     const message: string = e?.message || "Failed to login";
+      const message: string = e?.message || "Failed to login";
       const errors: FieldErrors = e?.errors || {};
       setFieldErrors(errors);
       toast.error(message);
@@ -66,9 +73,9 @@ export default function useLogin() {
   );
 
   return {
-    action,         
-    state,         
+    action,
+    state,
     loading: isPending,
-    fieldErrors 
+    fieldErrors,
   };
 }

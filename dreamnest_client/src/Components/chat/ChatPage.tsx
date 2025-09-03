@@ -1,23 +1,44 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import useChat from "../../Hooks/chat/useChat";
 import useChatUI from "../../Hooks/chat/useChatUI";
-import "./chat.css";
-import { Link } from "react-router-dom";
 import { useAuth } from "../../Context/AuthContext";
 import Avatar from "../shared/avatar/Avatar";
 import type { ChatRoom } from "../../Services/chat/chatService";
+import "./chat.css";
 
 const ChatPage: React.FC = () => {
+
   const { user } = useAuth() as any;
-  const userId = Number(user?.id) || 0; 
+  const userId = Number(user?.id) || 0;
 
-  const {rooms,activeRoom,setActiveId,messages,loadingRooms,loadingMsgs,send,} = useChat(userId);
+  const {
+    rooms,
+    activeRoom,
+    setActiveId,
+    messages,
+    loadingRooms,
+    loadingMsgs,
+    send,
+  } = useChat(userId);
 
-  const {text, setText,search, setSearch,mobileOpen, setMobileOpen,filteredRooms, activeOther,bodyRef, bottomRef,getOtherUser, onSubmit,
-        } = useChatUI({ userId, rooms, activeRoom, loadingMsgs, messages, send });
+  const {
+    text, setText,
+    search, setSearch,
+    mobileOpen, setMobileOpen,
+    filteredRooms, activeOther,
+    bodyRef, bottomRef,
+    getOtherUser, onSubmit,
+  } = useChatUI({ userId, rooms, activeRoom, loadingMsgs, messages, send });
+
+
+  const fmtTime = (iso: string | number | Date) =>
+    new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
 
   return (
     <div className="chat-wrap">
+
       <aside className="chat-sidebar">
         <div className="chat-search">
           <input
@@ -29,10 +50,18 @@ const ChatPage: React.FC = () => {
 
         <h3>Conversations</h3>
 
+
         {!userId ? (
           <div className="muted">Sign in first.</div>
         ) : loadingRooms ? (
           <div className="muted">Loading rooms…</div>
+        ) : rooms.length === 0 ? (
+          <div className="empty-state">
+            <p>No conversations yet.</p>
+            <p className="muted">
+              Start one from <Link to="/connections" className="con">Connections</Link>.
+            </p>
+          </div>
         ) : filteredRooms.length === 0 ? (
           <div className="muted">No conversations match “{search}”.</div>
         ) : (
@@ -64,30 +93,50 @@ const ChatPage: React.FC = () => {
         </div>
       </aside>
 
+  
       <main className="chat-main">
+  
         <header className="chat-header">
           <div className="chat-header-inner">
             <button
               className="chat-menu-btn"
-              aria-label="Open conversations"
-              aria-haspopup="dialog"
-              aria-expanded={mobileOpen}
               onClick={() => setMobileOpen(true)}
+              aria-label="Open conversations"
             >
               ☰
             </button>
-            <Avatar filename={activeOther?.profilePicture ?? null} className="room-avatar" />
+            <Avatar
+              filename={activeOther?.profilePicture ?? null}
+              className="room-avatar"
+            />
             <div className="chat-title">
               <h2>{activeOther?.userName || activeRoom?.name || "…"}</h2>
             </div>
           </div>
         </header>
 
+     
         <div className="chat-body" ref={bodyRef}>
           {!userId ? (
             <div className="muted">Sign in first.</div>
           ) : loadingMsgs ? (
             <div className="muted">Loading messages…</div>
+          ) : !activeRoom ? (
+            <div className="empty-main">
+              <h3>No conversation selected</h3>
+              {rooms.length === 0 ? (
+                <p className="muted">
+                  You don’t have any chats yet. Start one from{" "}
+                  <Link to="/connections" className="con">Connections</Link>.
+                </p>
+              ) : (
+                <p className="muted">Pick a conversation from the left.</p>
+              )}
+            </div>
+          ) : messages.length === 0 ? (
+            <div className="empty-main">
+              <p className="muted">No messages here yet. Say hi 👋</p>
+            </div>
           ) : (
             <ul className="msg-list">
               {messages.map((m) => {
@@ -97,12 +146,7 @@ const ChatPage: React.FC = () => {
                     <div className="bubble">
                       {m.content}
                       <div className="meta">
-                        <time>
-                          {new Date(m.createdAt).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </time>
+                        <time>{fmtTime(m.createdAt)}</time>
                       </div>
                     </div>
                   </li>
@@ -113,20 +157,24 @@ const ChatPage: React.FC = () => {
           )}
         </div>
 
+    
         <form className="chat-input" onSubmit={onSubmit}>
           <input
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Type a message…"
+            placeholder={
+              activeRoom
+                ? "Type a message…"
+                : "Select a conversation to start chatting"
+            }
             autoComplete="off"
             disabled={!userId || !activeRoom}
           />
-          <button aria-label="Send" disabled={!text.trim() || !userId || !activeRoom}>
-            ➤
-          </button>
+          <button disabled={!text.trim() || !userId || !activeRoom}>➤</button>
         </form>
       </main>
 
+ 
       <div
         className={`chat-drawer-backdrop ${mobileOpen ? "open" : ""}`}
         onClick={() => setMobileOpen(false)}
@@ -134,12 +182,17 @@ const ChatPage: React.FC = () => {
       <aside
         className={`chat-drawer ${mobileOpen ? "open" : ""}`}
         role="dialog"
-        aria-modal="true"
         aria-label="Conversations"
       >
         <div className="drawer-header">
           <h3>Conversations</h3>
-          <button className="drawer-close" aria-label="Close" onClick={() => setMobileOpen(false)}>✕</button>
+          <button
+            className="drawer-close"
+            onClick={() => setMobileOpen(false)}
+            aria-label="Close"
+          >
+            ✕
+          </button>
         </div>
 
         <div className="drawer-search">
@@ -152,6 +205,13 @@ const ChatPage: React.FC = () => {
 
         {loadingRooms ? (
           <div className="muted">Loading rooms…</div>
+        ) : rooms.length === 0 ? (
+          <div className="empty-state">
+            <p>No conversations yet.</p>
+            <p className="muted">
+              Go to <Link to="/connections">Connections</Link> to start one.
+            </p>
+          </div>
         ) : filteredRooms.length === 0 ? (
           <div className="muted">No conversations match “{search}”.</div>
         ) : (
@@ -163,9 +223,15 @@ const ChatPage: React.FC = () => {
                 <li
                   key={r.id}
                   className={`drawer-item ${isActive ? "active" : ""}`}
-                  onClick={() => setActiveId(r.id)}
+                  onClick={() => {
+                    setActiveId(r.id);
+                    setMobileOpen(false);
+                  }}
                 >
-                  <Avatar filename={otherUser?.profilePicture ?? null} className="room-avatar-img" />
+                  <Avatar
+                    filename={otherUser?.profilePicture ?? null}
+                    className="room-avatar-img"
+                  />
                   <div className="room-name">
                     {otherUser?.userName || r.name || `Room ${r.id}`}
                   </div>

@@ -13,9 +13,21 @@
   background: var(--soft-bg);
   overflow: hidden;
 }
-
+.con{
+  text-decoration: none;
+}
 .chat-search {
   margin: 12px 0 6px;
+}
+.empty-state,
+.empty-main {
+  padding: 16px;
+  text-align: center;
+}
+
+.empty-main h3 {
+  margin: 0 0 6px;
+  font-size: 18px;
 }
 
 .chat-search input {
