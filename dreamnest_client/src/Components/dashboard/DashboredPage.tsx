@@ -1,28 +1,13 @@
+// src/Pages/dashboard/DashboardPage.tsx
 import React from "react";
 import useDashboard from "../../Hooks/dashboard/useDashboard";
 import DashboardStatCards from "../../Components/dashboard/DashboardCards";
 import DashboardCharts from "../../Components/dashboard/DashboardCharts";
+import DashboardGoals from "../../Components/dashboard/DashboardGoals";
 import "./dashboard.css";
 
-const Header: React.FC<{ completionPct: number; inProgressPct: number; onRefresh: () => void }> = ({
-  completionPct,
-  inProgressPct,
-  onRefresh,
-}) => (
-  <div className="card dash-header">
-    <div className="dash-title">
-      <h2>Your Dashboard</h2>
-      <p>
-        Completion: <strong>{completionPct}%</strong> • In progress:{" "}
-        <strong>{inProgressPct}%</strong>
-      </p>
-    </div>
-    <button className="mark-all" onClick={onRefresh}>Refresh</button>
-  </div>
-);
-
 const DashboardPage: React.FC = () => {
-  const { data, loading, completionPct, inProgressPct, refresh } = useDashboard();
+  const { data, loading } = useDashboard();
 
   if (loading || !data) {
     return (
@@ -34,18 +19,15 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div className="dash">
-      <Header
-        completionPct={completionPct}
-        inProgressPct={inProgressPct}
-        onRefresh={refresh}
-      />
+      <div><p className="title">Dashboard</p></div>
 
       <DashboardStatCards
         total={data.totalGoals}
         completed={data.completedGoals}
         inProgress={data.inProgressGoals}
-        completionPct={completionPct}
       />
+
+      <DashboardGoals />
 
       <DashboardCharts
         postsPerMonth={data.postsPerMonth}

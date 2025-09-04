@@ -28,6 +28,7 @@ const DashboardCharts: React.FC<Props> = ({ postsPerMonth, goalsPerMonth }) => {
 
   const donutData   = postsSeries.map(d => ({ name: d.month, value: d.value }));
   const donutColors = ["var(--accent-2)", "var(--accent)", "var(--accent-3)"];
+  
 
   return (
     <>
