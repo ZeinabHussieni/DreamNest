@@ -1,9 +1,10 @@
-import React, { useCallback, useRef, useState, useEffect } from "react";
+import React from "react";
 import useNotifications from "../../Hooks/notifications/useNotifications";
+import useNotificationBell from "../../Hooks/notifications/useNotificationUI";
+import timeAgo from "../../Utils/timeAgo";
 import "./notifications.css";
 
 type TypeLabelMap = Record<string, string>;
-
 const TYPE_LABELS: TypeLabelMap = {
   NEW_CONNECTION: "New connection",
   CONNECTION_PARTIAL_ACCEPT: "Connection update",
@@ -15,18 +16,6 @@ const TYPE_LABELS: TypeLabelMap = {
   NEW_MESSAGE: "New message",
 };
 
-function timeAgo(iso: string) {
-  const diff = Date.now() - new Date(iso).getTime();
-  const s = Math.floor(diff / 1000);
-  if (s < 60) return `${s}s`;
-  const m = Math.floor(s / 60);
-  if (m < 60) return `${m}m`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h`;
-  const d = Math.floor(h / 24);
-  return `${d}d`;
-}
-
 const BellIcon: React.FC<{ active?: boolean }> = ({ active }) => (
   <svg className={`bell-icon ${active ? "active" : ""}`} viewBox="0 0 24 24">
     <path d="M12 22a2 2 0 0 0 2-2H10a2 2 0 0 0 2 2Zm7-6V11a7 7 0 1 0-14 0v5l-2 2v1h20v-1l-2-2Z" />
@@ -35,41 +24,7 @@ const BellIcon: React.FC<{ active?: boolean }> = ({ active }) => (
 
 const NotificationBell: React.FC = () => {
   const { items, unreadCount, activateItem, markAllRead } = useNotifications();
-
-  const [open, setOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement | null>(null);
-  const toggleOpen = useCallback(() => setOpen(v => !v), []);
-  const close = useCallback(() => setOpen(false), []);
-
-  useEffect(() => {
-    if (!open) return;
-    function onDocClick(e: MouseEvent) {
-      if (!rootRef.current) return;
-      if (!rootRef.current.contains(e.target as Node)) close();
-    }
-    document.addEventListener("click", onDocClick);
-    return () => document.removeEventListener("click", onDocClick);
-  }, [open, close]);
-
- 
-  useEffect(() => {
-    if (!open) return;
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") close();
-    }
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [open, close]);
-
-  const onItemKey = useCallback(
-    (e: React.KeyboardEvent<HTMLLIElement>, id: number) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        activateItem(id);
-      }
-    },
-    [activateItem]
-  );
+  const { open, toggleOpen, close, rootRef, onItemKey } = useNotificationBell();
 
   return (
     <div className="notif-wrapper" ref={rootRef}>
@@ -79,11 +34,7 @@ const NotificationBell: React.FC = () => {
         onClick={toggleOpen}
       >
         <BellIcon active={open} />
-        {unreadCount > 0 && (
-          <span className="notif-badge">
-            {unreadCount}
-          </span>
-        )}
+        {unreadCount > 0 && <span className="notif-badge">{unreadCount}</span>}
       </button>
 
       {open && (
@@ -92,7 +43,7 @@ const NotificationBell: React.FC = () => {
             <span>Notifications</span>
             <button className="mark-all" onClick={markAllRead} disabled={unreadCount === 0}>
               Mark all read
-          </button>
+            </button>
           </div>
 
           {items.length === 0 ? (
@@ -109,7 +60,7 @@ const NotificationBell: React.FC = () => {
                     tabIndex={0}
                     role="button"
                     onClick={() => activateItem(n.id)}
-                    onKeyDown={(e) => onItemKey(e, n.id)}
+                    onKeyDown={(e) => onItemKey(e, () => activateItem(n.id))}
                   >
                     <div className="notif-left">
                       <span className={pillClass}>{label}</span>

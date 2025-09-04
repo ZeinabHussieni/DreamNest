@@ -55,7 +55,7 @@ export default function useLogin() {
 
       login(accessToken, mappedUser, refreshToken);
       toast.success("Login successful!");
-      navigate("/");
+      navigate("/dashboard");
 
       return { success: true, error: null };
     } catch (e: any) {

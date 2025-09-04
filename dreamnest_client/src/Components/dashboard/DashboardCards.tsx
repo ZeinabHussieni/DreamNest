@@ -26,7 +26,7 @@ const MetricCard: React.FC<Metric> = ({ title, value, icon = goalPng, badge, ari
       <div className="metric-top">
         <div className="metric-title">{title}</div>
         {badge && (
-          <span className="metric-badge" aria-label={ariaLabel}>
+          <span className="metric-badge">
             {badge}
           </span>
         )}

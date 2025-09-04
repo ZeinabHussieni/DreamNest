@@ -106,7 +106,6 @@ const ChatPage: React.FC = () => {
             <button
               className="chat-menu-btn"
               onClick={() => setMobileOpen(true)}
-              aria-label="Open conversations"
             >
               ☰
             </button>
@@ -187,14 +186,12 @@ const ChatPage: React.FC = () => {
       <aside
         className={`chat-drawer ${mobileOpen ? "open" : ""}`}
         role="dialog"
-        aria-label="Conversations"
       >
         <div className="drawer-header">
           <h3>Conversations</h3>
           <button
             className="drawer-close"
             onClick={() => setMobileOpen(false)}
-            aria-label="Close"
           >
             ✕
           </button>

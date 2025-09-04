@@ -69,8 +69,6 @@ const Navbar: React.FC = () => {
             className="mobile-menu-btn"
             type="button"
             onClick={() => setIsMobileMenuOpen(v => !v)}
-            aria-controls="mobile-menu"
-            aria-expanded={isMobileMenuOpen}
           >
             ☰
           </button>
@@ -96,7 +94,7 @@ const Navbar: React.FC = () => {
                 </div>
               </div>
 
-              <NavLink to="/dashboard" onClick={closeMobile}>My Dashboard</NavLink>
+              <NavLink to="/dashboard" onClick={closeMobile}>Dashboard</NavLink>
             </div>
           )}
         </>
