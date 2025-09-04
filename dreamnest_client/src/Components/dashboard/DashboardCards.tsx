@@ -40,7 +40,7 @@ const DashboardStatCards: React.FC<StatProps> = ({ total, inProgress, completed 
   const safePct = (num: number, den: number) => (den > 0 ? Math.round((num / den) * 100) : 0);
 
   const inProgressPct = safePct(inProgress, total); 
-  const completionPct = safePct(completed, total);  
+  const completionPct = safePct(completed, total);
 
   const metrics: Metric[] = [
     { title: "Total Goals", value: `${total} goals` },

@@ -1,10 +1,10 @@
-// src/Pages/dashboard/DashboardPage.tsx
 import React from "react";
 import useDashboard from "../../Hooks/dashboard/useDashboard";
 import DashboardStatCards from "../../Components/dashboard/DashboardCards";
 import DashboardCharts from "../../Components/dashboard/DashboardCharts";
 import DashboardGoals from "../../Components/dashboard/DashboardGoals";
 import "./dashboard.css";
+
 
 const DashboardPage: React.FC = () => {
   const { data, loading } = useDashboard();

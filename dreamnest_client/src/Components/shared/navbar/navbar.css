@@ -7,7 +7,7 @@
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
   position: sticky;
   top: 0;
-  height: 87px;
+  height: 100px;
   z-index: 9000;
   flex-wrap: nowrap;
 }
@@ -288,6 +288,7 @@
   overflow: hidden;
   animation: slideDown 0.3s ease forwards;
   z-index: 2000;
+  margin-right: 500px;
 }
 
 @keyframes slideDown {

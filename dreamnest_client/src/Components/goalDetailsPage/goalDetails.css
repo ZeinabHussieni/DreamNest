@@ -78,7 +78,7 @@
 
 .gd-dot {
   position: absolute;
-  left: -57px;
+  left: -53px;
   top: 22px;
   width: 16px;
   height: 16px;
@@ -184,6 +184,11 @@
   color: #888;
   margin-left: 8px;
 }
+.mark-btn.locked {
+  opacity: 0.8;
+  cursor: not-allowed;
+}
+
 
 
 @media (max-width: 900px) {
@@ -203,7 +208,7 @@
     left: 26px; 
 }
   .gd-dot { 
-    left: -54px; 
+    left: -50px;
 }
 }
 

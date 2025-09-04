@@ -56,7 +56,7 @@ const DashboardCharts: React.FC<Props> = ({ postsPerMonth, goalsPerMonth }) => {
                   paddingAngle={2}
                 >
                   {donutData.map((_, i) => (
-                  <Cell key={i} fill="var(--nav-bg)" /> 
+                  <Cell key={i} fill="var(--button-bg)" /> 
                    ))}
                 </Pie>
                 <Tooltip />
@@ -72,16 +72,14 @@ const DashboardCharts: React.FC<Props> = ({ postsPerMonth, goalsPerMonth }) => {
               <XAxis dataKey="month" tick={{ fontSize: 12 }} />
               <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
               <Tooltip />
-              <Line type="monotone" dataKey="value" name="Goals"  stroke="var(--nav-bg)" strokeWidth={2} dot={{ r: 3, fill: "var(--nav-bg)" }} 
-              activeDot={{ r: 5, fill: "var(--nav-bg)" }} />
+              <Line type="monotone" dataKey="value" name="Goals"  stroke="var(--button-bg)" strokeWidth={2} dot={{ r: 3, fill: "var(--button-bg)" }} 
+              activeDot={{ r: 5, fill: "var(--button-bg)" }} />
             </LineChart>
           </ResponsiveContainer>
         </ChartCard>
       </div>
 
-
-      <div style={{ height: 18 }} />
-
+ 
       <ChartCard title="Goals vs Posts per Month">
         <ResponsiveContainer width="100%" height={260}>
           <ComposedChart data={compareSeries} margin={{ top: 10, right: 16, bottom: 0, left: 0 }}>
@@ -91,8 +89,8 @@ const DashboardCharts: React.FC<Props> = ({ postsPerMonth, goalsPerMonth }) => {
             <Tooltip />
             <Legend />
          
-            <Bar dataKey="a" stackId="x" name="Goals" fill="var(--nav-bg)" />
-            <Bar dataKey="b" stackId="x" name="Posts" fill="var(--purple)" />
+            <Bar dataKey="a" stackId="x" name="Goals" fill="var(--button-bg)" />
+            <Bar dataKey="b" stackId="x" name="Posts" fill="var(--purple-1)" />
 
           </ComposedChart>
         </ResponsiveContainer>

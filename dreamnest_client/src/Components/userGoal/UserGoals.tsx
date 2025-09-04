@@ -4,6 +4,7 @@ import useGoalsList from "../../Hooks/userGoals/useGoalsList";
 import useDeleteGoal from "../../Hooks/userGoals/useDeleteGoal";
 import UserGoalCard from "./UserGoalCard";
 import "./userGoals.css";
+
 import image  from "../../Assets/Images/empty2.png";
 
 const UserGoals: React.FC = () => {
@@ -20,8 +21,19 @@ const UserGoals: React.FC = () => {
   const { goals, setGoals, loading, error, reload } = useGoalsList(status);
   const { deleteAction } = useDeleteGoal({ setGoals, reload });
 
+  const orderedGoals = React.useMemo(() => {
+  const byTime = (g: any) => new Date(g?.createdAt ?? 0).getTime() || 0;
+  return [...goals].sort((a: any, b: any) => {
+    const ta = byTime(a);
+    const tb = byTime(b);
+    if (ta !== tb) return ta - tb;         
+    return (a.id ?? 0) - (b.id ?? 0);      
+   });
+  }, [goals]);
+
   return (
-    <section className="goals-section">
+    
+    <section className="goals-section user-goals">
       {/* mini navbar */}
       <header className="ug-header">
         <div className="ug-tabs" role="tablist">
@@ -59,7 +71,7 @@ const UserGoals: React.FC = () => {
         <p className="muted">No goals yet. Create your first goal</p>
       </div>
        ) : (
-        goals.map((goal: any) => (
+       orderedGoals.map((goal: any) => (
         <UserGoalCard key={goal.id} goal={goal} deleteAction={deleteAction} />
       ))
      )}

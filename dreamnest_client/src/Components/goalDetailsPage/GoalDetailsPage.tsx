@@ -1,6 +1,7 @@
 import React from "react";
 import { useParams, Link } from "react-router-dom";
 import useGoalDetails from "../../Hooks/goalDetails/useGoalDetails";
+
 import "./goalDetails.css";
 
 const fmt = (d?: string | Date | null) => {
@@ -58,13 +59,16 @@ const GoalDetailsPage: React.FC = () => {
                     <span>Due: {fmt(p.due_date) || "—"}</span>
                   </div>
                   <button
-                   className={`mark-btn ${p.completed ? "is-done" : ""}`}
+                   className={`mark-btn 
+                   ${p.completed ? "is-done" : ""} 
+                   ${!p.completed && isLocked(p.id) ? "locked" : ""}`}
                    onClick={() => onTogglePlan(p.id)}
                    disabled={!p.completed && isLocked(p.id)}
                    title={!p.completed && isLocked(p.id) ? "Complete previous steps first" : undefined}
                   >
-                    {p.completed ? "Marked as Done" : isLocked(p.id) ? "Locked" : "Mark as Done"}
+                   {p.completed ? "Marked as Done" : isLocked(p.id) ? "Locked" : "Mark as Done"}
                  </button>
+
                 </div>
               </div>
             </li>

@@ -9,7 +9,10 @@ import { AuthProvider } from './Context/AuthContext';
 import { BrowserRouter } from "react-router-dom";
 import { ThemeProvider } from './Context/ThemeContext';
 import { NotificationProvider } from "./Context/NotificationsContext";
-
+import "primereact/resources/themes/lara-light-indigo/theme.css";
+import "primereact/resources/primereact.min.css";
+import "primeicons/primeicons.css";
+import "primeflex/primeflex.css";
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );

@@ -83,9 +83,9 @@
 }
 .create-form .form-control,
 .create-form .image-input-label{
-  width:90%;
-  max-width:90%;
-  height:44px;
+  width:100%;
+  max-width:95%;
+  height:60px;
   padding:10px 12px;
   border-radius:12px;
   border:1px solid var(--soft-bg);

@@ -269,22 +269,31 @@
 .chat-actions {
   margin-top: auto;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   padding-top: 16px;
 }
 
 .chat-back {
+  display: inline-flex;        
+  align-items: center;          
+  gap: 8px;                    
   color: var(--main-bg);
   background-color: var(--nav-bg);
   border-radius: 10px;
-  padding: 12px 18px;
+  padding: 10px 14px;
   text-decoration: none;
   font-weight: 600;
   transition: background 0.2s ease;
+  padding-right: 26px;
 }
 
 .chat-back:hover {
   background-color: var(--purple);
+}
+
+.icon-back {
+  width: 20px;
+  height: 20px;
 }
 
 .chat-input input {

@@ -16,7 +16,7 @@ const ConnectionsPage: React.FC = () => {
 
   return (
     <section className="req-page">
-      <h1 className="req-title">Friends requests</h1>
+      <h1 className="req-title">Invites</h1>
 
       {connections.length === 0 && (
          <div className="no-posts">

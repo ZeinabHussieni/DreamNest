@@ -76,8 +76,8 @@
   margin-left: -3px;
 }
 .firstlast input {
-  width: 224px; 
-  height: 12px;
+  width: 242px;
+  height: 50px;
 }
 
 .Second{
@@ -105,6 +105,7 @@
   .register-form {
     width: 100%;
     max-width: 400px;
+    margin-top: -101px;
   }
 }
 

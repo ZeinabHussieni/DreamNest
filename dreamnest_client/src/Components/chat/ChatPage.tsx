@@ -5,6 +5,7 @@ import useChatUI from "../../Hooks/chat/useChatUI";
 import { useAuth } from "../../Context/AuthContext";
 import Avatar from "../shared/avatar/Avatar";
 import type { ChatRoom } from "../../Services/chat/chatService";
+import back from "../../Assets/Icons/back.svg";
 import "./chat.css";
 
 const ChatPage: React.FC = () => {
@@ -89,8 +90,12 @@ const ChatPage: React.FC = () => {
         )}
 
         <div className="chat-actions">
-          <Link to="/" className="chat-back">Back to Home Page</Link>
-        </div>
+          <Link to="/" className="chat-back">
+         <img src={back} alt="Back" className="icon-back" />
+          Back
+         </Link>
+       </div>
+
       </aside>
 
   
@@ -241,9 +246,12 @@ const ChatPage: React.FC = () => {
           </ul>
         )}
 
-        <div className="drawer-actions">
-          <Link to="/" className="chat-back">Back to Home Page</Link>
-        </div>
+        <div className="chat-actions">
+          <Link to="/" className="chat-back">
+         <img src={back} alt="Back" className="icon-back" />
+          Back
+         </Link>
+       </div>
       </aside>
     </div>
   );

@@ -1,7 +1,9 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useFormStatus } from "react-dom";
+import useNextStep from "../../Hooks/userGoals/useNextStep";
 import "./userGoals.css";
+
 
 type Goal = {
   id: number;
@@ -24,6 +26,8 @@ function DeleteBtn() {
   );
 }
 
+const ellipsize = (s: string, n = 40) => (s.length > n ? s.slice(0, n).trim() + "…" : s);
+
 const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString(undefined, {
     month: "long",
@@ -35,11 +39,23 @@ const clamp = (n: number) => Math.max(0, Math.min(100, Math.round(n)));
 
 const UserGoalCard: React.FC<Props> = ({ goal, deleteAction }) => {
   const pct = clamp(goal.progress);
+  const { nextTitle, loading: nextLoading } = useNextStep(goal.id);
 
   return (
-    <div className="goal-card">
+    <section className="user-goals">
+    <div className="goal-card-pg">
       <div className="goal-date-card">{formatDate(goal.createdAt)}</div>
       <h3 className="goal-title-card">{goal.title}</h3>
+
+      <div className={`next-step ${nextTitle ? "" : "done"}`}>
+          <span className="next-step-label">Next:</span>{" "}
+          {nextLoading ? "…" : nextTitle ? (
+            <span className="next-step-text" title={nextTitle}>{ellipsize(nextTitle, 40)}</span>
+          ) : (
+            "All steps complete 🎉"
+          )}
+        </div>
+
       <div
         className="goal-progress"
         role="progressbar"
@@ -63,6 +79,7 @@ const UserGoalCard: React.FC<Props> = ({ goal, deleteAction }) => {
         </form>
       </div>
     </div>
+    </section>
   );
 };
 
