@@ -17,13 +17,14 @@ import { OpenaiModule } from './openai/openai.module';
 import { ConnectionsController } from './connections/connections.controller';
 import { ConnectionsService } from './connections/connections.service';
 import { ConnectionsModule } from './connections/connections.module';
+import { CoinsModule } from './coins/coins.module';
 
 @Module({
   imports: [
   ScheduleModule.forRoot(),
   AutomationModule,
   ConfigModule.forRoot({ isGlobal: true }),
-  AuthModule, UserModule, PrismaModule, GoalsModule,PlanModule, PostModule, ChatModule, NotificationModule, AutomationModule, DashboardModule,OpenaiModule, ConnectionsModule
+  AuthModule, UserModule, PrismaModule, GoalsModule,PlanModule, PostModule, ChatModule, NotificationModule, AutomationModule, DashboardModule,OpenaiModule, ConnectionsModule, CoinsModule
 
 ],
   controllers: [DashboardController, ConnectionsController],

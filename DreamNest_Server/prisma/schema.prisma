@@ -32,6 +32,8 @@ model User {
   messages         Message[]   
   messageReads     MessageRead[] 
   notifications    Notification[] 
+  coinLedgers      CoinLedger[]
+  coinPurchases    CoinPurchase[]
 
   helps            Help[]
   helperConnections Connection[] @relation("HelperConnection")
@@ -217,4 +219,55 @@ model Notification {
 
   @@index([userId, read, createdAt])
   @@index([createdAt])
+}
+
+enum CoinReason {
+  PLAN_COMPLETED
+  PLAN_UNCHECKED
+  DAILY_DECAY
+  PURCHASE
+}
+
+model CoinLedger {
+  id         Int        @id @default(autoincrement())
+  userId     Int
+  user       User       @relation(fields: [userId], references: [id])
+
+  delta      Int                    // + or - coins
+  reason     CoinReason
+
+  goalId     Int?
+  planId     Int?
+
+  purchaseId Int?
+  purchase   CoinPurchase? @relation("PurchaseLedger", fields: [purchaseId], references: [id])
+
+  decayDay   DateTime?           
+
+  createdAt  DateTime   @default(now())
+
+  @@index([userId, createdAt])
+  @@index([reason, createdAt])
+  @@unique([userId, reason, decayDay])
+}
+
+enum PurchaseStatus {
+  pending
+  succeeded
+  failed
+}
+
+model CoinPurchase {
+  id            Int            @id @default(autoincrement())
+  userId        Int
+  user          User           @relation(fields: [userId], references: [id])
+
+  coins         Int
+  amountCents   Int
+  status        PurchaseStatus  @default(pending)
+
+  createdAt     DateTime        @default(now())
+  completedAt   DateTime?
+
+  ledgerEntries CoinLedger[]    @relation("PurchaseLedger")
 }

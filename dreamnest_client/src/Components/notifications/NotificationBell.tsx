@@ -24,7 +24,7 @@ const BellIcon: React.FC<{ active?: boolean }> = ({ active }) => (
 
 const NotificationBell: React.FC = () => {
   const { items, unreadCount, activateItem, markAllRead } = useNotifications();
-  const { open, toggleOpen, close, rootRef, onItemKey } = useNotificationBell();
+  const { open, toggleOpen, rootRef, onItemKey } = useNotificationBell();
 
   return (
     <div className="notif-wrapper" ref={rootRef}>

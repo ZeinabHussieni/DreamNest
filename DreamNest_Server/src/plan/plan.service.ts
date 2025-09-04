@@ -1,9 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Plan as PrismaPlan } from '@prisma/client';
+import { Plan as PrismaPlan,CoinReason } from '@prisma/client';
 import { NotificationService } from 'src/notification/notification.service';
 import { PlanResponseDto } from './responseDto/plan-response.dto';
+import {
+  PLAN_REWARD,
+  PLAN_UNCHECK_PENALTY,
+} from 'src/config/coins'; 
 
+
+const COINS_PER_PLAN = 15;
 @Injectable()
 export class PlanService {
   constructor(
@@ -47,104 +53,83 @@ export class PlanService {
     return plans.map(this.formatPlan);
   }
 
-
   async togglePlanDone(id: number): Promise<PlanResponseDto> {
-    const plan = await this.getPlanById(id);
-    const wasCompleted = plan.completed;            
 
-   const updatedPlan = await this.togglePlanCompleted(plan);
-
-   await this.updateGoalProgress(plan);
-   await this.sendGoalProgressNotification(plan);
-
-   if (!wasCompleted && updatedPlan.completed) {
-    const coinsReward = 15;
-    await this.rewardUserCoins(plan.goal.user.id, coinsReward);
-    await this.sendPlanCompletedNotification(updatedPlan, coinsReward, plan.goal.user.id);
-   } else if (wasCompleted && !updatedPlan.completed) {
-    await this.rewardUserCoins(plan.goal.user.id, -15);
-  }
-
-  return this.formatPlan(updatedPlan);
-}
-
-
- private async getPlanById(id: number) {
     const plan = await this.prisma.plan.findUnique({
-     where: { id },
-     include: { goal: { include: { user: true } } }, 
-   });
-   if (!plan) throw new NotFoundException('Plan not found');
-   return plan;
- }
+      where: { id },
+      include: { goal: { include: { user: true } } },
+    });
+    if (!plan) throw new NotFoundException('Plan not found');
+
+    const becomingCompleted = !plan.completed;
+    const delta = becomingCompleted ? PLAN_REWARD : PLAN_UNCHECK_PENALTY;
+    const reason = becomingCompleted ? CoinReason.PLAN_COMPLETED : CoinReason.PLAN_UNCHECKED;
+
+    const updatedPlan = await this.prisma.$transaction(async (tx) => {
+   
+      const toggled = await tx.plan.update({
+        where: { id: plan.id },
+        data: { completed: becomingCompleted },
+      });
+
+ 
+      const goalPlans = await tx.plan.findMany({
+        where: { goal_id: plan.goal_id },
+        select: { completed: true },
+      });
+      const total = goalPlans.length;
+      const done = goalPlans.reduce((n, p) => n + (p.completed ? 1 : 0), 0);
+      const progress = total ? (done / total) * 100 : 0;
+
+      await tx.goal.update({
+        where: { id: plan.goal_id },
+        data: { progress },
+      });
 
 
- private async togglePlanCompleted(plan: any) {
-   return this.prisma.plan.update({
-     where: { id: plan.id },
-     data: { completed: !plan.completed },
-   });
- }
+      await tx.coinLedger.create({
+        data: {
+          userId: plan.goal.user.id,
+          delta,
+          reason,
+          goalId: plan.goal_id,
+          planId: plan.id,
+        },
+      });
 
- private async updateGoalProgress(plan: any) {
-   const goalPlans = await this.prisma.plan.findMany({
-     where: { goal_id: plan.goal_id },
-   });
-   const totalPlans = goalPlans.length;
-   const completedPlans = goalPlans.filter(p => p.completed).length;
-   const progress = totalPlans > 0 ? (completedPlans / totalPlans) * 100 : 0;
+      await tx.user.update({
+        where: { id: plan.goal.user.id },
+        data: { coins: { increment: delta } },
+      });
 
-   return this.prisma.goal.update({
-     where: { id: plan.goal_id },
-     data: { progress },
-   });
+      return toggled;
+    });
+
+
+    await this.notificationService.createAndPush({
+      type: becomingCompleted ? 'PLAN_COMPLETED' : 'GOAL_PROGRESS',
+      userId: plan.goal.user.id,
+      planId: plan.id,
+      goalId: plan.goal_id,
+      content: becomingCompleted
+        ? `You completed "${plan.title}"! +${COINS_PER_PLAN} coins.`
+        : `You unchecked "${plan.title}". -${COINS_PER_PLAN} coins.`,
+    });
+
+    return this.formatPlan(updatedPlan);
   }
 
-  private async sendGoalProgressNotification(plan: any) {
-   const goalPlans = await this.prisma.plan.findMany({
-     where: { goal_id: plan.goal_id },
-   });
-   const totalPlans = goalPlans.length;
-   const completedPlans = goalPlans.filter(p => p.completed).length;
-   const progress = totalPlans > 0 ? (completedPlans / totalPlans) * 100 : 0;
 
-   return this.notificationService.createAndPush({
-     type: 'GOAL_PROGRESS',
-     userId: plan.goal.user_id,
-     goalId: plan.goal_id,
-     content: `Congrats! Your goal "${plan.goal.title}" progress is now ${progress.toFixed(0)}%`,
-   });
-  }
-
-  private async rewardUserCoins(userId: number, coins: number) {
-   return this.prisma.user.update({
-     where: { id: userId },
-     data: { coins: { increment: coins } },
-  });
- }
-
- private async sendPlanCompletedNotification(plan: any, coins: number, userId: number) {
-  return this.notificationService.createAndPush({
-    type: 'PLAN_COMPLETED',
-    userId: userId,
-    planId: plan.id,
-    content: `You completed the plan "${plan.title}"! +${coins} coins! Keep going!`,
-  });
- }
-
-
-
-  // private helper
   private formatPlan(plan: PrismaPlan): PlanResponseDto {
-  return {
-    id: plan.id,
-    title: plan.title,
-    description: plan.description,
-    due_date: plan.due_date,
-    completed: plan.completed,
-    goal_id: plan.goal_id,
-    createdAt: plan.createdAt,
-    updatedAt: plan.updatedAt,
-  };
-}
+    return {
+      id: plan.id,
+      title: plan.title,
+      description: plan.description,
+      due_date: plan.due_date,
+      completed: plan.completed,
+      goal_id: plan.goal_id,
+      createdAt: plan.createdAt,
+      updatedAt: plan.updatedAt,
+    };
+  }
 }

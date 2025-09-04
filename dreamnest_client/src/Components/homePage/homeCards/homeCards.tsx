@@ -33,7 +33,13 @@ const HomeCards: React.FC = () => {
           title="Progress Tracking"
           description="Track your milestones, complete tasks, and see your achievements grow."
         />
+        <FeaturesCard
+          image={dashboard}
+          title="Progress Tracking"
+          description="Track your milestones, complete tasks, and see your achievements grow."
+        />
       </div>
+      
 
       <h2 className="section-title">How DreamNest Works</h2>
       <div className="image-steps">

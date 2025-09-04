@@ -3,8 +3,8 @@ import useDashboard from "../../Hooks/dashboard/useDashboard";
 import DashboardStatCards from "../../Components/dashboard/DashboardCards";
 import DashboardCharts from "../../Components/dashboard/DashboardCharts";
 import DashboardGoals from "../../Components/dashboard/DashboardGoals";
+import LeaderboardCard from "../../Components/dashboard/LeaderboardCard"; 
 import "./dashboard.css";
-
 
 const DashboardPage: React.FC = () => {
   const { data, loading } = useDashboard();
@@ -27,12 +27,20 @@ const DashboardPage: React.FC = () => {
         inProgress={data.inProgressGoals}
       />
 
-      <DashboardGoals />
+
+      <div className="chart-grid with-leaderboard">
+        <div className="chart-stack">
+          <DashboardGoals />
+        </div>
+        <aside className="chart-sidebar">
+          <LeaderboardCard limit={3} />
+        </aside>
+      </div>
 
       <DashboardCharts
-        postsPerMonth={data.postsPerMonth}
-        goalsPerMonth={data.goalsPerMonth}
-      />
+            postsPerMonth={data.postsPerMonth}
+            goalsPerMonth={data.goalsPerMonth}
+          />
     </div>
   );
 };

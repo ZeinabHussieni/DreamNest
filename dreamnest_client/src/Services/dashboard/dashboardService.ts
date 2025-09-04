@@ -9,6 +9,13 @@ export type DashboardDto = {
   goalsPerMonth: MonthCounts;
 };
 
+export type LeaderboardUser = {
+  id: number;
+  name: string;
+  coins: number;
+  profilePicFilename?: string | null;
+};
+
 function deepUnwrap<T>(payload: any): T {
   let p = payload?.data ?? payload;
   if (p && typeof p === "object" && "data" in p) p = (p as any).data;
@@ -31,4 +38,17 @@ export async function fetchDashboard(): Promise<DashboardDto> {
     postsPerMonth: (raw?.postsPerMonth as MonthCounts) ?? {},
     goalsPerMonth: (raw?.goalsPerMonth as MonthCounts) ?? {},
   };
+}
+
+export async function getLeaderboard(limit = 5): Promise<LeaderboardUser[]> {
+  const res = await api.get("/coins/leaderboard", { params: { limit } });
+  const items = (res as any)?.data?.data?.items ?? []; 
+
+
+  return items.map((i: any) => ({
+    id: i.id,
+    name: i.userName,                
+    coins: Number(i.coins) || 0,
+    profilePicFilename: i.profilePicture ?? null, 
+  }));
 }

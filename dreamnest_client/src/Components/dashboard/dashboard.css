@@ -230,8 +230,16 @@
   text-decoration: none;
 }
 
-.dg-loading,
-.dg-error,
+.dg-loading {
+  padding: 10px 2px;
+  color: var(--muted);
+}
+
+.dg-error {
+  padding: 10px 2px;
+  color: var(--muted);
+}
+
 .dg-empty {
   padding: 10px 2px;
   color: var(--muted);
@@ -426,6 +434,137 @@ body.dark .dg-row {
   color: #6b7280;
 }
 
+.chart-grid.with-leaderboard {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 18px;
+  align-items: start;
+}
+
+.chart-stack {
+  display: grid;
+  gap: 18px;
+}
+
+.leaderboard-card.p-card {
+  background: var(--soft-bg);
+  border-radius: 20px;
+  height: 515px;
+}
+
+.chart-sidebar {
+  position: sticky;
+  top: 110px;
+}
+
+.lb-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.lb-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  border-radius: 14px;
+  padding: 10px 12px;
+}
+
+body.dark .lb-row {
+  background: rgba(255,255,255,0.06);
+}
+
+.lb-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.lb-rank {
+  min-width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+}
+
+.lb-meta {
+  display: grid;
+  line-height: 1.1;
+}
+
+.lb-name {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.lb-sub {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.lb-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.lb-coin {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+}
+
+.lb-coins {
+  font-size: 14px;
+}
+
+.lb-rank {
+  min-width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 14px;
+  color: #fff;
+}
+
+.lb-rank-1 {
+  background: var(--nav-bg);
+}
+
+.lb-rank-2 {
+  background: var(--purple-2);
+}
+
+.lb-rank-3 {
+  background: var(--muted);
+}
+
+.lb-rank-4 {
+  background: var(--muted);
+}
+
+.lb-rank-5 {
+  background: var(--muted);
+}
+
+@media (max-width: 1100px) {
+  .chart-grid.with-leaderboard {
+    grid-template-columns: 1fr;
+  }
+  .chart-sidebar {
+    position: static;
+  }
+}
 
 @media (max-width: 700px) {
   .donut-legend {
@@ -465,7 +604,9 @@ body.dark .dg-row {
 }
 
 @media (max-width: 700px) {
-  .dash-grid-cards,
+  .dash-grid-cards {
+    grid-template-columns: 1fr;
+  }
   .dash-grid-charts {
     grid-template-columns: 1fr;
   }
