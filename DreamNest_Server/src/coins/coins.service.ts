@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
-import { DAILY_DECAY } from '../config/coins';
+import { DAILY_DECAY } from '../common/shared/coins';
 import { NotificationService } from 'src/notification/notification.service'; 
 import { CoinReason } from '@prisma/client';
 

@@ -1,4 +1,5 @@
 import api from "../axios/axios";
+import type { ApiEnvelope } from "../axios/types";
 
 export type Goal = {
   id: number;
@@ -23,21 +24,15 @@ export type Plan = {
 };
 
 
-type ApiResponse<T> = {
-  data?: T;
-  items?: T;
-} & Record<string, any>;
-
-
 
 export const getGoalsDetails = async (): Promise<Goal[]> => {
-  const res = await api.get<ApiResponse<Goal[]>>("/goals");
-  return res.data?.data ?? res.data?.items ?? (res.data as any) ?? [];
+  const res = await api.get<ApiEnvelope<Goal[]>>("/goals");
+  return res.data.data;
 };
 
 export const getGoalsStatus = async (status: string): Promise<Goal[]> => {
-  const res = await api.get<ApiResponse<Goal[]>>("/goals", { params: { status } });
-  return res.data?.data ?? res.data?.items ?? (res.data as any) ?? [];
+  const res = await api.get<ApiEnvelope<Goal[]>>("/goals", { params: { status } });
+  return res.data.data;
 };
 
 export const deleteGoal = async (id: number): Promise<void> => {
@@ -45,29 +40,29 @@ export const deleteGoal = async (id: number): Promise<void> => {
 };
 
 export const fetchGoals = async (status?: string): Promise<Goal[]> => {
-  const res = await api.get<ApiResponse<Goal[]>>("/goals", {
+  const res = await api.get<ApiEnvelope<Goal[]>>("/goals", {
     params: status ? { status } : undefined,
   });
-  return res.data?.data ?? res.data?.items ?? (res.data as any) ?? [];
+  return res.data.data;
 };
 
 export const getGoalById = async (id: number): Promise<Goal> => {
-  const res = await api.get<ApiResponse<Goal>>(`/goals/${id}`);
-  return res.data?.data ?? (res.data as any);
+  const res = await api.get<ApiEnvelope<Goal>>(`/goals/${id}`);
+  return res.data.data;
 };
 
 export const getGoalPlans = async (id: number): Promise<Plan[]> => {
-  const res = await api.get<ApiResponse<Plan[]>>(`/goals/${id}/plans`);
-  return res.data?.data ?? (res.data as any);
+  const res = await api.get<ApiEnvelope<Plan[]>>(`/goals/${id}/plans`);
+  return res.data.data;
 };
 
 export const togglePlanDone = async (
   planId: number
 ): Promise<{ progress?: number }> => {
-  const res = await api.patch<ApiResponse<{ progress?: number }>>(
+  const res = await api.patch<ApiEnvelope<{ progress?: number }>>(
     `/goals/plans/${planId}/toggle`
   );
-  return res.data?.data ?? (res.data as any);
+  return res.data.data;
 };
 
 export default async function visionBoardUrl(filename: string): Promise<Blob> {

@@ -1,50 +1,59 @@
 import api from "../axios/axios";
+import type { ApiEnvelope } from "../axios/types";
 
 export type Decision = "pending" | "accepted" | "rejected";
 export type Status   = "pending" | "accepted" | "rejected";
+
+export type UserMini = {
+  id: number;
+  userName: string;
+  profilePicture?: string | null;
+};
+
+export type GoalMini = {
+  id: number;
+  title: string;
+};
 
 export type Connection = {
   id: number;
   helper_id: number;
   seeker_id: number;
-  goal: { id: number; title: string };
+  goal_id: number;
+  similarityScore?: number;
+  status: Status;
   helperDecision: Decision;
   seekerDecision: Decision;
-  status: Status;
-  helper: { id: number; userName: string; profilePicture?: string | null };
-  seeker: { id: number; userName: string; profilePicture?: string | null };
+  chatRoomId?: number | null;
+  createdAt: string;
+  updatedAt: string;
+  helper: UserMini;
+  seeker: UserMini;
+  goal: GoalMini;
 };
 
-function normalizeToArray<T = unknown>(payload: any): T[] {
-  const p = payload?.data ?? payload;
-  if (Array.isArray(p)) return p;
-  if (Array.isArray(p?.connections)) return p.connections;
-  if (Array.isArray(p?.data)) return p.data;
-  if (Array.isArray(p?.items)) return p.items;
-  return [];
-}
 
 export async function getConnections(): Promise<Connection[]> {
-  const res = await api.get("/connections");
-  return normalizeToArray<Connection>(res);
+  const res = await api.get<ApiEnvelope<Connection[]>>("/connections");
+  return res.data.data ?? [];
 }
 
 
 export async function acceptConnection(
   id: number
 ): Promise<{ connection: Connection; chatRoom: any | null }> {
-  const res = await api.patch(`/connections/${id}/accept`);
-  const d = res?.data ?? res;
-  const connection: Connection = d?.connection ?? d;
-  const chatRoom = d?.chatRoom ?? null;
+  const res = await api.patch<ApiEnvelope<{ connection: Connection; chatRoom: any | null }>>(
+    `/connections/${id}/accept`
+  );
+  const { connection, chatRoom } = res.data.data;
   return { connection, chatRoom };
 }
 
 export async function rejectConnection(
   id: number
 ): Promise<{ connection: Connection }> {
-  const res = await api.patch(`/connections/${id}/reject`);
-  const d = res?.data ?? res;
-  const connection: Connection = d?.connection ?? d;
-  return { connection };
+  const res = await api.patch<ApiEnvelope<{ connection: Connection }>>(
+    `/connections/${id}/reject`
+  );
+  return { connection: res.data.data.connection };
 }

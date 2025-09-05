@@ -14,13 +14,13 @@ const RegisterForm: React.FC = () => {
       <div className="name-row firstlast">
         <Input
           name="firstName"
-          hint="First Name"
+          hint="Firstname"
           placeholder="John"
           error={fieldErrors.firstName}
         />
         <Input
           name="lastName"
-          hint="Last Name"
+          hint="Lastname"
           placeholder="Doe"
           error={fieldErrors.lastName}
         />

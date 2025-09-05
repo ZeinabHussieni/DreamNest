@@ -5,6 +5,7 @@ import connection from "../../../Assets/Images/connection.png";
 import dashboard from "../../../Assets/Images/dashboared.png";
 import image from "../../../Assets/Images/image.png";
 import steps from "../../../Assets/Images/steps.png";
+import coinsreward from "../../../Assets/Icons/coinsreward.svg";
 
 import "./homeCards.css";
 
@@ -29,14 +30,14 @@ const HomeCards: React.FC = () => {
           description="Connect with others who share similar goals or can help you succeed"
         />
         <FeaturesCard
-          image={dashboard}
-          title="Progress Tracking"
-          description="Track your milestones, complete tasks, and see your achievements grow."
+          image={coinsreward}
+          title="Coins Tracker"
+          description="Earn 15 coins for every plan you complete. Miss a day without progress? 10 coins will be deducted. Stay consistent and keep your balance growing!"
         />
         <FeaturesCard
           image={dashboard}
           title="Progress Tracking"
-          description="Track your milestones, complete tasks, and see your achievements grow."
+          description="Track your milestones, complete tasks, and see your achievements grow"
         />
       </div>
       

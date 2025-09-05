@@ -1,4 +1,5 @@
 import api from "../axios/axios";
+import type { ApiEnvelope } from "../axios/types";
 
 export type Message = {
   id: number;
@@ -28,43 +29,25 @@ export type ChatRoom = {
   participants?: ChatParticipant[];
 };
 
+const toIso = (d: unknown) =>
+  typeof d === "string" ? d : new Date(d as any).toISOString();
 
-function unwrap<T = unknown>(payload: any): any {
+const withDefaults = (r: ChatRoom): ChatRoom => ({
+  ...r,
+  participants: r.participants ?? [],
+  messages: r.messages?.map(m => ({ ...m, createdAt: toIso(m.createdAt) })) ?? [],
+});
 
-  const p = payload?.data ?? payload;
-
-  if (Array.isArray(p)) return p;
-  if (Array.isArray(p?.data)) return p.data;    
-  if (Array.isArray(p?.items)) return p.items;
-  if (Array.isArray(p?.messages)) return p.messages;
-  return p;
-}
 
 export async function getChatRooms(): Promise<ChatRoom[]> {
-  const res  = await api.get("/chat/rooms");
-  const raw  = unwrap<ChatRoom[] | { rooms: ChatRoom[] } | { data: ChatRoom[] }>(res);
-
-  const rooms: ChatRoom[] = Array.isArray(raw)
-    ? raw
-    : Array.isArray((raw as any)?.rooms)
-      ? (raw as { rooms: ChatRoom[] }).rooms
-      : Array.isArray((raw as any)?.data)
-        ? (raw as { data: ChatRoom[] }).data
-        : [];
-
-  return rooms.map((r) => ({ ...r, participants: r.participants ?? [] }));
+  const res = await api.get<ApiEnvelope<ChatRoom[]>>("/chat/rooms");
+  const rooms = res.data?.data ?? [];
+  return rooms.map(withDefaults);
 }
 
 
 export async function getRoomMessages(roomId: number): Promise<Message[]> {
-  const res = await api.get(`/chat/messages/${roomId}`);
-  const arr = unwrap<Message[]>(res);              
-  const list = Array.isArray(arr) ? arr : [];
-  return list.map((m: any) => ({
-    ...m,
-    createdAt:
-      typeof m.createdAt === "string"
-        ? m.createdAt
-        : new Date(m.createdAt).toISOString(),
-  }));
+  const res = await api.get<ApiEnvelope<Message[]>>(`/chat/messages/${roomId}`);
+  const list = res.data?.data ?? [];
+  return list.map(m => ({ ...m, createdAt: toIso(m.createdAt) }));
 }

@@ -6,7 +6,7 @@ import { PlanResponseDto } from './responseDto/plan-response.dto';
 import {
   PLAN_REWARD,
   PLAN_UNCHECK_PENALTY,
-} from 'src/config/coins'; 
+} from 'src/common/shared/coins'; 
 
 
 const COINS_PER_PLAN = 15;

@@ -1,4 +1,4 @@
-import {Body, Controller, Get, HttpCode,Post, Query, Req, UseGuards, Param, Res,BadRequestException, UploadedFile, UseInterceptors,} from '@nestjs/common';
+import {Body, Controller, Get, HttpCode,Post, Query, Req, UseGuards, Param, Res,BadRequestException,} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import type { Response } from 'express';
 import { join } from 'path';

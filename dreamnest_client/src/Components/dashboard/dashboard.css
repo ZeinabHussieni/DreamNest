@@ -334,6 +334,7 @@ body.dark .dg-row {
   border: none;
   border-radius: 20px;
   box-shadow: none;
+  height: 515px;
 }
 
 .goals-card .p-card-body {

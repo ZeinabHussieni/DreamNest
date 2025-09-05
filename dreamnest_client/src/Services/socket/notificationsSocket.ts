@@ -1,4 +1,5 @@
 import api from "../axios/axios";
+import type { ApiEnvelope } from "../axios/types";
 
 export type NotificationDto = {
   id: number;
@@ -12,35 +13,30 @@ export type NotificationDto = {
   messageId?: number | null;
   content: string;
   read: boolean;
-  createdAt: string;
+  createdAt: string; // ISO
 };
 
-function unwrap<T>(payload: any): T {
-  const p = payload?.data ?? payload;
-  if (Array.isArray(p)) return p as T;
-  if (Array.isArray(p?.data)) return p.data as T;
-  return p as T;
+function toIso(v: unknown): string {
+  if (typeof v === "string") return v;
+  const t = new Date(v as any).toISOString();
+  return t;
 }
 
 export async function fetchNotifications(): Promise<NotificationDto[]> {
-  const res = await api.get("/notifications");
-  const list = unwrap<unknown>(res);
-  const arr = Array.isArray(list) ? list : [];
-  return arr.map((n: any) => ({
-    ...n,
-    createdAt:
-      typeof n.createdAt === "string"
-        ? n.createdAt
-        : new Date(n.createdAt).toISOString(),
-  })) as NotificationDto[];
+
+  const res = await api.get<ApiEnvelope<NotificationDto[]>>("/notifications");
+  const list = res.data.data ?? [];
+  return list.map(n => ({ ...n, createdAt: toIso(n.createdAt) }));
 }
 
 export async function markRead(id: number): Promise<NotificationDto> {
-  const res = await api.patch(`/notifications/${id}/read`);
-  return unwrap<NotificationDto>(res);
+
+  const res = await api.patch<ApiEnvelope<NotificationDto>>(`/notifications/${id}/read`);
+  const n = res.data.data;
+  return { ...n, createdAt: toIso(n.createdAt) };
 }
 
 export async function markAllRead(ids: number[]): Promise<void> {
   if (!ids?.length) return;
-  await Promise.all(ids.map((id) => markRead(id).catch(() => undefined)));
+  await Promise.all(ids.map(id => markRead(id).catch(() => undefined)));
 }

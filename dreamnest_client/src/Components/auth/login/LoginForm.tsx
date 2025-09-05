@@ -13,7 +13,7 @@ const Login: React.FC = () => {
       <div className="Second">
         <Input
           name="identifier"
-          hint="UserName or Email"
+          hint="Username or Email"
           placeholder="john@example.com"
           error={fieldErrors.identifier}
         />
