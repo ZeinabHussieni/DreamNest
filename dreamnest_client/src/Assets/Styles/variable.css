@@ -27,28 +27,49 @@
    --greyy:#f8f8f8de;
 }
 
-
 body.dark {
-  --nav-bg: #4C3A85;
-  --main-bg: #121212; 
-  --soft-bg: #1E1B26;
-  --button-bg: #1E1B26;
- --header-bg:#1E1B26;
-  --text: #E6E6E6;
-  --muted: #b7b2c6;
-  --border: #2a2536;
-    --connection:#1E1B26;
+  
+  --main-bg: #0f0e14;        
+  --nav-bg:  #151228;        
+  --soft-bg: #18162a;       
+  --soft-color: #1e1b34;  
 
-  --track: #1b1624;
+ 
+  --text:  #efeaf6;        
+  --muted: #b5adc9;       
 
-  --purple: #8a74e0;
-  --purple-2: #b8a6ff;
+  --border:    #2e2944;     
+  --connection:#2a2741;     
+  --grey:      #3a3846;    
+  --greyy:     #242230;    
+  --track:     #131120;    
 
-  --danger: #ff6b64;
+ 
+  --purple:   #7f6aff;      
+  --purple-1: #a495ff;       
+  --purple-2: #c9c0ff;     
 
-  --mark-done-bg: #2a2440;
-  --mark-done-color: #c7baff;
+  --pink:     #ff75c3;       
+  --pink-1:   #ff98d1;       
+  --pink-2:   #ffc0e2;
+
+
+  --button-bg:     #5f49e8;  
+  --button-hover:  #5640d9;
+  --button-pressed:#4a36c4;
+
+
+  --danger:   #ff6a81;     
+  --header-bg:#191636;     
+  --empty-req:#1b1833;      
+
+
+  --mark-done-bg:    #182524;
+  --mark-done-color: #aaf2cd;
+
+
 }
+
 
 body {
   background-color: var(--main-bg);

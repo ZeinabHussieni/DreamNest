@@ -2,7 +2,7 @@
   font-size: 30px;
   font-weight: 600;
   margin-right: 300px;
-  color: #1f1f1f;
+  color: var(--text);
 }
 .login-form {
   width: 360px;

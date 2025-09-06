@@ -17,9 +17,7 @@
 .con{
   text-decoration: none;
 }
-.chat-search {
-  margin: 12px 0 6px;
-}
+
 .empty-state,
 .empty-main {
   padding: 16px;
@@ -31,17 +29,35 @@
   font-size: 18px;
 }
 
+.chat-search {
+  position: relative;
+  margin: 12px 0 6px;
+  width: 100%;
+}
+
 .chat-search input {
-  width: 97%;
-  padding: 16px 14px;
+  width: 100%;
+  padding: 12px 14px 12px 42px; 
   border-radius: 12px;
   border: 1px solid var(--border);
   background: var(--main-bg);
+  color: var(--text);
 }
+
 .chat-search input:focus-visible {
   outline: none;
   border-color: var(--purple);
   box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+.chat-search .search-icon {
+  position: absolute;
+  top: 50%;
+  left: 14px;      
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
 }
 
 .room-list {
@@ -88,7 +104,7 @@
 
 .room-avatar-img {
   width: 66px;
-  height: 64px;
+  height: 66px;
   border-radius: 50%;
 }
 
@@ -123,8 +139,8 @@
 }
 
 .room-avatar {
-  width: 86px;
-  height: 84px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
 }
 
@@ -283,7 +299,7 @@
   display: inline-flex;        
   align-items: center;          
   gap: 8px;                    
-  color: var(--main-bg);
+  color: white;
   background-color: var(--nav-bg);
   border-radius: 10px;
   padding: 10px 14px;
@@ -306,6 +322,7 @@
   padding: 23px 24px;
   border-radius: 16px;
   border: 1px solid var(--border);
+  color: var(--text);
   background-color: var(--soft-bg);
   transition: border-color .2s ease, box-shadow .2s ease;
 }
@@ -319,7 +336,7 @@
 .chat-input button {
   border: 0;
   background: var(--purple);
-  color: var(--soft-color);
+  color: var(--text);
   padding: 0 16px;
   border-radius: 12px;
   font-weight: 700;
@@ -449,7 +466,10 @@
   display: flex;
   justify-content: flex-start;
 }
-
+.menu{
+  width: 32px;
+  height: 32px;
+}
 @media (max-width: 1603px) {
   
 .chat-sidebar {

@@ -61,11 +61,11 @@
 }
 .btnn.confirm { 
     background:var(--nav-bg) ; 
-    color: var(--main-bg); 
+    color: var(--text); 
 }
 .btnn.reject {
     background: var(--danger); 
-    color: var(--main-bg); 
+    color: var(--text); 
 }
 .err {
     color: var(--danger);

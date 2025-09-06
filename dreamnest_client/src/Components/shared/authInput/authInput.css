@@ -10,7 +10,7 @@
   background: var(--main-bg);
   padding: 0 5px;
   font-size: 1rem;
-  color: #000000;
+  color: var(--text);
   z-index: 1;
   margin-top: 13px;
 }

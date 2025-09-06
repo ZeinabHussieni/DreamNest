@@ -54,7 +54,7 @@
 }
 .button-create button{
   background:var(--nav-bg);
-  color:var(--main-bg);
+  color:white;
   border:0;
   border-radius:12px;
   padding:16px 25px;

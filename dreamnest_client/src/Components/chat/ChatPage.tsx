@@ -6,6 +6,8 @@ import { useAuth } from "../../Context/AuthContext";
 import Avatar from "../shared/avatar/Avatar";
 import type { ChatRoom } from "../../Services/chat/chatService";
 import back from "../../Assets/Icons/back.svg";
+import menu from "../../Assets/Icons/menublack.svg";
+import searchh from "../../Assets/Icons/search.svg";
 import "./chat.css";
 
 const ChatPage: React.FC = () => {
@@ -41,7 +43,9 @@ const ChatPage: React.FC = () => {
     <div className="chat-wrap">
 
       <aside className="chat-sidebar">
+         <h3>Conversations</h3>
         <div className="chat-search">
+          <img src={searchh} alt="search" className="search-icon"/>
           <input
             placeholder="Search…"
             value={search}
@@ -49,7 +53,6 @@ const ChatPage: React.FC = () => {
           />
         </div>
 
-        <h3>Conversations</h3>
 
 
         {!userId ? (
@@ -107,7 +110,7 @@ const ChatPage: React.FC = () => {
               className="chat-menu-btn"
               onClick={() => setMobileOpen(true)}
             >
-              ☰
+              <img src={menu} alt="menu" className="menu"/>
             </button>
             <Avatar
               filename={activeOther?.profilePicture ?? null}

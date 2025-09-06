@@ -1,6 +1,6 @@
 .footer {
   background-color: var(--nav-bg); 
-  color: var(--main-bg);
+  color: white;
   padding: 90px 20px;
   margin-left: -35px; 
   margin-right: -32px; 
@@ -41,6 +41,7 @@
   flex-basis: 100%;
   max-width: 800px;
   margin: 0 auto 30px;
+  color: white;
   text-align: left;
   font-size: 18px;
   line-height: 1.5;
@@ -60,7 +61,7 @@
   width: 45px;
   height: 45px;
   border-radius: 50%;
-  background-color: var(--soft-bg); 
+  background-color: #F2EAF7;;
   color: var(--nav-bg); 
   font-size: 18px;
   transition: all 0.3s ease;
@@ -88,13 +89,13 @@
 }
 
 .footer-middle a {
-  color: var(--main-bg);
+  color: white;
   text-decoration: none;
   transition: color 0.3s;
 }
 
 .footer-middle a:hover {
-  color: var(--main-bg);
+ color: white;
 }
 
 .footer-right p {
@@ -103,7 +104,7 @@
 }
 
 .footer-right a {
-  color: var(--main-bg);
+  color: white;
   text-decoration: underline;
 }
 

@@ -115,12 +115,12 @@
 
 .user-goals .learn-more-btn {
   background: var(--nav-bg);
-  color: var(--main-bg);
+  color: white
 }
 
 .user-goals .delete-btn {
   background: var(--danger);
-  color: var(--main-bg);
+  color: white;
   padding: 0 39px;
 }
 

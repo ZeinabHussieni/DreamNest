@@ -40,7 +40,7 @@
   font-size: 30px;
   font-weight: 600;
   margin-right: 80px;
-  color: #1f1f1f;
+  color: var(--text);
 }
 .register-form {
   width: 360px;
@@ -67,7 +67,7 @@
 }
 
 .firstlast{
-  color: black;
+  color: var(--text);
   display: flex;
   align-items: center;
   gap: 0.4rem;
@@ -85,11 +85,13 @@
 }
 
 .button-register{
+  color: var(--text);
   margin-top: 5px;
   margin-left: 150px;
 }
 
 .back{
+  color: var(--text);
   font-size: 1.2rem;
   letter-spacing: 1px;
   margin-top: 40px;
