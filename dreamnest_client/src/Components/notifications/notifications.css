@@ -27,7 +27,15 @@
 .bell-icon.active {
   opacity: 1;
 }
-
+.remove-notify{
+  border: none;
+  background-color: transparent;
+}
+.remove-notify-icon{
+  width: 20px;
+  height: 20px;
+  margin-left: -4px;
+}
 .notif-badge {
   position: absolute;
   top: -4px;

@@ -4,8 +4,7 @@ import { Plan as PrismaPlan,CoinReason } from '@prisma/client';
 import { NotificationService } from 'src/notification/notification.service';
 import { PlanResponseDto } from './responseDto/plan-response.dto';
 import {
-  PLAN_REWARD,
-  PLAN_UNCHECK_PENALTY,
+  PLAN_REWARD
 } from 'src/common/shared/coins'; 
 
 
@@ -61,37 +60,37 @@ export class PlanService {
     });
     if (!plan) throw new NotFoundException('Plan not found');
 
-    const becomingCompleted = !plan.completed;
-    const delta = becomingCompleted ? PLAN_REWARD : PLAN_UNCHECK_PENALTY;
-    const reason = becomingCompleted ? CoinReason.PLAN_COMPLETED : CoinReason.PLAN_UNCHECKED;
+
+     if (plan.completed) {
+      return this.formatPlan(plan);
+    }
 
     const updatedPlan = await this.prisma.$transaction(async (tx) => {
    
-      const toggled = await tx.plan.update({
-        where: { id: plan.id },
-        data: { completed: becomingCompleted },
+      const flip = await tx.plan.updateMany({
+        where: { id: plan.id,completed:false },
+        data: { completed: true  },
       });
 
+  
  
-      const goalPlans = await tx.plan.findMany({
-        where: { goal_id: plan.goal_id },
-        select: { completed: true },
-      });
-      const total = goalPlans.length;
-      const done = goalPlans.reduce((n, p) => n + (p.completed ? 1 : 0), 0);
-      const progress = total ? (done / total) * 100 : 0;
+      const [totalCount, doneCount] = await Promise.all([
+        tx.plan.count({ where: { goal_id: plan.goal_id } }),
+        tx.plan.count({ where: { goal_id: plan.goal_id, completed: true } }),
+      ]);
+      const progress = totalCount ? (doneCount / totalCount) * 100 : 0;
 
       await tx.goal.update({
         where: { id: plan.goal_id },
         data: { progress },
       });
 
-
+      if (flip.count > 0) {
       await tx.coinLedger.create({
         data: {
           userId: plan.goal.user.id,
-          delta,
-          reason,
+          delta: PLAN_REWARD,
+          reason: CoinReason.PLAN_COMPLETED,
           goalId: plan.goal_id,
           planId: plan.id,
         },
@@ -99,22 +98,25 @@ export class PlanService {
 
       await tx.user.update({
         where: { id: plan.goal.user.id },
-        data: { coins: { increment: delta } },
+        data: { coins: { increment: PLAN_REWARD  } },
       });
 
-      return toggled;
+    }
+
+      const toggled = await tx.plan.findUnique({ where: { id: plan.id } });
+      return toggled!;
     });
 
-
+    if (!plan.completed && updatedPlan.completed) {
     await this.notificationService.createAndPush({
-      type: becomingCompleted ? 'PLAN_COMPLETED' : 'GOAL_PROGRESS',
+      type: 'PLAN_COMPLETED',
       userId: plan.goal.user.id,
       planId: plan.id,
       goalId: plan.goal_id,
-      content: becomingCompleted
-        ? `You completed "${plan.title}"! +${COINS_PER_PLAN} coins.`
-        : `You unchecked "${plan.title}". -${COINS_PER_PLAN} coins.`,
+      content: `You completed "${plan.title}"! +${COINS_PER_PLAN} coins.`
+       
     });
+  }
 
     return this.formatPlan(updatedPlan);
   }

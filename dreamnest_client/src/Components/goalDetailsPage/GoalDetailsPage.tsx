@@ -15,7 +15,7 @@ const fmt = (d?: string | Date | null) => {
 const GoalDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const goalId = Number(id);
-  const { goal, plans, imageUrl, deadlineLabel, loading, error, onTogglePlan,isLocked } =
+  const { goal, plans, imageUrl, deadlineLabel, loading, error, onCompletePlan,isLocked } =
     useGoalDetails(goalId);
 
   if (!Number.isFinite(goalId)) return <div className="gd-page"><p className="gd-error">Invalid goal id.</p></div>;
@@ -62,7 +62,7 @@ const GoalDetailsPage: React.FC = () => {
                    className={`mark-btn 
                    ${p.completed ? "is-done" : ""} 
                    ${!p.completed && isLocked(p.id) ? "locked" : ""}`}
-                   onClick={() => onTogglePlan(p.id)}
+                   onClick={() => onCompletePlan(p.id)}
                    disabled={!p.completed && isLocked(p.id)}
                    title={!p.completed && isLocked(p.id) ? "Complete previous steps first" : undefined}
                   >

@@ -40,3 +40,11 @@ export async function markAllRead(ids: number[]): Promise<void> {
   if (!ids?.length) return;
   await Promise.all(ids.map(id => markRead(id).catch(() => undefined)));
 }
+
+export const deleteNotificationById = async (id: number): Promise<void> => {
+  await api.delete(`/notifications/${id}`);
+};
+
+export const deleteAllForUser = async (): Promise<void> => {
+  await api.delete(`/notifications`);
+};

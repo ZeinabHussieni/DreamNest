@@ -12,28 +12,35 @@ import ChatPage from "../Pages/chatPage/chatPage";
 import UserPosts from "../Pages/userPosts/UserPosts";
 import CommunityPosts from "../Pages/communityPosts/CommunityPosts";
 import DashboardPage from "../Pages/dashboard/Dashboard";
-
+import { ProtectedRoute, GuestRoute } from "./guards";
 
 const AppRoutes: React.FC = () => {
   return (
     <Routes>
-
-      <Route path="/register" element={<RegisterForm />} />
-      <Route path="/login" element={<LoginForm />} />
-
-  
-      <Route element={<AppLayout />}>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/userGoals" element={<UserGoals />} />
-      <Route path="/createGoalPage" element={<CreateGoal />} />
-      <Route path="/goals/:id" element={<GoalDetailsPage />} />
-      <Route path="/connections" element={<Connections />} />
-      <Route path="/myposts" element={<UserPosts />} />
-      <Route path="/posts" element={<CommunityPosts />} />
-      <Route path="/dashboard" element={<DashboardPage />} />
-      
+   
+      <Route element={<GuestRoute />}>
+        <Route path="/register" element={<RegisterForm />} />
+        <Route path="/login" element={<LoginForm />} />
       </Route>
-       <Route path="/chats" element={<ChatPage />} />
+
+
+      <Route element={<AppLayout />}>
+        <Route path="/" element={<HomePage />} />
+      </Route>
+
+
+      <Route element={<ProtectedRoute />}>
+        <Route element={<AppLayout />}>
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/userGoals" element={<UserGoals />} />
+          <Route path="/createGoalPage" element={<CreateGoal />} />
+          <Route path="/goals/:id" element={<GoalDetailsPage />} />
+          <Route path="/connections" element={<Connections />} />
+          <Route path="/myposts" element={<UserPosts />} />
+          <Route path="/posts" element={<CommunityPosts />} />
+        </Route>
+        <Route path="/chats" element={<ChatPage />} />
+      </Route>
     </Routes>
   );
 };

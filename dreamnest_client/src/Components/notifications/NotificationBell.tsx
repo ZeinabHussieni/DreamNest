@@ -1,5 +1,6 @@
 import React from "react";
 import useNotifications from "../../Hooks/notifications/useNotifications";
+import remove from "../../Assets/Icons/remove.svg"
 import useNotificationBell from "../../Hooks/notifications/useNotificationUI";
 import timeAgo from "../../Utils/timeAgo";
 import "./notifications.css";
@@ -23,7 +24,7 @@ const BellIcon: React.FC<{ active?: boolean }> = ({ active }) => (
 );
 
 const NotificationBell: React.FC = () => {
-  const { items, unreadCount, activateItem, markAllRead } = useNotifications();
+  const { items, unreadCount, activateItem, markAllRead,removeById,removeAll } = useNotifications();
   const { open, toggleOpen, rootRef, onItemKey } = useNotificationBell();
 
   return (
@@ -43,6 +44,9 @@ const NotificationBell: React.FC = () => {
             <span>Notifications</span>
             <button className="mark-all" onClick={markAllRead} disabled={unreadCount === 0}>
               Mark all read
+            </button>
+             <button className="remove-notify" onClick={removeAll}>
+              <img src={remove} alt="remve all" className="remove-notify-icon"/>
             </button>
           </div>
 
@@ -70,6 +74,9 @@ const NotificationBell: React.FC = () => {
                       <span className="time">{timeAgo(n.createdAt)}</span>
                       {!n.read && <span className="dot" />}
                     </div>
+                    <button className="remove-notify" onClick={() => removeById(n.id)}>
+                     <img src={remove} alt="remve all" className="remove-notify-icon"/>
+                    </button>
                   </li>
                 );
               })}

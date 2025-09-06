@@ -71,4 +71,31 @@ export class NotificationService {
       throw new InternalServerErrorException('Failed to mark notification as read');
     }
   }
+
+   async deleteById(id: number): Promise<{ success: boolean }> {
+    try {
+      await this.prisma.notification.delete({ where: { id } });
+      return { success: true };
+    } catch (error: any) {
+      if (error?.code === 'P2025') {
+        throw new NotFoundException('Notification not found');
+      }
+      throw new InternalServerErrorException('Failed to delete notification');
+    }
+  }
+
+
+
+  async deleteAllForUser(userId: number): Promise<{ success: boolean; deletedCount: number }> {
+    try {
+      const res = await this.prisma.notification.deleteMany({ where: { userId } });
+      if (res.count === 0) {
+        throw new NotFoundException('No notifications found for this user');
+      }
+      return { success: true, deletedCount: res.count };
+    } catch (error: any) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Failed to delete user notifications');
+    }
+  }
 }
