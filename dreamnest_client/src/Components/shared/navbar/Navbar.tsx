@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import Logo from "../../../Assets/Images/Final logo.png";
 import drop from "../../../Assets/Icons/dropdown.svg";
 import coinIcon from "../../../Assets/Icons/coins.svg";
+import menu from "../../../Assets/Icons/menu.svg";
 import ThemeToggle from "../../themeToggle/ThemeToggle";
 import { useAuth } from "../../../Context/AuthContext";
 import useDropdown from "../../../Hooks/navBar/useDropdown";
@@ -70,7 +71,7 @@ const Navbar: React.FC = () => {
             type="button"
             onClick={() => setIsMobileMenuOpen(v => !v)}
           >
-            ☰
+            <img src={menu} alt="Coin" className="coin-icon" />
           </button>
 
           {/* Mobile menu */}

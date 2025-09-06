@@ -99,6 +99,10 @@
   list-style: none;
   font-size: 15px;
 }
+.dropdown-btn{
+  border: none;
+  background-color: var(--main-bg);
+}
 
 .dropdown a {
   color: black;
@@ -334,7 +338,7 @@
 
 .mobile-menu-btn {
   display: none;
-  color: white;
+  background-color: var(--nav-bg);
 }
 
 /* Responsive breakpoints */
@@ -385,7 +389,8 @@
     display: block;
     font-size: 1rem;
     cursor: pointer;
-    color: white;
     margin-left: 1rem;
+    background-color: var(--nav-bg);
+    border: none;
   }
 }
