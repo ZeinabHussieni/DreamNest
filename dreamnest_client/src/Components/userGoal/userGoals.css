@@ -9,7 +9,7 @@
 }
 
 .user-goals .goal-post {
-  width: 100%;
+  width: 380%;
 }
 
 .user-goals .goal-card-pg {
@@ -232,10 +232,13 @@
   .btns { grid-template-columns: 1fr; }
 }
 
-@media (max-width: 560px) {
+@media (max-width: 560px)and (min-width: 508px)  {
   .goal-title-card { font-size: 16px; }
   .learn-more-btn,
   .delete-btn { padding: 9px 12px; }
+  .user-goals .goal-post {
+   width: 100px;
+  }
 }
 
 @media (max-width: 1282px) and (min-width: 981px) {
@@ -249,6 +252,9 @@
   .progress-pct { font-size: 11.5px; margin-top: -36px; }
   .learn-more-btn,
   .delete-btn { height: 42px; font-size: 13.5px; }
+  .user-goals .goal-post {
+  width: 1000px;
+}
 }
 
 @media (max-width: 980px) and (min-width: 621px) {
@@ -262,8 +268,10 @@
   .learn-more-btn,
   .delete-btn { height: 40px; font-size: 13px; padding: 0 14px; }
   .goals-container { grid-template-columns: repeat(2, 300px); }
+  .user-goals .goal-post {
+  width: 500px;
+  }
 }
-
 @media (max-width: 679px) {
   .goal-card { padding: 14px; border-radius: 18px; gap: 8px; width: 80%; }
   .goal-title-card { font-size: 15px; }
@@ -275,11 +283,17 @@
   .learn-more-btn,
   .delete-btn { height: 38px; font-size: 12.5px; padding: 0 12px; }
   .goals-container { grid-template-columns: repeat(2, 290px); padding-right: 30px; }
+  .user-goals .goal-post {
+  width: 300px;
+  }
 }
 
 @media (max-width: 577px) {
   .goal-card { padding: 14px; border-radius: 18px; gap: 2px; width: 170px; }
   .goals-container { grid-template-columns: repeat(2, 190px); }
+  .user-goals .goal-post {
+    width: 320px;
+  }
 }
 
 @media (max-width: 300px) {
