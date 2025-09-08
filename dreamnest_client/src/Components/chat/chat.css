@@ -179,7 +179,6 @@
 .msg.me {
   justify-items: end;
 }
-
 .bubble {
   position: relative;
   max-width: min(72ch, 86%);
@@ -450,7 +449,7 @@
 .drawer-item {
   display: grid;
   grid-template-columns: 40px 1fr;
-  gap: 10px;
+  gap: 50px;
   align-items: center;
   padding: 10px;
   border-radius: 12px;
@@ -509,4 +508,9 @@
   .chat-sidebar {
     display: none;
   }
+}
+@media (max-width: 889px) {
+    .chat-sidebar {
+        width: 222px;
+    }
 }

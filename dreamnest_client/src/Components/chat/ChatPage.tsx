@@ -1,29 +1,20 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import useChat from "../../Hooks/chat/useChat";
+import useChatRedux from "../../Redux/chat/useChatRedux";
 import useChatUI from "../../Hooks/chat/useChatUI";
 import { useAuth } from "../../Context/AuthContext";
 import Avatar from "../shared/avatar/Avatar";
-import type { ChatRoom } from "../../Services/chat/chatService";
+import type { ChatRoom } from "../../Redux/chat/chat.types";
 import back from "../../Assets/Icons/back.svg";
 import menu from "../../Assets/Icons/menublack.svg";
 import searchh from "../../Assets/Icons/search.svg";
 import "./chat.css";
 
 const ChatPage: React.FC = () => {
-
   const { user } = useAuth() as any;
   const userId = Number(user?.id) || 0;
 
-  const {
-    rooms,
-    activeRoom,
-    setActiveId,
-    messages,
-    loadingRooms,
-    loadingMsgs,
-    send,
-  } = useChat(userId);
+  const {rooms,activeRoom,setActiveId,messages,loadingRooms,loadingMsgs,send,} = useChatRedux(userId);
 
   const {
     text, setText,
@@ -34,16 +25,14 @@ const ChatPage: React.FC = () => {
     getOtherUser, onSubmit,
   } = useChatUI({ userId, rooms, activeRoom, loadingMsgs, messages, send });
 
-
   const fmtTime = (iso: string | number | Date) =>
     new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-
 
   return (
     <div className="chat-wrap">
 
       <aside className="chat-sidebar">
-         <h3>Conversations</h3>
+        <h3>Conversations</h3>
         <div className="chat-search">
           <img src={searchh} alt="search" className="search-icon"/>
           <input
@@ -52,8 +41,6 @@ const ChatPage: React.FC = () => {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-
-
 
         {!userId ? (
           <div className="muted">Sign in first.</div>
@@ -79,13 +66,8 @@ const ChatPage: React.FC = () => {
                   className={`room-item ${isActive ? "active" : ""}`}
                   onClick={() => setActiveId(r.id)}
                 >
-                  <Avatar
-                    filename={otherUser?.profilePicture ?? null}
-                    className="room-avatar-img"
-                  />
-                  <div className="room-name">
-                    {otherUser?.userName || r.name || `Room ${r.id}`}
-                  </div>
+                  <Avatar filename={otherUser?.profilePicture ?? null} className="room-avatar-img" />
+                  <div className="room-name">{otherUser?.userName || r.name || `Room ${r.id}`}</div>
                 </li>
               );
             })}
@@ -94,35 +76,27 @@ const ChatPage: React.FC = () => {
 
         <div className="chat-actions">
           <Link to="/" className="chat-back">
-         <img src={back} alt="Back" className="icon-back" />
-          Back
-         </Link>
-       </div>
-
+            <img src={back} alt="Back" className="icon-back" />
+            Back
+          </Link>
+        </div>
       </aside>
 
-  
+   
       <main className="chat-main">
-  
         <header className="chat-header">
           <div className="chat-header-inner">
-            <button
-              className="chat-menu-btn"
-              onClick={() => setMobileOpen(true)}
-            >
+            <button className="chat-menu-btn" onClick={() => setMobileOpen(true)}>
               <img src={menu} alt="menu" className="menu"/>
             </button>
-            <Avatar
-              filename={activeOther?.profilePicture ?? null}
-              className="room-avatar"
-            />
+            <Avatar filename={activeOther?.profilePicture ?? null} className="room-avatar" />
             <div className="chat-title">
               <h2>{activeOther?.userName || activeRoom?.name || "…"}</h2>
             </div>
           </div>
         </header>
 
-     
+
         <div className="chat-body" ref={bodyRef}>
           {!userId ? (
             <div className="muted">Sign in first.</div>
@@ -146,7 +120,7 @@ const ChatPage: React.FC = () => {
             </div>
           ) : (
             <ul className="msg-list">
-              {messages.map((m) => {
+              {messages.map((m:any) => {
                 const mine = m.senderId === userId;
                 return (
                   <li key={m.id} className={`msg ${mine ? "me" : "other"}`}>
@@ -169,11 +143,7 @@ const ChatPage: React.FC = () => {
           <input
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder={
-              activeRoom
-                ? "Type a message…"
-                : "Select a conversation to start chatting"
-            }
+            placeholder={activeRoom ? "Type a message…" : "Select a conversation to start chatting"}
             autoComplete="off"
             disabled={!userId || !activeRoom}
           />
@@ -181,7 +151,6 @@ const ChatPage: React.FC = () => {
         </form>
       </main>
 
- 
       <div
         className={`chat-drawer-backdrop ${mobileOpen ? "open" : ""}`}
         onClick={() => setMobileOpen(false)}

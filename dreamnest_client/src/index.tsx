@@ -8,11 +8,13 @@ import "react-toastify/dist/ReactToastify.css";
 import { AuthProvider } from './Context/AuthContext';
 import { BrowserRouter } from "react-router-dom";
 import { ThemeProvider } from './Context/ThemeContext';
-import { NotificationProvider } from "./Context/NotificationsContext";
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 import "primeflex/primeflex.css";
+import { store } from './store/store';
+import { Provider } from 'react-redux';
+
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
@@ -22,12 +24,12 @@ root.render(
     <ToastContainer/>
     <ThemeProvider>
 
-  <React.StrictMode>
-    <NotificationProvider>
+    <React.StrictMode>
+ 
+    <Provider store={store}>
+      <App />
+    </Provider>
       
-            <App />
-       
-    </NotificationProvider>
   </React.StrictMode>
   </ThemeProvider>
   </BrowserRouter>
