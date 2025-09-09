@@ -16,6 +16,7 @@ export function attachNotificationsSocket(dispatch: AppDispatch) {
   socket.on('newNotification', onNew)
 
   return () => {
-    socket?.removeAllListeners?.('newNotification')
+    socket?.removeAllListeners?.('newNotification');
+    socket.off('newNotification', onNew);
   }
 }

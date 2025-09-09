@@ -1,63 +1,69 @@
-import { useEffect, useRef, useCallback } from 'react'
-import { useAppDispatch, useAppSelector } from '../../store/hooks'
+import { useEffect, useCallback } from 'react';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {
   selectRooms, selectRoomsStatus, selectActiveRoomId, selectActiveRoom,
   selectMessages, selectMessagesStatus, setActiveRoomId, appendMessageIfActive
-} from './chat.slice'
-import { loadRoomsThunk, loadMessagesThunk } from './chat.thunks'
-import { getChatSocket } from '../../Services/socket/socket'
-import type { Message } from './chat.types'
+} from './chat.slice';
+import { loadRoomsThunk, loadMessagesThunk } from './chat.thunks';
+import { getChatSocket } from '../../Services/socket/socket';
+import type { Message } from './chat.types';
 
 export default function useChatRedux(currentUserId: number) {
-  const dispatch = useAppDispatch()
-  const rooms = useAppSelector(selectRooms)
-  const roomsStatus = useAppSelector(selectRoomsStatus)
-  const activeRoomId = useAppSelector(selectActiveRoomId)
-  const activeRoom = useAppSelector(selectActiveRoom)
-  const messages = useAppSelector(selectMessages)
-  const messagesStatus = useAppSelector(selectMessagesStatus)
+  const dispatch = useAppDispatch();
 
-  const socketRef = useRef(getChatSocket())
+  const rooms = useAppSelector(selectRooms);
+  const roomsStatus = useAppSelector(selectRoomsStatus);
+  const activeRoomId = useAppSelector(selectActiveRoomId);
+  const activeRoom = useAppSelector(selectActiveRoom);
+  const messages = useAppSelector(selectMessages);
+  const messagesStatus = useAppSelector(selectMessagesStatus);
+
+ 
+  useEffect(() => {
+    if (currentUserId) dispatch(loadRoomsThunk());
+  }, [currentUserId, dispatch]);
+
+  // to make sure we always use the freshest socket after auth changes
+  useEffect(() => {
+    if (currentUserId) {
+      getChatSocket(); 
+    }
+  }, [currentUserId]);
 
   useEffect(() => {
-    if (currentUserId) dispatch(loadRoomsThunk())
-  }, [currentUserId, dispatch])
+    if (!activeRoom || !currentUserId) return;
 
+ 
+    dispatch(loadMessagesThunk(activeRoom.id));
 
-  useEffect(() => {
-    if (!activeRoom || !currentUserId) return
-    const socket = socketRef.current
-
-    dispatch(loadMessagesThunk(activeRoom.id))
-
-    socket.emit('joinRoom', { chatRoomId: activeRoom.id, userId: currentUserId })
+    const socket = getChatSocket(); 
 
     const onNew = (msg: Message) => {
       if (msg.chatRoomId === activeRoom.id) {
-        dispatch(appendMessageIfActive(msg))
+        dispatch(appendMessageIfActive(msg));
       }
-    }
+    };
 
-    socket.off('newMessage', onNew)
-    socket.on('newMessage', onNew)
+    socket.off('chat:newMessage', onNew);
+    socket.on('chat:newMessage', onNew);
 
     return () => {
-      socket.off('newMessage', onNew)
-    }
-  }, [activeRoom?.id, currentUserId, dispatch])
+      socket.off('chat:newMessage', onNew);
+    };
+  }, [activeRoom?.id, currentUserId, dispatch]);
 
   const setActiveId = useCallback((id: number) => {
-    dispatch(setActiveRoomId(id))
-  }, [dispatch])
+    dispatch(setActiveRoomId(id));
+  }, [dispatch]);
 
   const send = useCallback((content: string) => {
-    if (!content.trim() || !activeRoomId) return
-    socketRef.current.emit('sendMessage', {
+    if (!content.trim() || !activeRoomId) return;
+    getChatSocket().emit('sendMessage', {
       chatRoomId: activeRoomId,
       senderId: currentUserId,
       content,
-    })
-  }, [activeRoomId, currentUserId])
+    });
+  }, [activeRoomId, currentUserId]);
 
   return {
     rooms,
@@ -68,5 +74,5 @@ export default function useChatRedux(currentUserId: number) {
     setActiveId,
     send,
     reloadRooms: () => dispatch(loadRoomsThunk()),
-  } as const
+  } as const;
 }
