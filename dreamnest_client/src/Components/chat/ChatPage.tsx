@@ -1,20 +1,27 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
-import useChat from "../../Hooks/chat/useChat";
+import Avatar from "../shared/avatar/Avatar";
+import { useAppDispatch } from "../../store/hooks";
+import useChatRedux from "../../Redux/chat/useChatRedux";
 import useChatUI from "../../Hooks/chat/useChatUI";
 import { useAuth } from "../../Context/AuthContext";
-import Avatar from "../shared/avatar/Avatar";
-import type { ChatRoom } from "../../Services/chat/chatService";
-import back from "../../Assets/Icons/back.svg";
-import menu from "../../Assets/Icons/menublack.svg";
-import searchh from "../../Assets/Icons/search.svg";
+import backk from "../../Assets/Icons/back.svg"
+import type { ChatRoom } from "../../Redux/chat/chat.types";
+import { initChatSocketThunk, loadRoomsThunk } from "../../Redux/chat/chat.thunks";
 import "./chat.css";
 
-const ChatPage: React.FC = () => {
+const Ticks: React.FC<{ status?: "sent" | "delivered" | "read" }> = ({ status = "sent" }) => {
+  if (status === "read") return <span className="tick tick-read">✓✓</span>;
+  if (status === "delivered") return <span className="tick tick-delivered">✓✓</span>;
+  return <span className="tick tick-sent">✓</span>;
+};
 
+const ChatPage: React.FC = () => {
+  const dispatch = useAppDispatch();
   const { user } = useAuth() as any;
   const userId = Number(user?.id) || 0;
 
+  // data and sockets
   const {
     rooms,
     activeRoom,
@@ -23,37 +30,45 @@ const ChatPage: React.FC = () => {
     loadingRooms,
     loadingMsgs,
     send,
-  } = useChat(userId);
+  } = useChatRedux(userId);
 
+  // ui logic
   const {
     text, setText,
     search, setSearch,
     mobileOpen, setMobileOpen,
-    filteredRooms, activeOther,
+    filteredRooms,
+    activeOther,
+    statusLine,
+    activeRoomTyping,
     bodyRef, bottomRef,
-    getOtherUser, onSubmit,
+    getOtherUser,
+    onSubmit,
+    firstUnreadId,
+    isUserOnline,
+    getMsgStatus,
+    fmtTime,
+    unreadByRoom,
   } = useChatUI({ userId, rooms, activeRoom, loadingMsgs, messages, send });
 
-
-  const fmtTime = (iso: string | number | Date) =>
-    new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-
+  useEffect(() => {
+    dispatch(initChatSocketThunk());
+    dispatch(loadRoomsThunk());
+  }, [dispatch]);
 
   return (
     <div className="chat-wrap">
-
+   
       <aside className="chat-sidebar">
-         <h3>Conversations</h3>
+        <h3>Conversations</h3>
+
         <div className="chat-search">
-          <img src={searchh} alt="search" className="search-icon"/>
           <input
             placeholder="Search…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-
-
 
         {!userId ? (
           <div className="muted">Sign in first.</div>
@@ -62,29 +77,33 @@ const ChatPage: React.FC = () => {
         ) : rooms.length === 0 ? (
           <div className="empty-state">
             <p>No conversations yet.</p>
-            <p className="muted">
-              Start one from <Link to="/connections" className="con">Connections</Link>.
-            </p>
+            <p className="muted">Start one from <Link to="/connections">Connections</Link>.</p>
           </div>
         ) : filteredRooms.length === 0 ? (
           <div className="muted">No conversations match “{search}”.</div>
         ) : (
           <ul className="room-list">
             {filteredRooms.map((r) => {
-              const otherUser = getOtherUser(r as ChatRoom);
+              const other = getOtherUser(r as ChatRoom);
               const isActive = activeRoom?.id === r.id;
+              const unread = unreadByRoom[r.id]?.count || 0;
+
               return (
                 <li
                   key={r.id}
                   className={`room-item ${isActive ? "active" : ""}`}
                   onClick={() => setActiveId(r.id)}
                 >
-                  <Avatar
-                    filename={otherUser?.profilePicture ?? null}
-                    className="room-avatar-img"
-                  />
+                  <div className="room-avatar-wrap">
+                    <Avatar filename={other?.profilePicture ?? null} className="room-avatar-img" />
+                    {!!other && (
+                      <span className={`presence-dot ${isUserOnline(other.id) ? "online" : "offline"}`} />
+                    )}
+                  </div>
+
                   <div className="room-name">
-                    {otherUser?.userName || r.name || `Room ${r.id}`}
+                    {other?.userName || r.name || `Room ${r.id}`}
+                    {unread > 0 && <span className="unread-badge">{unread}</span>}
                   </div>
                 </li>
               );
@@ -94,35 +113,34 @@ const ChatPage: React.FC = () => {
 
         <div className="chat-actions">
           <Link to="/" className="chat-back">
-         <img src={back} alt="Back" className="icon-back" />
-          Back
-         </Link>
-       </div>
-
+            <img src={backk} alt="Back" className="icon-back" />
+            Back
+          </Link>
+        </div>
       </aside>
 
-  
       <main className="chat-main">
-  
         <header className="chat-header">
           <div className="chat-header-inner">
-            <button
-              className="chat-menu-btn"
-              onClick={() => setMobileOpen(true)}
-            >
-              <img src={menu} alt="menu" className="menu"/>
-            </button>
-            <Avatar
-              filename={activeOther?.profilePicture ?? null}
-              className="room-avatar"
-            />
+            <button className="chat-menu-btn" onClick={() => setMobileOpen(true)}>☰</button>
+
+            <div className="room-avatar-wrap">
+              <Avatar filename={activeOther?.profilePicture ?? null} className="room-avatar" />
+            </div>
+
             <div className="chat-title">
               <h2>{activeOther?.userName || activeRoom?.name || "…"}</h2>
+              <div className="subtle">{statusLine}</div>
+
+              {!!activeRoom && activeRoomTyping.length > 0 && (
+                <div className="typing-indicator">
+                  {activeRoomTyping.length === 1 ? "typing…" : `${activeRoomTyping.length} are typing…`}
+                </div>
+              )}
             </div>
           </div>
         </header>
 
-     
         <div className="chat-body" ref={bodyRef}>
           {!userId ? (
             <div className="muted">Sign in first.</div>
@@ -131,32 +149,37 @@ const ChatPage: React.FC = () => {
           ) : !activeRoom ? (
             <div className="empty-main">
               <h3>No conversation selected</h3>
-              {rooms.length === 0 ? (
-                <p className="muted">
-                  You don’t have any chats yet. Start one from{" "}
-                  <Link to="/connections" className="con">Connections</Link>.
-                </p>
-              ) : (
-                <p className="muted">Pick a conversation from the left.</p>
-              )}
+              <p className="muted">
+                {rooms.length === 0
+                  ? <>Start one from <Link to="/connections">Connections</Link>.</>
+                  : "Pick a conversation from the left."}
+              </p>
             </div>
           ) : messages.length === 0 ? (
-            <div className="empty-main">
-              <p className="muted">No messages here yet. Say hi 👋</p>
-            </div>
+            <div className="empty-main"><p className="muted">No messages yet. Say hi 👋</p></div>
           ) : (
             <ul className="msg-list">
               {messages.map((m) => {
                 const mine = m.senderId === userId;
+                const showCatchUp = firstUnreadId && m.id === firstUnreadId;
+                const status = mine ? getMsgStatus(m.id) || "sent" : undefined;
+
                 return (
-                  <li key={m.id} className={`msg ${mine ? "me" : "other"}`}>
-                    <div className="bubble">
-                      {m.content}
-                      <div className="meta">
-                        <time>{fmtTime(m.createdAt)}</time>
+                  <React.Fragment key={m.id}>
+                    {showCatchUp && (
+                      <li className="catch-up"><span>New</span></li>
+                    )}
+                    <li className={`msg ${mine ? "me" : "other"}`}>
+                      <div className="bubble">
+                        {m.content}
+                        <div className="meta">
+                          <time>{fmtTime(m.createdAt)}</time>
+                          {mine && <Ticks status={getMsgStatus(m.id)} />}
+
+                        </div>
                       </div>
-                    </div>
-                  </li>
+                    </li>
+                  </React.Fragment>
                 );
               })}
               <div ref={bottomRef} />
@@ -164,16 +187,11 @@ const ChatPage: React.FC = () => {
           )}
         </div>
 
-    
         <form className="chat-input" onSubmit={onSubmit}>
           <input
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder={
-              activeRoom
-                ? "Type a message…"
-                : "Select a conversation to start chatting"
-            }
+            placeholder={activeRoom ? "Type a message…" : "Select a conversation to start chatting"}
             autoComplete="off"
             disabled={!userId || !activeRoom}
           />
@@ -181,23 +199,15 @@ const ChatPage: React.FC = () => {
         </form>
       </main>
 
- 
+    
       <div
         className={`chat-drawer-backdrop ${mobileOpen ? "open" : ""}`}
         onClick={() => setMobileOpen(false)}
       />
-      <aside
-        className={`chat-drawer ${mobileOpen ? "open" : ""}`}
-        role="dialog"
-      >
+      <aside className={`chat-drawer ${mobileOpen ? "open" : ""}`} role="dialog">
         <div className="drawer-header">
           <h3>Conversations</h3>
-          <button
-            className="drawer-close"
-            onClick={() => setMobileOpen(false)}
-          >
-            ✕
-          </button>
+          <button className="drawer-close" onClick={() => setMobileOpen(false)}>✕</button>
         </div>
 
         <div className="drawer-search">
@@ -213,17 +223,17 @@ const ChatPage: React.FC = () => {
         ) : rooms.length === 0 ? (
           <div className="empty-state">
             <p>No conversations yet.</p>
-            <p className="muted">
-              Go to <Link to="/connections">Connections</Link> to start one.
-            </p>
+            <p className="muted">Go to <Link to="/connections">Connections</Link> to start one.</p>
           </div>
         ) : filteredRooms.length === 0 ? (
           <div className="muted">No conversations match “{search}”.</div>
         ) : (
           <ul className="drawer-list">
             {filteredRooms.map((r) => {
-              const otherUser = getOtherUser(r as ChatRoom);
+              const other = getOtherUser(r as ChatRoom);
               const isActive = activeRoom?.id === r.id;
+              const unread = unreadByRoom[r.id]?.count || 0;
+
               return (
                 <li
                   key={r.id}
@@ -233,25 +243,31 @@ const ChatPage: React.FC = () => {
                     setMobileOpen(false);
                   }}
                 >
-                  <Avatar
-                    filename={otherUser?.profilePicture ?? null}
-                    className="room-avatar-img"
-                  />
-                  <div className="room-name">
-                    {otherUser?.userName || r.name || `Room ${r.id}`}
+                  <div className="room-avatar-wrap">
+                    <Avatar filename={other?.profilePicture ?? null} className="room-avatar-img" />
+                    {!!other && (
+                      <span className={`presence-dot ${isUserOnline(other.id) ? "online" : "offline"}`} />
+                    )}
                   </div>
+
+                  <div className="room-name">
+                    {other?.userName || r.name || `Room ${r.id}`}
+                  </div>
+
+                  {unread > 0 && <span className="unread-badge">{unread}</span>}
                 </li>
               );
             })}
           </ul>
         )}
 
-        <div className="chat-actions">
+         <div className="chat-actions">
           <Link to="/" className="chat-back">
-         <img src={back} alt="Back" className="icon-back" />
-          Back
-         </Link>
-       </div>
+            <img src={backk} alt="Back" className="icon-back" />
+            Back
+          </Link>
+          </div>
+
       </aside>
     </div>
   );

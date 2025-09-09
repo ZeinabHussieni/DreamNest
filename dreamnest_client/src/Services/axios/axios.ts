@@ -9,7 +9,7 @@ const API_BASE =
 const api = axios.create({
   baseURL: API_BASE,
   headers: { "Content-Type": "application/json" },
-  timeout: 20000,
+  timeout: 900000,
 });
 
 api.interceptors.request.use((config) => {

@@ -179,7 +179,6 @@
 .msg.me {
   justify-items: end;
 }
-
 .bubble {
   position: relative;
   max-width: min(72ch, 86%);
@@ -371,7 +370,7 @@
   cursor: pointer;
 }
 
-/* Drawer + backdrop (mobile only) */
+
 .chat-drawer-backdrop {
   position: fixed;
   inset: 0;
@@ -450,7 +449,7 @@
 .drawer-item {
   display: grid;
   grid-template-columns: 40px 1fr;
-  gap: 10px;
+  gap: 50px;
   align-items: center;
   padding: 10px;
   border-radius: 12px;
@@ -470,6 +469,69 @@
   width: 32px;
   height: 32px;
 }
+.unread-badge { 
+  background:var(--nav-bg);
+  color:#fff; 
+  border-radius:999px;
+  padding:2px 6px;
+  font-size:11px; 
+  margin-left:90px; 
+}
+.presence-dot {
+  position:absolute;
+  bottom:0;
+  margin-bottom: 5px;
+  margin-left:58px; 
+  width:13px;
+  height:13px;
+  border-radius:50%;
+  border:2px solid #1c1928; 
+}
+.presence-dot.online { 
+  background:#22c55e;
+}
+.presence-dot.offline {
+  background:#9ca3af; 
+}
+.room-avatar-wrap { 
+  position:relative;
+  display:inline-block;
+}
+.tick { 
+  font-size: 12px; 
+  margin-left: 6px;
+  opacity: .9;
+  color: currentColor;        
+}
+
+.tick-sent { 
+  color:#9ca3af;
+ }        
+.tick-delivered {
+   color:#b58afa;
+}   
+.tick-read { 
+  color:#22c55e; 
+}        
+
+.catch-up { 
+  display:flex; 
+  justify-content:center;
+  margin:10px 0; 
+}
+.catch-up > span { 
+  font-size:12px; 
+  padding:2px 10px; 
+  border-radius:999px;
+  background:rgba(255,255,255,.08); 
+}
+.subtle {
+  color:#9ca3af; 
+  font-size:12px;
+  margin-top:2px;
+ }
+
+
 @media (max-width: 1603px) {
   
 .chat-sidebar {
@@ -509,4 +571,9 @@
   .chat-sidebar {
     display: none;
   }
+}
+@media (max-width: 889px) {
+    .chat-sidebar {
+        width: 222px;
+    }
 }

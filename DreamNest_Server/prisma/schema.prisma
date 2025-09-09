@@ -25,6 +25,8 @@ model User {
   profilePicture   String?
   coins            Int          @default(0)
 
+  lastActiveAt     DateTime?
+
   goals            Goal[] 
   posts            Post[] 
   likes            PostLike[] 
@@ -161,21 +163,25 @@ model ChatRoom {
 
   connections   Connection[]   @relation("ConnectionChatRoom")
 }
+
 model ChatRoomUser {
   id        Int      @id @default(autoincrement()) 
   userId      Int
   chatRoomId Int
+  lastSeenAt DateTime @default(now())
 
   user      User     @relation(fields: [userId], references: [id])
   chatRoom  ChatRoom @relation(fields: [chatRoomId], references: [id])
 
-  @@unique([userId, chatRoomId])          
+  @@unique([userId, chatRoomId])      
+  @@index([chatRoomId, userId, lastSeenAt])     
 }
 
 model Message {
   id         Int      @id @default(autoincrement())
   content    String
   createdAt  DateTime @default(now())
+  deliveredAt DateTime?
 
   senderId   Int
   sender     User     @relation(fields: [senderId], references: [id])
@@ -187,19 +193,21 @@ model Message {
   @@index([chatRoomId, createdAt])
 }
 
+
 model MessageRead {
-  id        Int      @id @default(autoincrement())
-  userId      Int
-  messageId Int
-  readAt    DateTime @default(now())
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  messageId  Int
+  readAt     DateTime @default(now())
 
-  user      User     @relation(fields: [userId], references: [id])
-  message   Message  @relation(fields: [messageId], references: [id])
-  @@index([userId, readAt])
-
+  user       User     @relation(fields: [userId], references: [id])
+  message    Message  @relation(fields: [messageId], references: [id])
 
   @@unique([userId, messageId])
+  @@index([messageId], map: "idx_messageread_message")
+  @@index([userId, readAt], map: "idx_messageread_user_readat")
 }
+
 
 model Notification {
   id         Int      @id @default(autoincrement())
