@@ -42,13 +42,15 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: 12345
           POSTGRES_DB: dreamnest
+        ports:
+          - 5432:5432
         options: >-
           --health-cmd="pg_isready -U postgres"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=10
     env:
-      DATABASE_URL: postgresql://postgres:12345@postgres:5432/dreamnest?schema=public
+      DATABASE_URL: postgresql://postgres:12345@localhost:5432/dreamnest?schema=public
     defaults:
       run:
         working-directory: DreamNest_Server
@@ -62,15 +64,20 @@ jobs:
 
       - run: npm ci
       - run: npx prisma generate
-      - run: npx -y wait-on tcp:postgres:5432 --timeout 90000 --verbose
+      - run: npx -y wait-on tcp:localhost:5432 --timeout 90000 --verbose
 
       - name: DB sanity check
         run: |
           sudo apt-get update
           sudo apt-get install -y postgresql-client
-          PGPASSWORD=12345 psql -h postgres -U postgres -d dreamnest -c "\l"
+          PGPASSWORD=12345 psql -h localhost -U postgres -d dreamnest -c "\l"
 
       - run: npx prisma migrate deploy
       - run: npm run lint --if-present
       - run: npm run typecheck --if-present
       - run: npm test -- --ci --watchAll=false --runInBand
+
+      - name: Docker build (only on main)
+        if: github.ref == 'refs/heads/main'
+        run: docker build -t dreamnest-backend:ci -f Dockerfile .
+        working-directory: DreamNest_Server
