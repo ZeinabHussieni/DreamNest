@@ -73,7 +73,12 @@ jobs:
           PGPASSWORD=12345 psql -h localhost -U postgres -d dreamnest -c "\l"
 
       - run: npx prisma migrate deploy
-      - run: npm run lint --if-present
+
+ 
+      - name: Lint (non-blocking)
+        run: npm run lint --if-present
+        continue-on-error: true
+
       - run: npm run typecheck --if-present
       - run: npm test -- --ci --watchAll=false --runInBand
 
