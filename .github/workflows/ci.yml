@@ -33,48 +33,44 @@ jobs:
         working-directory: dreamnest_client
 
   backend:
-  name: Backend (DreamNest_Server)
-  runs-on: ubuntu-latest
-  services:
-    postgres:
-      image: postgres:16
-      env:
-        POSTGRES_USER: postgres
-        POSTGRES_PASSWORD: 12345
-        POSTGRES_DB: dreamnest
-      options: >-
-        --health-cmd="pg_isready -U postgres"
-        --health-interval=10s
-        --health-timeout=5s
-        --health-retries=10
-  env:
-    DATABASE_URL: postgresql://postgres:12345@postgres:5432/dreamnest?schema=public
-  defaults:
-    run:
-      working-directory: DreamNest_Server
-  steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
-      with:
-        node-version: 20
-        cache: npm
-        cache-dependency-path: DreamNest_Server/package-lock.json
+    name: Backend (DreamNest_Server)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: 12345
+          POSTGRES_DB: dreamnest
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    env:
+      DATABASE_URL: postgresql://postgres:12345@postgres:5432/dreamnest?schema=public
+    defaults:
+      run:
+        working-directory: DreamNest_Server
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: DreamNest_Server/package-lock.json
 
-    - run: npm ci
-    - run: npx prisma generate
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npx -y wait-on tcp:postgres:5432 --timeout 90000 --verbose
 
-    # wait for the service to open port 5432 (max 90s)
-    - run: npx -y wait-on tcp:postgres:5432 --timeout 90000 --verbose
+      - name: DB sanity check
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+          PGPASSWORD=12345 psql -h postgres -U postgres -d dreamnest -c "\l"
 
-    # (debug) install psql client and prove the DB is reachable
-    - name: DB sanity check
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y postgresql-client
-        PGPASSWORD=12345 psql -h postgres -U postgres -d dreamnest -c "\l"
-
-    - run: npx prisma migrate deploy
-    - run: npm run lint --if-present
-    - run: npm run typecheck --if-present
-    - run: npm test -- --ci --watchAll=false --runInBand
-
+      - run: npx prisma migrate deploy
+      - run: npm run lint --if-present
+      - run: npm run typecheck --if-present
+      - run: npm test -- --ci --watchAll=false --runInBand
