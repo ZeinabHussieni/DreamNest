@@ -40,7 +40,7 @@ jobs:
         image: postgres:16
         env:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
+          POSTGRES_PASSWORD: 12345
           POSTGRES_DB: dreamnest
         options: >-
           --health-cmd="pg_isready -U postgres"
@@ -48,7 +48,7 @@ jobs:
           --health-timeout=5s
           --health-retries=10
     env:
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/dreamnest?schema=public
+      DATABASE_URL: postgresql://postgres:12345@localhost:5432/dreamnest?schema=public
     defaults:
       run:
         working-directory: DreamNest_Server
