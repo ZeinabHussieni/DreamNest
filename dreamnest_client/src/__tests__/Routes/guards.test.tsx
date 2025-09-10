@@ -26,7 +26,7 @@ test('ProtectedRoute redirects when not authenticated', async () => {
 	renderWithProviders(
 		<MemoryRouter initialEntries={['/private']}>
 			<Routes>
-				<Route element={require('../../Routes/guards').ProtectedRoute.default || require('../../Routes/guards').ProtectedRoute}>
+				<Route element={React.createElement(require('../../Routes/guards').ProtectedRoute.default || require('../../Routes/guards').ProtectedRoute)}>
 					<Route path="/private" element={<Dummy />} />
 				</Route>
 				<Route path="/login" element={<div>Login Page</div>} />
@@ -41,14 +41,15 @@ test('GuestRoute redirects when authenticated', async () => {
 	renderWithProviders(
 		<MemoryRouter initialEntries={['/login']}>
 			<Routes>
-				<Route element={require('../../Routes/guards').GuestRoute.default || require('../../Routes/guards').GuestRoute}>
+				<Route element={React.createElement(require('../../Routes/guards').GuestRoute.default || require('../../Routes/guards').GuestRoute)}>
 					<Route path="/login" element={<div>Login Page</div>} />
 				</Route>
 				<Route path="/dashboard" element={<div>Dashboard</div>} />
 			</Routes>
 		</MemoryRouter>
 	);
-	expect(await screen.findByText(/dashboard/i)).toBeInTheDocument();
+	// With our router mock, redirects render as "Navigate:/dashboard" text.
+	expect(await screen.findByText(/Navigate:\s*\/dashboard/i)).toBeInTheDocument();
 	window.localStorage.removeItem('token');
 });
 

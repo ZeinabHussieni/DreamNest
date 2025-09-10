@@ -39,6 +39,26 @@ jest.mock('sweetalert2', () => {
 });
 
 
+// Some UI libs like lottie try to access canvas APIs not present in jsdom.
+// Provide a lightweight mock so components can mount in tests.
+jest.mock('lottie-react', () => ({
+  __esModule: true,
+  default: function Lottie() { return null as any; }
+}));
+
+
 test('global setup loaded', () => expect(true).toBe(true));
 
 
+// src/setupTests.ts  (or your existing test setup file)
+class MockIntersectionObserver {
+  constructor(_: IntersectionObserverCallback, __?: IntersectionObserverInit) {}
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+Object.defineProperty(global, 'IntersectionObserver', {
+  writable: true,
+  configurable: true,
+  value: MockIntersectionObserver,
+});

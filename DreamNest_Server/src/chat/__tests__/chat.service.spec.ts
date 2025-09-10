@@ -15,6 +15,7 @@ describe('ChatService', () => {
   const prisma = {
     user: {
       findMany: jest.fn(),
+      update: jest.fn(),  
     },
     chatRoom: {
       findFirst: jest.fn(),
@@ -23,8 +24,9 @@ describe('ChatService', () => {
       findMany: jest.fn(),
     },
     chatRoomUser: {
-      findFirst: jest.fn(),
-    },
+    findFirst: jest.fn(),
+    findMany: jest.fn(),  
+   },
     message: {
       create: jest.fn(),
       findMany: jest.fn(),
@@ -37,6 +39,9 @@ describe('ChatService', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks();
+    prisma.chatRoomUser.findMany.mockResolvedValue([]); 
+    prisma.user.update.mockResolvedValue({ id: 5 });         
+    notifications.createAndPush.mockResolvedValue(undefined);
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ChatService,
@@ -87,12 +92,14 @@ describe('ChatService', () => {
 
     it('wraps non-2 userIds with InternalServerErrorException', async () => {
      
-      await expect(service.createChatRoom([1], 1)).rejects.toThrow(InternalServerErrorException);
+      await expect(service.createChatRoom([1], 1))
+     .rejects.toThrow(BadRequestException);
     });
 
     it('wraps "users not found" with InternalServerErrorException', async () => {
-      prisma.user.findMany.mockResolvedValue([{ id: 1 }]); 
-      await expect(service.createChatRoom([1, 2], 1)).rejects.toThrow(InternalServerErrorException);
+      prisma.user.findMany.mockResolvedValue([{ id: 1 }]);
+      await expect(service.createChatRoom([1, 2], 1))
+      .rejects.toThrow(NotFoundException);
     });
   });
 
@@ -100,17 +107,29 @@ describe('ChatService', () => {
     it('returns rooms including participants and messages', async () => {
       prisma.chatRoom.findMany.mockResolvedValue([{ id: 5 }]);
       const res = await service.getUserChatRooms(9);
-      expect(prisma.chatRoom.findMany).toHaveBeenCalledWith({
-        where: { participants: { some: { userId: 9 } } },
-        include: {
-          participants: {
-            include: {
-              user: { select: { id: true, userName: true, profilePicture: true } },
-            },
+expect(prisma.chatRoom.findMany).toHaveBeenCalledWith({
+  where: { participants: { some: { userId: 9 } } },
+  include: {
+    participants: {
+      select: {
+        id: true,
+        userId: true,
+        chatRoomId: true,
+        lastSeenAt: true,
+        user: {
+          select: {
+            id: true,
+            userName: true,
+            profilePicture: true,
+            lastActiveAt: true,
           },
-          messages: { orderBy: { createdAt: 'asc' } },
         },
-      });
+      },
+    },
+    messages: { orderBy: { createdAt: 'asc' } },
+  },
+});
+
       expect(res).toEqual([{ id: 5 }]);
     });
   });
@@ -128,7 +147,8 @@ describe('ChatService', () => {
 
     it('wraps prisma errors into InternalServerErrorException', async () => {
       prisma.message.findMany.mockRejectedValue(new Error('db'));
-      await expect(service.getRoomMessages(1)).rejects.toThrow(InternalServerErrorException);
+await expect(service.getRoomMessages(1))
+  .rejects.toThrow('db');
     });
   });
 
@@ -153,15 +173,22 @@ describe('ChatService', () => {
 
     it('wraps validation/membership failures with InternalServerErrorException', async () => {
      
-      await expect(service.createMessage(1, 2, '' as any)).rejects.toThrow(InternalServerErrorException);
+      await expect(service.createMessage(1, 2, '' as any))
+  .rejects.toThrow(BadRequestException);
+
 
    
       prisma.chatRoom.findUnique.mockResolvedValue(null);
-      await expect(service.createMessage(99, 5, 'hey')).rejects.toThrow(InternalServerErrorException);
+    prisma.chatRoom.findUnique.mockResolvedValue(null);
+await expect(service.createMessage(99, 5, 'hey'))
+  .rejects.toThrow(NotFoundException);
 
       prisma.chatRoom.findUnique.mockResolvedValue({ id: 2 });
       prisma.chatRoomUser.findFirst.mockResolvedValue(null);
-      await expect(service.createMessage(2, 5, 'hey')).rejects.toThrow(InternalServerErrorException);
+    prisma.chatRoom.findUnique.mockResolvedValue({ id: 2 });
+prisma.chatRoomUser.findFirst.mockResolvedValue(null);
+await expect(service.createMessage(2, 5, 'hey'))
+  .rejects.toThrow(ForbiddenException);
     });
   });
 
