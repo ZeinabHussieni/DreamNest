@@ -5,6 +5,9 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { DashboardGateway } from 'src/dashboard/gateway/dashboard.gateway';
 import { OpenAIService } from 'src/openai/openai.service';
 import { NotificationService } from 'src/notification/notification.service';
+import { PlanningAgentService } from 'src/agent/agent.service';
+import { ConfigService } from '@nestjs/config';
+
 
 let errSpy: jest.SpyInstance;
 beforeAll(() => {
@@ -31,7 +34,6 @@ describe('GoalsService', () => {
       update: jest.fn(),
     },
     help: {
-      create: jest.fn(),
       findMany: jest.fn(),
     },
     connection: {
@@ -40,16 +42,27 @@ describe('GoalsService', () => {
   };
 
   const gateway = {
-    emitDashboardUpdate: jest.fn(),
-  };
+  emitDashboardUpdate: jest.fn().mockResolvedValue(undefined), // 👈 async
+};
+
 
   const openai = {
     generateEmbedding: jest.fn(),
-    generatePlan: jest.fn(),
   };
 
   const notifications = {
     createAndPush: jest.fn(),
+  };
+
+  const agent = {
+    planAndAttachToGoal: jest.fn(),
+  };
+
+  const config = {
+    get: jest.fn().mockImplementation((k: string) => {
+      if (k === 'SIM_THRESHOLD') return '0.4';
+      return undefined;
+    }),
   };
 
   beforeEach(async () => {
@@ -62,6 +75,8 @@ describe('GoalsService', () => {
         { provide: DashboardGateway, useValue: gateway },
         { provide: OpenAIService, useValue: openai },
         { provide: NotificationService, useValue: notifications },
+        { provide: PlanningAgentService, useValue: agent },
+        { provide: ConfigService, useValue: config },
       ],
     }).compile();
 
@@ -72,13 +87,16 @@ describe('GoalsService', () => {
     it('returns formatted goal', async () => {
       const goal = {
         id: 1, title: 'T', description: 'D', helpText: null, visionBoardFilename: null,
-        progress: 0, createdAt: new Date(), updatedAt: new Date(),
+        progress: 0, createdAt: new Date(), updatedAt: new Date(), plans: [],
       };
       prisma.goal.findUnique.mockResolvedValue(goal);
 
       const res = await service.findById(1);
 
-      expect(prisma.goal.findUnique).toHaveBeenCalledWith({ where: { id: 1 } });
+      expect(prisma.goal.findUnique).toHaveBeenCalledWith({
+        where: { id: 1 },
+        include: { plans: true },
+      });
       expect(res).toMatchObject({ id: 1, title: 'T' });
     });
 
@@ -147,15 +165,12 @@ describe('GoalsService', () => {
   });
 
   describe('createGoalWithAI', () => {
-    it('creates goal with AI (vision board, embeddings, plans) and emits dashboard update', async () => {
-    
-      openai.generateEmbedding.mockResolvedValueOnce([0.1, 0.2, 0.3]); 
-      openai.generatePlan.mockResolvedValue([
-        { title: 'Step 1', description: 'desc 1', due_date: '2025-01-01', completed: false },
-        { title: 'Step 2', description: 'desc 2', due_date: '2025-01-08', completed: false },
-      ]);
+    it('creates goal with AI (saves vision, embeds, plans via agent) and emits dashboard update', async () => {
 
-      const created = {
+      openai.generateEmbedding.mockResolvedValueOnce([0.1, 0.2, 0.3]);
+      prisma.goal.create.mockResolvedValue({ id: 10 });
+      agent.planAndAttachToGoal.mockResolvedValue(undefined);
+      const goalWithPlans = {
         id: 10,
         title: 'Learn TS',
         description: 'Master TypeScript',
@@ -170,9 +185,7 @@ describe('GoalsService', () => {
           { id: 2, title: 'Step 2', description: 'desc 2', due_date: new Date('2025-01-08'), completed: false },
         ],
       };
-      prisma.goal.create.mockResolvedValue(created);
-
-  
+      prisma.goal.findUnique.mockResolvedValue(goalWithPlans);
       prisma.help.findMany.mockResolvedValue([]);
 
       const res = await service.createGoalWithAI({
@@ -183,74 +196,67 @@ describe('GoalsService', () => {
         user_id: 5,
       });
 
-
-      expect(prisma.goal.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.objectContaining({
-            title: 'Learn TS',
-            description: 'Master TypeScript',
-            visionBoardFilename: 'vision.png',
-            embedding: [0.1, 0.2, 0.3],
-            user: { connect: { id: 5 } },
-            plans: expect.objectContaining({ create: expect.any(Array) }),
-          }),
-          include: { plans: true },
-        }),
-      );
+      expect(prisma.goal.create).toHaveBeenCalledWith({
+        data: {
+          title: 'Learn TS',
+          description: 'Master TypeScript',
+          helpText: null,
+          visionBoardFilename: 'vision.png',
+          embedding: [0.1, 0.2, 0.3],
+          user: { connect: { id: 5 } },
+        },
+        select: { id: true },
+      });
+      expect(agent.planAndAttachToGoal).toHaveBeenCalledWith({
+        userId: 5,
+        goalId: 10,
+        title: 'Learn TS',
+        description: 'Master TypeScript',
+      });
+      expect(prisma.goal.findUnique).toHaveBeenCalledWith({
+        where: { id: 10 },
+        include: { plans: true },
+      });
 
       expect(gateway.emitDashboardUpdate).toHaveBeenCalledWith(5);
+
       expect(res).toMatchObject({ id: 10, title: 'Learn TS' });
     });
 
     it('creates connections + sends notifications when similarity passes threshold', async () => {
- 
       openai.generateEmbedding
-        .mockResolvedValueOnce([1, 0, 0])
-        .mockResolvedValueOnce([1, 0, 0]);
+        .mockResolvedValueOnce([1, 0, 0]) 
+        .mockResolvedValueOnce([1, 0, 0]); 
 
-      openai.generatePlan.mockResolvedValue([]);
+      prisma.goal.create.mockResolvedValue({ id: 22 });
+      agent.planAndAttachToGoal.mockResolvedValue(undefined);
 
-    
-      const createdGoal = {
+      prisma.goal.findUnique.mockResolvedValue({
         id: 22, title: 'G', description: 'D', helpText: 'H', visionBoardFilename: null,
         progress: 0, user_id: 9, createdAt: new Date(), updatedAt: new Date(), plans: [],
-      };
-      prisma.goal.create.mockResolvedValue(createdGoal);
+      });
 
-   
       prisma.help.findMany.mockResolvedValue([
-        { id: 1, user_id: 100, embedding: [1, 0, 0], user: { id: 100 } }, 
+        { user_id: 100, embedding: [1, 0, 0] },
       ]);
-
       prisma.goal.findMany.mockResolvedValue([
         { id: 500, user_id: 200, embedding: [1, 0, 0] },
       ]);
 
       prisma.connection.createMany.mockResolvedValue({ count: 2 });
+      notifications.createAndPush.mockResolvedValue(undefined);
 
       const res = await service.createGoalWithAI({
         title: 'G', description: 'D', helpText: 'H', user_id: 9,
       });
-
-     
-      expect(prisma.help.create).toHaveBeenCalledWith(
+      expect(prisma.connection.createMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          data: expect.objectContaining({
-            description: 'H',
-            user_id: 9,
-            embedding: [1, 0, 0],
-          }),
+          data: expect.any(Array),
+          skipDuplicates: true,
         }),
       );
-
- 
-      expect(prisma.connection.createMany).toHaveBeenCalledWith(
-        expect.objectContaining({ skipDuplicates: true, data: expect.any(Array) }),
-      );
-
-   
       expect(notifications.createAndPush).toHaveBeenCalled();
-     expect(notifications.createAndPush).toHaveBeenCalledTimes(4);
+      expect(notifications.createAndPush).toHaveBeenCalledTimes(4);
 
       expect(res.id).toBe(22);
     });

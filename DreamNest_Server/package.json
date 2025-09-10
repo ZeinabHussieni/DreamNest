@@ -77,22 +77,32 @@
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.7.3",
-    "typescript-eslint": "^8.20.0"
+    "typescript-eslint": "^8.20.0",
+    "wait-on": "^8.0.4"
   },
-"jest": {
-  "preset": "ts-jest",
-  "rootDir": ".",
-  "testEnvironment": "node",
-  "moduleFileExtensions": ["ts", "js", "json"],
-  "transform": {
-    "^.+\\.(t|j)s$": "ts-jest"
-  },
-  "moduleNameMapper": {
-    "^src/(.*)$": "<rootDir>/src/$1"
-  },
-  "moduleDirectories": ["node_modules", "<rootDir>/src"],
-  "testRegex": ".*\\.spec\\.ts$",
-  "testPathIgnorePatterns": ["/node_modules/", "/dist/"]
-}
-
+  "jest": {
+    "preset": "ts-jest",
+    "rootDir": ".",
+    "testEnvironment": "node",
+    "moduleFileExtensions": [
+      "ts",
+      "js",
+      "json"
+    ],
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "moduleNameMapper": {
+      "^src/(.*)$": "<rootDir>/src/$1"
+    },
+    "moduleDirectories": [
+      "node_modules",
+      "<rootDir>/src"
+    ],
+    "testRegex": ".*\\.spec\\.ts$",
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/dist/"
+    ]
+  }
 }

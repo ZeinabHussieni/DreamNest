@@ -78,7 +78,7 @@ const NotificationBell: React.FC = () => {
                       <p className="notif-text">{n.content}</p>
                     </div>
                     <div className="notif-right">
-                      <span className="time">{timeAgo(n.createdAt)}</span>
+                      <span className="timee">{timeAgo(n.createdAt)}</span>
                       {!n.read && <span className="dot" />}
                     </div>
                     <button

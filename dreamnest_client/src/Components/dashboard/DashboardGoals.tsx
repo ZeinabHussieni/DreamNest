@@ -14,16 +14,32 @@ const DashboardGoals: React.FC = () => {
 
   return (
     <Card
-      title="Your Goals"
-      subTitle="Quick look at your goals & progress"
-      className="goals-card p-card-shadow"
-      footer={
-        <div className="footer-actions">
-          <Button label="+ New Goal" size="small" className="goal-btn" onClick={() => nav("/createGoalPage")} />
-          <Button label="View All" size="small" className="border-btn" outlined onClick={() => nav("/usergoals")} />
-        </div>
-      }
-    >
+  className="goals-card p-card-shadow"
+  header={
+    <div className="goal-header">
+      <div className="goal-header-left">
+        <h3 className="goal-titlee">Your Goals</h3>
+        <p className="goal-sub">Quick look at your goals & progress</p>
+      </div>
+      <div className="goal-header-actions">
+        <Button 
+          label="+ New Goal" 
+          size="small" 
+          className="goal-btn" 
+          onClick={() => nav("/createGoalPage")} 
+        />
+        <Button 
+          label="View All" 
+          size="small" 
+          className="border-btn" 
+          outlined 
+          onClick={() => nav("/usergoals")} 
+        />
+      </div>
+    </div>
+  }
+>
+
       {loading && <p className="text-500">Loading goals…</p>}
       {error && <p className="text-red-500">{error}</p>}
 

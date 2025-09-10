@@ -5,9 +5,12 @@ import { useAppDispatch } from "../../store/hooks";
 import useChatRedux from "../../Redux/chat/useChatRedux";
 import useChatUI from "../../Hooks/chat/useChatUI";
 import { useAuth } from "../../Context/AuthContext";
-import backk from "../../Assets/Icons/back.svg"
+import backk from "../../Assets/Icons/back.svg";
+import searchh from "../../Assets/Icons/search.svg";
 import type { ChatRoom } from "../../Redux/chat/chat.types";
 import { initChatSocketThunk, loadRoomsThunk } from "../../Redux/chat/chat.thunks";
+import Lottie from "lottie-react";
+import EmptyConnectionsAnim from "../../Assets/Animations/connections.json";
 import "./chat.css";
 
 const Ticks: React.FC<{ status?: "sent" | "delivered" | "read" }> = ({ status = "sent" }) => {
@@ -21,7 +24,6 @@ const ChatPage: React.FC = () => {
   const { user } = useAuth() as any;
   const userId = Number(user?.id) || 0;
 
-  // data and sockets
   const {
     rooms,
     activeRoom,
@@ -32,7 +34,6 @@ const ChatPage: React.FC = () => {
     send,
   } = useChatRedux(userId);
 
-  // ui logic
   const {
     text, setText,
     search, setSearch,
@@ -58,11 +59,11 @@ const ChatPage: React.FC = () => {
 
   return (
     <div className="chat-wrap">
-   
       <aside className="chat-sidebar">
         <h3>Conversations</h3>
 
         <div className="chat-search">
+          <img src={searchh} alt="search" className="search-icon" />
           <input
             placeholder="Search…"
             value={search}
@@ -77,7 +78,6 @@ const ChatPage: React.FC = () => {
         ) : rooms.length === 0 ? (
           <div className="empty-state">
             <p>No conversations yet.</p>
-            <p className="muted">Start one from <Link to="/connections">Connections</Link>.</p>
           </div>
         ) : filteredRooms.length === 0 ? (
           <div className="muted">No conversations match “{search}”.</div>
@@ -120,26 +120,28 @@ const ChatPage: React.FC = () => {
       </aside>
 
       <main className="chat-main">
-        <header className="chat-header">
-          <div className="chat-header-inner">
-            <button className="chat-menu-btn" onClick={() => setMobileOpen(true)}>☰</button>
+        {activeRoom ? (
+          <header className="chat-header">
+            <div className="chat-header-inner">
+              <button className="chat-menu-btn" onClick={() => setMobileOpen(true)}>☰</button>
 
-            <div className="room-avatar-wrap">
-              <Avatar filename={activeOther?.profilePicture ?? null} className="room-avatar" />
+              <div className="room-avatar-wrap">
+                <Avatar filename={activeOther?.profilePicture ?? null} className="room-avatar" />
+              </div>
+
+              <div className="chat-title">
+                <h2>{activeOther?.userName || activeRoom?.name || "…"}</h2>
+                <div className="subtle">{statusLine}</div>
+
+                {!!activeRoom && activeRoomTyping.length > 0 && (
+                  <div className="typing-indicator">
+                    {activeRoomTyping.length === 1 ? "typing…" : `${activeRoomTyping.length} are typing…`}
+                  </div>
+                )}
+              </div>
             </div>
-
-            <div className="chat-title">
-              <h2>{activeOther?.userName || activeRoom?.name || "…"}</h2>
-              <div className="subtle">{statusLine}</div>
-
-              {!!activeRoom && activeRoomTyping.length > 0 && (
-                <div className="typing-indicator">
-                  {activeRoomTyping.length === 1 ? "typing…" : `${activeRoomTyping.length} are typing…`}
-                </div>
-              )}
-            </div>
-          </div>
-        </header>
+          </header>
+        ) : null}
 
         <div className="chat-body" ref={bodyRef}>
           {!userId ? (
@@ -147,13 +149,23 @@ const ChatPage: React.FC = () => {
           ) : loadingMsgs ? (
             <div className="muted">Loading messages…</div>
           ) : !activeRoom ? (
-            <div className="empty-main">
-              <h3>No conversation selected</h3>
-              <p className="muted">
-                {rooms.length === 0
-                  ? <>Start one from <Link to="/connections">Connections</Link>.</>
-                  : "Pick a conversation from the left."}
-              </p>
+            <div className="empty-chat-landing">
+              <div className="empty-card">
+                <div className="empty-anim">
+                  <Lottie animationData={EmptyConnectionsAnim} loop />
+                </div>
+                <div className="empty-textt">
+                <h2>No conversations yet</h2>
+                <Link to="/connections" className="empty-cta">
+                  Find people to chat
+                </Link>
+                <div className="chat-actions-appear">
+                 <Link to="/" className="chat-back-appear">
+                   Back
+                </Link>
+                </div>
+                </div>
+              </div>
             </div>
           ) : messages.length === 0 ? (
             <div className="empty-main"><p className="muted">No messages yet. Say hi 👋</p></div>
@@ -162,20 +174,15 @@ const ChatPage: React.FC = () => {
               {messages.map((m) => {
                 const mine = m.senderId === userId;
                 const showCatchUp = firstUnreadId && m.id === firstUnreadId;
-                const status = mine ? getMsgStatus(m.id) || "sent" : undefined;
-
                 return (
                   <React.Fragment key={m.id}>
-                    {showCatchUp && (
-                      <li className="catch-up"><span>New</span></li>
-                    )}
+                    {showCatchUp && <li className="catch-up"><span>New</span></li>}
                     <li className={`msg ${mine ? "me" : "other"}`}>
                       <div className="bubble">
                         {m.content}
                         <div className="meta">
                           <time>{fmtTime(m.createdAt)}</time>
-                          {mine && <Ticks status={getMsgStatus(m.id)} />}
-
+                          {mine && <Ticks status={(getMsgStatus(m.id) || "sent") as any} />}
                         </div>
                       </div>
                     </li>
@@ -187,19 +194,20 @@ const ChatPage: React.FC = () => {
           )}
         </div>
 
-        <form className="chat-input" onSubmit={onSubmit}>
-          <input
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder={activeRoom ? "Type a message…" : "Select a conversation to start chatting"}
-            autoComplete="off"
-            disabled={!userId || !activeRoom}
-          />
-          <button disabled={!text.trim() || !userId || !activeRoom}>➤</button>
-        </form>
+        {activeRoom ? (
+          <form className="chat-input" onSubmit={onSubmit}>
+            <input
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder="Type a message…"
+              autoComplete="off"
+              disabled={!userId || !activeRoom}
+            />
+            <button disabled={!text.trim() || !userId || !activeRoom}>➤</button>
+          </form>
+        ) : null}
       </main>
 
-    
       <div
         className={`chat-drawer-backdrop ${mobileOpen ? "open" : ""}`}
         onClick={() => setMobileOpen(false)}
@@ -261,13 +269,12 @@ const ChatPage: React.FC = () => {
           </ul>
         )}
 
-         <div className="chat-actions">
+        <div className="chat-actions">
           <Link to="/" className="chat-back">
             <img src={backk} alt="Back" className="icon-back" />
             Back
           </Link>
-          </div>
-
+        </div>
       </aside>
     </div>
   );

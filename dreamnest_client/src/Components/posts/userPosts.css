@@ -95,7 +95,7 @@
 
 .post-title {
   font-size: 18px;
-  font-weight: 700;
+  font-weight: 500;
   margin: 6px 0 4px;       
   -webkit-box-orient: vertical;
   overflow: hidden;
@@ -153,7 +153,6 @@
 
 .post-title {
   font-size: 18px;
-  font-weight: 700;
   margin: 6px 0 4px;
 }
 .post-sub {

@@ -1,4 +1,5 @@
 import '../../setup';
+import { act } from '@testing-library/react';
 import React from 'react';
 import NotificationBell from '../../../Components/notifications/NotificationBell';
 import { renderWithProviders, screen } from '../../test-utils';
@@ -18,6 +19,7 @@ test('opens dropdown, shows items, and marks all read', async () => {
 	// @ts-ignore
 	Swal.fire.mockResolvedValue?.({ isConfirmed: true });
 	window.localStorage.setItem('token', 't');
+	window.localStorage.setItem('user', JSON.stringify({ id: 1, userName: 'john' }));
 
 	store.dispatch(upsertOneLocal({
 		id: 1,
@@ -33,7 +35,7 @@ test('opens dropdown, shows items, and marks all read', async () => {
 	await userEvent.click(screen.getByRole('button'));
 
 	expect(await screen.findByText(/notifications/i)).toBeInTheDocument();
-	expect(screen.getByText(/you have a new message/i)).toBeInTheDocument();
+	expect(await screen.findByText(/you have a new message/i)).toBeInTheDocument();
 
 	const markAll = screen.getByRole('button', { name: /mark all read/i });
 	expect(markAll).toBeEnabled();
@@ -57,13 +59,17 @@ test('badge, delete actions, socket push and ordering', async () => {
 	// Remove one (use first remove button)
 	const removeButtons = screen.getAllByRole('button').filter(b => b.className.includes('remove-notify'));
 	if (removeButtons[0]) {
-		await userEvent.click(removeButtons[0]);
+		await act(async () => {
+			await userEvent.click(removeButtons[0]);
+		});
 	}
 
 	// Remove all (header remove)
 	const headerRemove = removeButtons.find(b => b.querySelector('img')?.getAttribute('alt') === 'remove all');
 	if (headerRemove) {
-		await userEvent.click(headerRemove);
+		await act(async () => {
+			await userEvent.click(headerRemove);
+		});
 	}
 });
 

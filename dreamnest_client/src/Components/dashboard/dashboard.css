@@ -345,10 +345,42 @@ body.dark .dg-row {
   color: var(--text, #222);
   font-weight: 800;
 }
-
+.goal-titlee{
+  font-size: 25px;
+}
 .goals-card .p-card-subtitle {
   color: var(--muted, #6b7280);
 }
+.goal-header {
+    display: flex
+;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: -1px;
+    margin: 0px 31px;
+    margin-top: 5px;
+}
+
+.goal-header-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.goal-title {
+  margin: 0;
+}
+
+.goal-sub {
+  margin-top: -14px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.goal-header-actions {
+  display: flex;
+  gap: 8px;
+}
+
 
 .footer-actions {
   display: flex;
@@ -450,7 +482,7 @@ body.dark .dg-row {
 .leaderboard-card.p-card {
   background: var(--soft-bg);
   border-radius: 20px;
-  height: 515px;
+  height: 512px
 }
 
 .chart-sidebar {
