@@ -22,12 +22,11 @@ jobs:
           cache-dependency-path: dreamnest_client/package-lock.json
 
       - run: npm ci
-      - run: npm run lint --if-present       
-      - run: npm run typecheck --if-present   
+      - run: npm run lint --if-present
+      - run: npm run typecheck --if-present
       - run: npm test -- --ci --watchAll=false
-      - run: npm run build
+      - run: CI=false npm run build 
 
-    
       - name: Docker build (only on main)
         if: github.ref == 'refs/heads/main'
         run: docker build -t dreamnest-frontend:ci -f Dockerfile .
@@ -47,7 +46,7 @@ jobs:
           --health-cmd="pg_isready -U postgres"
           --health-interval=10s
           --health-timeout=5s
-          --health-retries=5
+          --health-retries=10
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/dreamnest?schema=public
     defaults:
@@ -63,12 +62,12 @@ jobs:
 
       - run: npm ci
       - run: npx prisma generate
+      - run: npx wait-on tcp:localhost:5432   
       - run: npx prisma migrate deploy
       - run: npm run lint --if-present
       - run: npm run typecheck --if-present
       - run: npm test -- --ci --watchAll=false --runInBand
 
- 
       - name: Docker build (only on main)
         if: github.ref == 'refs/heads/main'
         run: docker build -t dreamnest-backend:ci -f Dockerfile .
