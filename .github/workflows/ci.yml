@@ -22,6 +22,8 @@ jobs:
           cache-dependency-path: dreamnest_client/package-lock.json
 
       - run: npm ci
+      - run: npm run lint --if-present
+      - run: npm run typecheck --if-present
       - run: npm test -- --ci --watchAll=false
       - run: CI=false npm run build
 
