@@ -206,8 +206,8 @@ describe('refresh', () => {
   describe('logout', () => {
     it('clears refresh token', async () => {
       users.setRefreshToken.mockResolvedValue(undefined);
-      const res = await service.logout({ sub: 5 } as any);
-      expect(users.setRefreshToken).toHaveBeenCalledWith(5);
+      const res = await service.logout(5);
+      expect(users.setRefreshToken).toHaveBeenCalledWith(5, null); 
       expect(res).toEqual({ success: true });
     });
 
