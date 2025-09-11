@@ -87,7 +87,8 @@ export class AuthController {
   @Post('logout')
   @ApiOperation({ summary: 'Logout current user (invalidate refresh token)' })
   @ApiOkResponse({ description: 'Logged out' })
-  async logout(@GetUser('sub') userId: number) {
+  async logout(@GetUser('sub') user: any) {
+    const userId = user?.sub;
     return this.auth.logout(userId);
   }
 
