@@ -1,33 +1,34 @@
 import api from "../axios/axios";
 import type { ApiEnvelope } from "../axios/types";
 
-// Services/chat/chatService.ts
+
+
 export type Message = {
   id: number;
-  content: string;
+  type: 'text' | 'audio';
+  content: string | null;
+  audioUrl: string | null;
+  transcript: string | null;
+  status: 'sent' | 'delivered' | 'read' | string;
   createdAt: string;
-  deliveredAt?: string | null;   // 👈 add this
+  deliveredAt?: string | null;
   senderId: number;
   chatRoomId: number;
 };
 
 
-
-
-// Services/chat/chatService.ts (types)
-
 export type ParticipantUser = {
   id: number;
   userName: string;
   profilePicture?: string | null;
-  lastActiveAt?: string | null;   // 👈 from User
+  lastActiveAt?: string | null;
 };
 
 export type ChatParticipant = {
   id: number;
   userId: number;
   chatRoomId: number;
-  lastSeenAt: string;             // 👈 from ChatRoomUser
+  lastSeenAt: string;
   user: ParticipantUser;
 };
 
@@ -37,22 +38,41 @@ export type ChatRoom = {
   messages?: Message[];
   participants?: ChatParticipant[];
 };
-const toIso = (d: unknown) =>
-  d == null ? null : typeof d === 'string' ? d : new Date(d as any).toISOString();
 
-const withDefaults = (r: ChatRoom): ChatRoom => ({
+export type UnreadForRoom = {
+  count: number;
+  firstUnreadId: number | null;
+};
+
+export type ReactionRow = {
+  messageId: number;
+  emoji: string;
+  count: number;
+};
+
+//coerce unknown date to ISO string 
+const toIsoString = (d: unknown): string =>
+  typeof d === "string" ? d : new Date(d as any).toISOString();
+
+//coerce unknown date to ISO string or null
+const toIsoNullable = (d: unknown): string | null =>
+  d == null ? null : typeof d === "string" ? d : new Date(d as any).toISOString();
+
+//normalize a chatRoom payload to ensure date strings and defaults
+const normalizeRoom = (r: ChatRoom): ChatRoom => ({
   ...r,
-  participants: (r.participants ?? []).map(p => ({
+  participants: (r.participants ?? []).map((p) => ({
     ...p,
-    lastSeenAt: toIsoString(p.lastSeenAt),                 // required
+    lastSeenAt: toIsoString((p as any).lastSeenAt),
     user: {
       ...p.user,
-      lastActiveAt: toIsoNullable(p.user?.lastActiveAt),   // optional
+      lastActiveAt: toIsoNullable((p.user as any)?.lastActiveAt),
     },
   })),
-  messages: (r.messages ?? []).map(m => ({
+  messages: (r.messages ?? []).map((m) => ({
     ...m,
-    createdAt: toIsoString(m.createdAt),                   // required
+    createdAt: toIsoString((m as any).createdAt),
+    deliveredAt: toIsoNullable((m as any).deliveredAt),
   })),
 });
 
@@ -61,35 +81,43 @@ const withDefaults = (r: ChatRoom): ChatRoom => ({
 export async function getChatRooms(): Promise<ChatRoom[]> {
   const res = await api.get<ApiEnvelope<ChatRoom[]>>("/chat/rooms");
   const rooms = res.data?.data ?? [];
-  return rooms.map(withDefaults);
+  return rooms.map(normalizeRoom);
 }
-
-
-const toIsoNullable = (d: unknown): string | null =>
-  d == null ? null : typeof d === "string" ? d : new Date(d as any).toISOString();
-
-const toIsoString = (d: unknown): string =>
-  typeof d === "string" ? d : new Date(d as any).toISOString();
 
 export async function getRoomMessages(roomId: number): Promise<Message[]> {
   const res = await api.get<ApiEnvelope<Message[]>>(`/chat/messages/${roomId}`);
   const list = res.data?.data ?? [];
-  return list.map((m: any) => ({
+  return list.map((m) => ({
     ...m,
-    createdAt: toIsoString(m.createdAt),
-    deliveredAt: toIsoNullable(m.deliveredAt), // 👈 map it
+    createdAt: toIsoString((m as any).createdAt),
+    deliveredAt: toIsoNullable((m as any).deliveredAt),
   }));
 }
-
-export type UnreadForRoom = { count: number; firstUnreadId: number | null };
 
 export async function getRoomUnread(roomId: number): Promise<UnreadForRoom> {
   const res = await api.get<ApiEnvelope<UnreadForRoom>>(`/chat/rooms/${roomId}/unread`);
   return res.data?.data ?? { count: 0, firstUnreadId: null };
 }
-export type ReactionRow = { messageId: number; emoji: string; count: number };
 
 export async function getRoomReactions(roomId: number): Promise<ReactionRow[]> {
   const res = await api.get<ApiEnvelope<ReactionRow[]>>(`/chat/rooms/${roomId}/reactions`);
   return res.data?.data ?? [];
+}
+
+
+export async function sendVoice(roomId: number, file: File, onProgress?: (pct: number) => void) {
+  const fd = new FormData();
+  fd.append('roomId', String(roomId));
+  fd.append('audio', file, file.name || 'voice.webm');
+
+  const res = await api.post<ApiEnvelope<Message>>('/chat/messages/voice', fd, {
+    headers: { "Content-Type": "multipart/form-data" }, 
+    onUploadProgress: (e) => {
+      if (onProgress && e.total) {
+        onProgress(Math.round((e.loaded / e.total) * 100));
+      }
+    },
+  });
+
+  return res.data?.data;
 }

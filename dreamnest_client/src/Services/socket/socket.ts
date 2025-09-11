@@ -7,6 +7,7 @@ let dashSocketRef: Socket | null = null;
 let chatAuthSig: string | null = null;
 let notifAuthSig: string | null = null;
 let dashAuthSig: string | null = null;
+type ErrorEvt = { code: string; message: string };
 
 //for token
 function buildAuthPayload() {
@@ -163,6 +164,8 @@ export function subscribeChatEvents(h: Handlers = {}) {
   const connected = () => h.onConnect?.();
   const disconnected = (reason: string) => h.onDisconnect?.(reason);
   const error = (err: unknown) => h.onError?.(err);
+  const errorEvt = (p: ErrorEvt) => h.onError?.(p);
+
 
   s.on("chat:joined", joined);
   s.on("chat:newMessage", newMsg);
@@ -174,6 +177,7 @@ export function subscribeChatEvents(h: Handlers = {}) {
   s.on("connect", connected);
   s.on("disconnect", disconnected);
   s.on("connect_error", error);
+  s.on("chat:error", errorEvt);
 
   // if user out
   return () => {
@@ -187,5 +191,6 @@ export function subscribeChatEvents(h: Handlers = {}) {
     s.off("connect", connected);
     s.off("disconnect", disconnected);
     s.off("connect_error", error);
+    s.off("chat:error", errorEvt);
   };
 }

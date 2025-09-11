@@ -7,12 +7,17 @@ import useChatUI from "../../Hooks/chat/useChatUI";
 import { useAuth } from "../../Context/AuthContext";
 import backk from "../../Assets/Icons/back.svg";
 import searchh from "../../Assets/Icons/search.svg";
+import audio from "../../Assets/Icons/audio.svg";
+import sendMsg from "../../Assets/Icons/send.svg";
+import paused from "../../Assets/Icons/paused.svg";
 import type { ChatRoom } from "../../Redux/chat/chat.types";
+import AudioBubble from "./AudioBubble";
 import { initChatSocketThunk, loadRoomsThunk } from "../../Redux/chat/chat.thunks";
 import Lottie from "lottie-react";
 import EmptyConnectionsAnim from "../../Assets/Animations/connections.json";
+import { useRecorder } from "../../Hooks/recorder/useRecorder";
 import "./chat.css";
-
+import { buildFileUrl } from "../../Utils/buildFileUrl";
 const Ticks: React.FC<{ status?: "sent" | "delivered" | "read" }> = ({ status = "sent" }) => {
   if (status === "read") return <span className="tick tick-read">✓✓</span>;
   if (status === "delivered") return <span className="tick tick-delivered">✓✓</span>;
@@ -31,8 +36,12 @@ const ChatPage: React.FC = () => {
     messages,
     loadingRooms,
     loadingMsgs,
+    sendVoice,
     send,
+    
   } = useChatRedux(userId);
+
+  const { start, stop, recording } = useRecorder();
 
   const {
     text, setText,
@@ -178,15 +187,29 @@ const ChatPage: React.FC = () => {
                   <React.Fragment key={m.id}>
                     {showCatchUp && <li className="catch-up"><span>New</span></li>}
                     <li className={`msg ${mine ? "me" : "other"}`}>
-                      <div className="bubble">
-                        {m.content}
-                        <div className="meta">
-                          <time>{fmtTime(m.createdAt)}</time>
-                          {mine && <Ticks status={(getMsgStatus(m.id) || "sent") as any} />}
-                        </div>
-                      </div>
-                    </li>
-                  </React.Fragment>
+               <div className="bubble">
+                      {m.type === "audio" ? (
+                      <div className="audio-message">
+                      <AudioBubble
+                       src={m.audioUrl ? buildFileUrl(m.audioUrl) : ""}
+                       transcript={m.transcript}
+                       mine={mine}
+                      />
+
+                    </div>
+                  ) : (
+                    <span>{m.content}</span>
+                   )}
+
+
+                  <div className="meta">
+                   <time>{fmtTime(m.createdAt)}</time>
+                   {mine && <Ticks status={(getMsgStatus(m.id) || "sent") as any} />}
+                 </div>
+              </div>
+
+              </li>
+              </React.Fragment>
                 );
               })}
               <div ref={bottomRef} />
@@ -194,18 +217,51 @@ const ChatPage: React.FC = () => {
           )}
         </div>
 
-        {activeRoom ? (
-          <form className="chat-input" onSubmit={onSubmit}>
-            <input
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder="Type a message…"
-              autoComplete="off"
-              disabled={!userId || !activeRoom}
-            />
-            <button disabled={!text.trim() || !userId || !activeRoom}>➤</button>
-          </form>
-        ) : null}
+      {activeRoom ? (
+        <form className="chat-input" onSubmit={onSubmit}>
+         <input
+           value={text}
+           onChange={(e) => setText(e.target.value)}
+           placeholder="Type a message…"
+           autoComplete="off"
+           disabled={!userId || !activeRoom}
+           />
+
+          {!recording ? (
+            <button
+            type="button"
+            onClick={start}
+           disabled={!userId || !activeRoom}
+           className="mic-btn"
+           title="Record voice"
+          >
+           <img src={audio} alt="" className="mic-icon" />
+        </button>
+        ) : (
+         <button
+           type="button"
+           onClick={async () => {
+           const file = await stop();
+           if (file) sendVoice(file);
+           }}
+           className="stop-btn"
+           title="Stop recording"
+          >
+           <img src={paused} alt="" className="paused-icon" />
+        </button>
+      )}
+
+     <button
+      type="submit"
+      disabled={!text.trim() || !userId || !activeRoom}
+      className="send-btn"
+      title="Send"
+     >
+      <img src={sendMsg} alt="send" className="sendmsg"/>
+     </button>
+     </form>
+   ) : null}
+
       </main>
 
       <div

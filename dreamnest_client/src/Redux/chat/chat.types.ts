@@ -2,27 +2,36 @@ export type ID = number;
 export type ISODateString = string;
 
 
-export interface Message {
+export type Message = {
   id: ID;
-  content: string;
+  type: 'text' | 'audio';
+  content: string | null;
+  audioUrl: string | null;
+  transcript: string | null;
+  status: 'sent' | 'delivered' | 'read' | string;
+
   createdAt: ISODateString;
   deliveredAt?: ISODateString | null;
   senderId: ID;
   chatRoomId: ID;
-}
+};
 
 //for message payloads 
 export function isMessage(x: unknown): x is Message {
   if (!x || typeof x !== "object") return false;
   const m = x as Record<string, unknown>;
   const deliveredOk =
-    m.deliveredAt === undefined ||
-    m.deliveredAt === null ||
-    typeof m.deliveredAt === "string";
+    m.deliveredAt === undefined || m.deliveredAt === null || typeof m.deliveredAt === "string";
+
+  const nullableStr = (v: unknown) => v == null || typeof v === "string";
 
   return (
     typeof m.id === "number" &&
-    typeof m.content === "string" &&
+    (m.type === "text" || m.type === "audio") &&
+    nullableStr(m.content) &&
+    nullableStr(m.audioUrl) &&
+    nullableStr(m.transcript) &&
+    typeof m.status === "string" &&
     typeof m.createdAt === "string" &&
     typeof m.senderId === "number" &&
     typeof m.chatRoomId === "number" &&

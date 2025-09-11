@@ -20,12 +20,16 @@ import { CoinsModule } from './coins/coins.module';
 import { LlmModule } from './llm/llm.module';
 import { AgentModule } from './agent/agent.module';
 import { PlanningAgentService } from './agent/agent.service';
+import { ModerationModule } from './moderation/moderation.module';
+import { TranscribeModule } from './transcribe/transcribe.module';
+import { StorageModule } from './storage/storage.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
   ScheduleModule.forRoot(),
   ConfigModule.forRoot({ isGlobal: true }),
-  AuthModule, UserModule, PrismaModule, GoalsModule,PlanModule, PostModule, ChatModule, NotificationModule, DashboardModule,OpenaiModule, ConnectionsModule, CoinsModule, LlmModule, AgentModule
+  AuthModule, UserModule, PrismaModule, GoalsModule,PlanModule, PostModule, ChatModule, NotificationModule, DashboardModule,OpenaiModule, ConnectionsModule, CoinsModule, LlmModule, AgentModule, ModerationModule, TranscribeModule, StorageModule, EventEmitterModule.forRoot(),
 
 ],
   controllers: [DashboardController, ConnectionsController],

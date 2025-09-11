@@ -2,12 +2,30 @@ import { Injectable, NotFoundException, ForbiddenException, BadRequestException 
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Message as PrismaMessage, ChatRoom } from '@prisma/client';
 import { NotificationService } from 'src/notification/notification.service';
+import { ModerationService } from 'src/moderation/moderation.service';
+import { TranscribeService } from 'src/transcribe/transcribe.service';
+import { StorageService } from 'src/storage/storage.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import * as fsp from 'fs/promises';
+import * as path from 'path';
+import { randomUUID } from 'crypto';
+
+type HandleVoiceArgs = {
+  userId: number;
+  roomId: number;
+  file: Express.Multer.File;
+};
+
 
 @Injectable()
 export class ChatService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notificationService: NotificationService,
+    private readonly moderation: ModerationService,
+    private readonly transcribe: TranscribeService,
+    private readonly storage: StorageService,
+    private readonly events: EventEmitter2, 
   ) {}
 
   async createChatRoom(userIds: number[], currentUserId: number): Promise<ChatRoom> {
@@ -70,41 +88,107 @@ export class ChatService {
     });
   }
 
-  async createMessage(chatRoomId: number, senderId: number, content: string): Promise<PrismaMessage> {
-    if (!chatRoomId || !senderId || !content) throw new BadRequestException('Missing fields');
+  async createTextMessage(chatRoomId: number, senderId: number, content: string) {
+  if (!chatRoomId || !senderId || !content?.trim()) throw new BadRequestException('Missing fields');
 
-    const chatRoom = await this.prisma.chatRoom.findUnique({ where: { id: chatRoomId } });
-    if (!chatRoom) throw new NotFoundException('Chat room not found');
+  const isMember = await this.isParticipant(chatRoomId, senderId);
+  if (!isMember) throw new ForbiddenException('Not a member of this room');
 
-    const member = await this.prisma.chatRoomUser.findFirst({
-      where: { chatRoomId, userId: senderId },
-      select: { id: true },
+  const verdict = await this.moderation.isBlocked(content);
+  if (!verdict.ok) throw new BadRequestException('MESSAGE_BLOCKED');
+
+  const message = await this.prisma.message.create({
+    data: { chatRoomId, senderId, type: 'text', content, status: 'sent' },
+  });
+
+  await this.notifyOthers(chatRoomId, senderId, content.slice(0, 120));
+  await this.bumpLastActive(senderId);
+  return message;
+}
+
+ async handleVoiceUploadAndCreateMessage({ userId, roomId, file }: HandleVoiceArgs) {
+    if (!roomId || !userId || !file) throw new BadRequestException('Missing fields');
+    const tmpPath = await this.saveUploadToTemp(file);
+    try {
+     const msg = await this.createAudioMessage(roomId, userId, tmpPath, file.originalname);
+     this.events.emit('chat.message.created', { roomId, message: msg });
+
+      return msg;
+    } finally {
+      try { await fsp.rm(tmpPath, { force: true }); } catch {}
+   }
+ }
+
+
+  private async saveUploadToTemp(file: Express.Multer.File): Promise<string> {
+    if ((file as any).path) return (file as any).path;
+
+    const dir = path.join(process.cwd(), 'storage', 'voice', 'tmp');
+    await fsp.mkdir(dir, { recursive: true });
+    const base = `up-${Date.now()}-${randomUUID()}.webm`;
+    const tmpPath = path.join(dir, base);
+    await fsp.writeFile(tmpPath, file.buffer);
+    return tmpPath;
+  }
+
+  async createAudioMessage(
+    chatRoomId: number,
+    senderId: number,
+    tempPath: string,
+    originalFilename?: string
+  ) {
+    if (!chatRoomId || !senderId || !tempPath) throw new BadRequestException('Missing fields');
+
+    const isMember = await this.isParticipant(chatRoomId, senderId);
+    if (!isMember) {
+      try { await fsp.rm(tempPath, { force: true }); } catch {}
+      throw new ForbiddenException('Not a member of this room');
+    }
+
+    const { text } = await this.transcribe.transcribeWebm(tempPath);
+
+    const verdict = await this.moderation.isBlocked(text);
+    if (!verdict.ok) {
+      try { await fsp.rm(tempPath, { force: true }); } catch {}
+      throw new BadRequestException('VOICE_BLOCKED');
+    }
+
+    const saved = await this.storage.moveTempToVoices(tempPath, originalFilename);
+
+    const message = await this.prisma.message.create({
+      data: {
+        chatRoomId,
+        senderId,
+        type: 'audio',
+        audioUrl: saved.url,
+        transcript: text,
+        status: 'sent',
+      },
     });
-    if (!member) throw new ForbiddenException('Not a member of this room');
 
-    const message = await this.prisma.message.create({ data: { content, senderId, chatRoomId } });
-
-    const recipients = await this.prisma.chatRoomUser.findMany({
-      where: { chatRoomId, userId: { not: senderId } },
-      select: { userId: true },
-    });
-
-    await Promise.all(
-      recipients.map((r) =>
-        this.notificationService.createAndPush({
-          type: 'CHAT_MESSAGE',
-          userId: r.userId,
-          actorId: senderId,
-          chatRoomId,
-          messageId: message.id,
-          content: content.slice(0, 120),
-        }),
-      ),
-    );
-
+    await this.notifyOthers(chatRoomId, senderId, text.slice(0, 120));
     await this.bumpLastActive(senderId);
     return message;
   }
+
+
+private async notifyOthers(chatRoomId: number, senderId: number, preview: string) {
+  const recipients = await this.prisma.chatRoomUser.findMany({
+    where: { chatRoomId, userId: { not: senderId } },
+    select: { userId: true },
+  });
+  await Promise.all(
+    recipients.map((r) =>
+      this.notificationService.createAndPush({
+        type: 'CHAT_MESSAGE',
+        userId: r.userId,
+        actorId: senderId,
+        chatRoomId,
+        content: preview,
+      }),
+    ),
+  );
+}
 
   async isParticipant(chatRoomId: number, userId: number) {
     const p = await this.prisma.chatRoomUser.findFirst({ where: { chatRoomId, userId } });

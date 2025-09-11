@@ -1,7 +1,8 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import type { ChatRoom, Message } from './chat.types';
 import { isMessage } from './chat.types';
-import { getChatRooms, getRoomMessages } from '../../Services/chat/chatService';
+import { getChatRooms, getRoomMessages,sendVoice  } from '../../Services/chat/chatService'
+import { toast } from "react-toastify";
 import {
   setActiveRoomId,
   appendMessageIfActive,
@@ -114,5 +115,22 @@ export const markRoomReadThunk = createAsyncThunk<
   async ({ roomId, untilMessageId }, { dispatch }) => {
     dispatch(zeroUnreadForRoom({ roomId }));
     markReadUntil(roomId, untilMessageId);
+  }
+);
+
+
+export const sendVoiceThunk = createAsyncThunk(
+  "chat/sendVoice",
+  async ({ roomId, file }: { roomId: number; file: File }, { rejectWithValue }) => {
+    try {
+      return await sendVoice(roomId, file);
+    } catch (err: any) {
+      if (err.status === 400 && err.message === "VOICE_BLOCKED") {
+        toast.error("Voice message not sent: contains inappropriate words.");
+      } else {
+        toast.error(`Failed to send voice note: ${err.message || "Unknown error"}`);
+      }
+      return rejectWithValue(err);
+    }
   }
 );

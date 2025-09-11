@@ -8,7 +8,6 @@ const API_BASE =
 
 const api = axios.create({
   baseURL: API_BASE,
-  headers: { "Content-Type": "application/json" },
   timeout: 900000,
 });
 
@@ -16,10 +15,15 @@ api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token") || localStorage.getItem("access_token");
   if (token) {
     config.headers = config.headers ?? {};
-    (config.headers as any).Authorization = `Bearer ${token}`;
+    (config.headers as any).set?.("Authorization", `Bearer ${token}`);
   }
+  if (!(config.data instanceof FormData)) {
+    (config.headers as any).set?.("Content-Type", "application/json");
+  }
+
   return config;
 });
+
 
 api.interceptors.response.use(
   (res) => res,

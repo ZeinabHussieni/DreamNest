@@ -178,20 +178,27 @@ model ChatRoomUser {
 }
 
 model Message {
-  id         Int      @id @default(autoincrement())
-  content    String
-  createdAt  DateTime @default(now())
+  id          Int       @id @default(autoincrement())
+  type        String    @default("text") 
+  content     String?                   
+  audioUrl    String?                     
+  transcript  String?                     
+  status      String    @default("sent")  
+  
+  createdAt   DateTime  @default(now())
   deliveredAt DateTime?
 
-  senderId   Int
-  sender     User     @relation(fields: [senderId], references: [id])
+  senderId    Int
+  sender      User      @relation(fields: [senderId], references: [id])
 
-  chatRoomId Int
-  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id])
-  reads      MessageRead[]   
+  chatRoomId  Int
+  chatRoom    ChatRoom  @relation(fields: [chatRoomId], references: [id])
+
+  reads       MessageRead[]
 
   @@index([chatRoomId, createdAt])
 }
+
 
 
 model MessageRead {
