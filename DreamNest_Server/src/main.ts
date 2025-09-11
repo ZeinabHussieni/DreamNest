@@ -8,6 +8,8 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { json, urlencoded } from 'express';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
@@ -20,7 +22,7 @@ async function bootstrap() {
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
-      transformOptions: { enableImplicitConversion: true }, 
+      transformOptions: { enableImplicitConversion: true },
       stopAtFirstError: false,
       exceptionFactory: (validationErrors = []) => {
         const errors: Record<string, string> = {};
@@ -38,28 +40,47 @@ async function bootstrap() {
     }),
   );
 
-
   const adapter = new IoAdapter(app);
   app.useWebSocketAdapter(adapter);
 
-
   app.useGlobalInterceptors(new ResponseInterceptor());
   app.useGlobalFilters(new HttpExceptionFilter());
+
 
   app.useStaticAssets(join(__dirname, '..', 'uploads'), {
     prefix: '/uploads/',
   });
 
+
   app.enableCors({
     origin: [
-      'http://localhost:3000', 
+      'http://localhost:3000',
       'http://localhost:3001',
       'http://localhost:5173',
       'http://localhost:5174',
     ],
     credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization'], 
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
+
+
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('DreamNest API')
+    .setDescription('HTTP API for DreamNest_Server')
+    .setVersion('1.0.0')
+    .addBearerAuth(
+      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+      'bearer', 
+    )
+    .build();
+
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('docs', app, document, {
+    swaggerOptions: { persistAuthorization: true },
+  });
+
+
   await app.listen(3000);
 }
+
 bootstrap();

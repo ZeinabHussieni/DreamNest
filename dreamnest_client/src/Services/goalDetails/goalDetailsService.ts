@@ -52,7 +52,7 @@ export const getGoalById = async (id: number): Promise<Goal> => {
 };
 
 export const getGoalPlans = async (id: number): Promise<Plan[]> => {
-  const res = await api.get<ApiEnvelope<Plan[]>>(`/goals/${id}/plans`);
+  const res = await api.get<ApiEnvelope<Plan[]>>(`/plans/${id}`);
   return res.data.data;
 };
 
@@ -60,7 +60,7 @@ export const togglePlanDone = async (
   planId: number
 ): Promise<{ progress?: number }> => {
   const res = await api.patch<ApiEnvelope<{ progress?: number }>>(
-    `/goals/plans/${planId}/toggle`
+    `/plans/${planId}/toggle`
   );
   return res.data.data;
 };
