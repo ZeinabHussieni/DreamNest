@@ -4,9 +4,11 @@ import {
   selectRooms, selectRoomsStatus, selectActiveRoomId, selectActiveRoom,
   selectMessages, selectMessagesStatus, setActiveRoomId, appendMessageIfActive
 } from './chat.slice';
-import { loadRoomsThunk, loadMessagesThunk } from './chat.thunks';
+import { toast } from "react-toastify";
+import { loadRoomsThunk, loadMessagesThunk,sendVoiceThunk } from './chat.thunks';
 import { getChatSocket } from '../../Services/socket/socket';
 import type { Message } from './chat.types';
+import { sendImageThunk } from './chat.thunks';  
 
 export default function useChatRedux(currentUserId: number) {
   const dispatch = useAppDispatch();
@@ -25,32 +27,59 @@ export default function useChatRedux(currentUserId: number) {
 
   // to make sure we always use the freshest socket after auth changes
   useEffect(() => {
-    if (currentUserId) {
-      getChatSocket(); 
+  if (!currentUserId) return;
+
+  const socket = getChatSocket();
+
+  const onError = (p: { code?: string; message?: string }) => {
+  const msg = p?.message ?? "";
+  if (msg === "MESSAGE_BLOCKED" || msg.includes("MESSAGE_BLOCKED") || p?.code === "BAD_REQUEST") {
+    toast.error("Message not sent: inappropriate words detected.");
+  } else if (msg) {
+    toast.error(` ${msg}`);
+  } else {
+    toast.error("Failed to send message.");
+  }
+};
+
+
+  socket.on("chat:error", onError);
+  return () => {
+    socket.off("chat:error", onError);
+  };
+}, [currentUserId]);
+
+useEffect(() => {
+  if (!activeRoom || !currentUserId) return;
+
+  dispatch(loadMessagesThunk(activeRoom.id));
+
+  const socket = getChatSocket();
+
+  const onNew = (msg: Message) => {
+  if (msg.chatRoomId === activeRoom.id) {
+    dispatch(appendMessageIfActive(msg));
+  }
+
+  if (msg.senderId === currentUserId) {
+    if (msg.status === "delivered_censored") {
+      toast.info("Your message was moderated and shown with masking.");
+    } else if (msg.status === "blocked") {
+      toast.error("Your voice message was blocked for inappropriate content.");
     }
-  }, [currentUserId]);
+  }
+};
 
-  useEffect(() => {
-    if (!activeRoom || !currentUserId) return;
 
- 
-    dispatch(loadMessagesThunk(activeRoom.id));
 
-    const socket = getChatSocket(); 
+  socket.off('chat:newMessage', onNew);
+  socket.on('chat:newMessage', onNew);
 
-    const onNew = (msg: Message) => {
-      if (msg.chatRoomId === activeRoom.id) {
-        dispatch(appendMessageIfActive(msg));
-      }
-    };
-
+  return () => {
     socket.off('chat:newMessage', onNew);
-    socket.on('chat:newMessage', onNew);
+  };
+}, [activeRoom?.id, currentUserId, dispatch]);
 
-    return () => {
-      socket.off('chat:newMessage', onNew);
-    };
-  }, [activeRoom?.id, currentUserId, dispatch]);
 
   const setActiveId = useCallback((id: number) => {
     dispatch(setActiveRoomId(id));
@@ -65,6 +94,25 @@ export default function useChatRedux(currentUserId: number) {
     });
   }, [activeRoomId, currentUserId]);
 
+
+  const sendVoice = useCallback(
+     async (file: File) => {
+     if (!activeRoomId) return;
+     console.log("VOICE DEBUG sending:", { roomId: activeRoomId, file });
+     dispatch(sendVoiceThunk({ roomId: activeRoomId, file }));
+    },
+    [activeRoomId, dispatch]
+  );
+
+  const sendImage = useCallback(
+    async (file: File) => {
+      if (!activeRoomId) return;
+      dispatch(sendImageThunk({ roomId: activeRoomId, file }));
+    },
+    [activeRoomId, dispatch]
+  );
+
+
   return {
     rooms,
     activeRoom,
@@ -73,6 +121,8 @@ export default function useChatRedux(currentUserId: number) {
     loadingMsgs: messagesStatus === 'pending',
     setActiveId,
     send,
+    sendVoice,
+    sendImage,
     reloadRooms: () => dispatch(loadRoomsThunk()),
   } as const;
 }

@@ -1,11 +1,14 @@
-import { WebSocketGateway,SubscribeMessage,MessageBody,ConnectedSocket,OnGatewayConnection,OnGatewayDisconnect,WebSocketServer,} from '@nestjs/websockets';
+import {WebSocketGateway,SubscribeMessage,MessageBody,ConnectedSocket,OnGatewayConnection,OnGatewayDisconnect,WebSocketServer,} from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
 import { ChatService } from '../chat.service';
+import { OnEvent } from '@nestjs/event-emitter';
+import { BadRequestException, ForbiddenException } from '@nestjs/common';
 
-const socketUser = new Map<string, number>();
-const userSockets = new Map<number, Set<string>>();
-const userRooms = new Map<number, Set<number>>();
-const onlineUsers = new Set<number>();
+
+const socketUser = new Map<string, number>();//to find the user for a disconnecting socket.
+const userSockets = new Map<number, Set<string>>();//a user can have multiple sockets tabs,devices) only when the last one drops do we mark them offline
+const userRooms = new Map<number, Set<number>>();//when the last socket drops we know which rooms to broadcast went offline
+const onlineUsers = new Set<number>();//online across sockets
 
 @WebSocketGateway({ namespace: '/chat', cors: { origin: true, credentials: true } })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -15,14 +18,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   handleConnection(_client: Socket) {}
 
-  handleDisconnect(client: Socket) {
+  async handleDisconnect(client: Socket) {
     const userId = socketUser.get(client.id);
     if (!userId) return;
 
     socketUser.delete(client.id);
 
     const sockets = userSockets.get(userId);
-    this.chatService.bumpLastActive(userId); 
+    await this.chatService.bumpLastActive(userId);
+
     if (sockets) {
       sockets.delete(client.id);
       if (sockets.size === 0) {
@@ -53,43 +57,47 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!userRooms.has(d.userId)) userRooms.set(d.userId, new Set());
     userRooms.get(d.userId)!.add(d.chatRoomId);
 
-   // if first socket for this user, mark online and broadcast to this room
-  if (!onlineUsers.has(d.userId)) {
-    onlineUsers.add(d.userId);
-    this.server.to(`room-${d.chatRoomId}`).emit('chat:presenceUpdate', {
-      userId: d.userId,
-      online: true,
-    });
-  }
+    if (!onlineUsers.has(d.userId)) {
+      onlineUsers.add(d.userId);
+      this.server.to(`room-${d.chatRoomId}`).emit('chat:presenceUpdate', { userId: d.userId, online: true });
+    }
 
-  // join socket room
-  client.join(`room-${d.chatRoomId}`);
-  client.emit('chat:joined', { roomId: d.chatRoomId });
+    client.join(`room-${d.chatRoomId}`);
+    client.emit('chat:joined', { roomId: d.chatRoomId });
 
-  // 🔵 presence SNAPSHOT for the joining client
-  // everyone currently in this room → tell the joiner who is online right now
-  const participantIds = await this.chatService.getRoomParticipantIds(d.chatRoomId);
-  for (const pid of participantIds) {
-    const isOnline = onlineUsers.has(pid);
-    client.emit('chat:presenceUpdate', { userId: pid, online: isOnline });
-  }
+    const participantIds = await this.chatService.getRoomParticipantIds(d.chatRoomId);
+    for (const pid of participantIds) {
+      client.emit('chat:presenceUpdate', { userId: pid, online: onlineUsers.has(pid) });
+    }
 
-  // unread summary for sidebar
-  const summary = await this.chatService.getUnreadSummary(d.userId);
-  client.emit('chat:unreadSummary', { rooms: summary });
+    const summary = await this.chatService.getUnreadSummary(d.userId);
+    client.emit('chat:unreadSummary', { rooms: summary });
 
     await this.chatService.bumpLastActive(d.userId);
-
-    
   }
+
 
   @SubscribeMessage('sendMessage')
-  async handleMessage(@MessageBody() d: { chatRoomId: number; senderId: number; content: string }) {
-    const message = await this.chatService.createMessage(d.chatRoomId, d.senderId, d.content);
-    this.server.to(`room-${d.chatRoomId}`).emit('chat:newMessage', message);
-    await this.chatService.markDelivered(message.id);
-    this.server.to(`room-${d.chatRoomId}`).emit('chat:messageDelivered', { messageId: message.id });
+  async handleMessage(
+    @MessageBody() d: { chatRoomId: number; senderId: number; content: string }
+  ) {
+    try {
+      const message = await this.chatService.createTextMessage(d.chatRoomId, d.senderId, (d.content ?? '').trim());
+      this.server.to(`room-${d.chatRoomId}`).emit('chat:newMessage', message);
+
+      await this.chatService.markDelivered(message.id);
+      this.server.to(`room-${d.chatRoomId}`).emit('chat:messageDelivered', { messageId: message.id });
+    } catch (err) {
+
+      const code =
+        err instanceof BadRequestException ? 'BAD_REQUEST'
+        : err instanceof ForbiddenException ? 'FORBIDDEN'
+        : 'ERROR';
+      const message = (err as any)?.message || 'Failed to send message';
+      this.server.to(`room-${d.chatRoomId}`).emit('chat:error', { code, message });
+    }
   }
+  
 
   @SubscribeMessage('chat:requestUnreadSummary')
   async unreadSummary(@MessageBody() d: { userId: number }, @ConnectedSocket() client: Socket) {
@@ -108,8 +116,20 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('chat:typing')
   async typing(@MessageBody() d: { roomId: number; userId: number; typing: boolean }) {
-    await this.chatService.bumpLastActive(d.userId);  
+    await this.chatService.bumpLastActive(d.userId);
     this.server.to(`room-${d.roomId}`).emit('chat:typing', { roomId: d.roomId, userId: d.userId, typing: d.typing });
   }
+
+  public emitNewMessage(roomId: number, message: any) {
+    this.server.to(`room-${roomId}`).emit('chat:newMessage', message);
+  }
+  
+  @OnEvent('chat.message.created')
+  async handleNewMessage(payload: { roomId: number; message: any }) {
+  const { roomId, message } = payload;
+  this.server.to(`room-${roomId}`).emit('chat:newMessage', message);
+  await this.chatService.markDelivered(message.id);
+  this.server.to(`room-${roomId}`).emit('chat:messageDelivered', { messageId: message.id });
+}
 
 }

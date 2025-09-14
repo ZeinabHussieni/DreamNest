@@ -9,6 +9,8 @@ import { AuthService } from '../auth.service';
 import { UserService } from 'src/user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { Prisma } from '@prisma/client';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 
 jest.mock('argon2', () => ({
@@ -16,16 +18,15 @@ jest.mock('argon2', () => ({
   verify: jest.fn(async (hash: string, plain: string) => hash === `hashed:${plain}`),
 }));
 
-
 jest.mock('src/common/shared/file.utils', () => ({
   saveBase64Image: jest.fn(() => 'avatar.png'),
 }));
 
 import * as argon2 from 'argon2';
-import { Prisma } from '@prisma/client';
 
 describe('AuthService', () => {
   let service: AuthService;
+
 
   const users = {
     findByEmailOrUsername: jest.fn(),
@@ -35,9 +36,11 @@ describe('AuthService', () => {
     findById: jest.fn(),
   };
 
+
   const jwt = {
     sign: jest.fn(),
   };
+
 
   const config = {
     get: jest.fn((key: string) => {
@@ -50,6 +53,13 @@ describe('AuthService', () => {
       return map[key];
     }),
   };
+
+
+  const prisma = {
+    userModeration: {
+      findUnique: jest.fn(),
+    },
+  } as unknown as PrismaService;
 
   const demoUser = {
     id: 1,
@@ -66,9 +76,12 @@ describe('AuthService', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
 
-    jwt.sign
-      .mockReturnValueOnce('acc-token')   
-      .mockReturnValueOnce('ref-token');
+
+    (prisma.userModeration.findUnique as jest.Mock).mockResolvedValue(null);
+
+    (jwt.sign as jest.Mock)
+      .mockReturnValueOnce('acc-token')  
+      .mockReturnValueOnce('ref-token'); 
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -76,6 +89,7 @@ describe('AuthService', () => {
         { provide: UserService, useValue: users },
         { provide: JwtService, useValue: jwt },
         { provide: ConfigService, useValue: config },
+        { provide: PrismaService, useValue: prisma },
       ],
     }).compile();
 
@@ -106,8 +120,13 @@ describe('AuthService', () => {
       expect(users.setRefreshToken).toHaveBeenCalledWith(1, 'hashed:ref-token');
       expect(res).toEqual({
         user: {
-          id: 1, firstName: 'A', lastName: 'B', userName: 'ab',
-          email: 'a@b.com', coins: 0, profilePicture: null,
+          id: 1,
+          firstName: 'A',
+          lastName: 'B',
+          userName: 'ab',
+          email: 'a@b.com',
+          coins: 0,
+          profilePicture: null,
         },
         accessToken: 'acc-token',
         refreshToken: 'ref-token',
@@ -146,44 +165,43 @@ describe('AuthService', () => {
   });
 
   describe('login', () => {
-  it('returns tokens when identifier+password are valid', async () => {
-    users.findByIdentifier.mockResolvedValue(demoUser);
-    users.setRefreshToken.mockResolvedValue(undefined);
+    it('returns tokens when identifier+password are valid', async () => {
+      users.findByIdentifier.mockResolvedValue(demoUser);
+      users.setRefreshToken.mockResolvedValue(undefined);
 
-    // 🔧 reset then set the tokens you assert
-    (jwt.sign as jest.Mock).mockReset();
-    jwt.sign
-      .mockReturnValueOnce('acc2')
-      .mockReturnValueOnce('ref2');
+    
+      (jwt.sign as jest.Mock).mockReset();
+      jwt.sign
+        .mockReturnValueOnce('acc2')
+        .mockReturnValueOnce('ref2');
 
-    const res = await service.login('a@b.com', 'pw');
+      const res = await service.login('a@b.com', 'pw');
 
-    expect(users.findByIdentifier).toHaveBeenCalledWith('a@b.com');
-    expect(res).toMatchObject({
-      user: expect.objectContaining({ id: 1 }),
-      accessToken: 'acc2',
-      refreshToken: 'ref2',
+      expect(users.findByIdentifier).toHaveBeenCalledWith('a@b.com');
+      expect(res).toMatchObject({
+        user: expect.objectContaining({ id: 1 }),
+        accessToken: 'acc2',
+        refreshToken: 'ref2',
+      });
+      expect(users.setRefreshToken).toHaveBeenCalledWith(1, 'hashed:ref2');
     });
-    expect(users.setRefreshToken).toHaveBeenCalledWith(1, 'hashed:ref2');
   });
-});
 
-describe('refresh', () => {
-  it('valid refresh returns new tokens', async () => {
-    users.findById.mockResolvedValue(demoUser);
-    users.setRefreshToken.mockResolvedValue(undefined);
+  describe('refresh', () => {
+    it('valid refresh returns new tokens', async () => {
+      users.findById.mockResolvedValue(demoUser);
+      users.setRefreshToken.mockResolvedValue(undefined);
 
+      (jwt.sign as jest.Mock).mockReset();
+      jwt.sign
+        .mockReturnValueOnce('acc3')
+        .mockReturnValueOnce('ref3');
 
-    (jwt.sign as jest.Mock).mockReset();
-    jwt.sign
-      .mockReturnValueOnce('acc3')
-      .mockReturnValueOnce('ref3');
-
-    const res = await service.refresh(1, 'a@b.com', 'refresh');
-    expect(res).toEqual({ accessToken: 'acc3', refreshToken: 'ref3' });
-    expect(users.setRefreshToken).toHaveBeenCalledWith(1, 'hashed:ref3');
+      const res = await service.refresh(1, 'a@b.com', 'refresh');
+      expect(res).toEqual({ accessToken: 'acc3', refreshToken: 'ref3' });
+      expect(users.setRefreshToken).toHaveBeenCalledWith(1, 'hashed:ref3');
+    });
   });
-});
 
   describe('getUser', () => {
     it('returns formatted user', async () => {
@@ -207,7 +225,7 @@ describe('refresh', () => {
     it('clears refresh token', async () => {
       users.setRefreshToken.mockResolvedValue(undefined);
       const res = await service.logout(5);
-      expect(users.setRefreshToken).toHaveBeenCalledWith(5, null); 
+      expect(users.setRefreshToken).toHaveBeenCalledWith(5, null);
       expect(res).toEqual({ success: true });
     });
 

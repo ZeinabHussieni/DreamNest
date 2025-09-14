@@ -7,6 +7,7 @@ let dashSocketRef: Socket | null = null;
 let chatAuthSig: string | null = null;
 let notifAuthSig: string | null = null;
 let dashAuthSig: string | null = null;
+type ErrorEvt = { code: string; message: string };
 
 //for token
 function buildAuthPayload() {
@@ -75,8 +76,16 @@ export function getNotifSocket(): Socket {
   return notifSocketRef;
 }
 
-export function getDashboardSocket(): Socket {
-  if (!dashSocketRef) dashSocketRef = io(`${WS_BASE}/dashboard`, makeOptions());
+export function getDashboardSocket(isAdmin = false): Socket {
+  const baseAuth = buildAuthPayload();
+  const auth = isAdmin ? { ...baseAuth, admin: true as any } : baseAuth;
+  const sig = `${authSig(baseAuth)}:${isAdmin ? "A" : "U"}`;
+
+  if (!dashSocketRef || dashAuthSig !== sig) {
+    dashSocketRef?.disconnect();
+    dashSocketRef = io(`${WS_BASE}/dashboard`, { ...makeOptions(), auth });
+    dashAuthSig = sig;
+  }
   return dashSocketRef;
 }
 
@@ -163,6 +172,8 @@ export function subscribeChatEvents(h: Handlers = {}) {
   const connected = () => h.onConnect?.();
   const disconnected = (reason: string) => h.onDisconnect?.(reason);
   const error = (err: unknown) => h.onError?.(err);
+  const errorEvt = (p: ErrorEvt) => h.onError?.(p);
+
 
   s.on("chat:joined", joined);
   s.on("chat:newMessage", newMsg);
@@ -174,6 +185,7 @@ export function subscribeChatEvents(h: Handlers = {}) {
   s.on("connect", connected);
   s.on("disconnect", disconnected);
   s.on("connect_error", error);
+  s.on("chat:error", errorEvt);
 
   // if user out
   return () => {
@@ -187,5 +199,6 @@ export function subscribeChatEvents(h: Handlers = {}) {
     s.off("connect", connected);
     s.off("disconnect", disconnected);
     s.off("connect_error", error);
+    s.off("chat:error", errorEvt);
   };
 }

@@ -7,7 +7,7 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { json, urlencoded } from 'express';
 import { IoAdapter } from '@nestjs/platform-socket.io';
-
+import * as express from 'express';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
@@ -50,6 +50,15 @@ async function bootstrap() {
   app.useStaticAssets(join(__dirname, '..', 'uploads'), {
     prefix: '/uploads/',
   });
+    app.use('/static/voice', express.static(
+    join(process.cwd(), 'storage/private/voice'),
+    { maxAge: '1d', immutable: false }
+  ));
+
+  app.use('/static/img', express.static(
+  join(process.cwd(), 'storage/private/image'),
+  { maxAge: '1d', immutable: false }
+));
 
 
   app.enableCors({

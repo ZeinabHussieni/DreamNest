@@ -3,6 +3,11 @@ import { ChatService } from './chat.service';
 import { AccessTokenGuard } from '../auth/guards/access-token.guard';
 import { GetUser } from '../common/decorators/get-user.decorator';
 import { MessageResponseDto } from './responseDto/message-response.dto';
+import { UploadedFile, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { SendVoiceDto } from './dto/SendVoiceDto';
+import { SendTextDto } from './dto/SendTextDto';
+import { CreateChatRoomDto } from './dto/CreateChatRoomDto';
 
 import {
   ApiTags,
@@ -13,13 +18,9 @@ import {
   ApiOkResponse,
   ApiParam,
   ApiBody,
-  ApiProperty,
+  ApiConsumes,
 } from '@nestjs/swagger';
 
-class CreateChatRoomDto {
-  @ApiProperty({ example: 123, description: 'The other user ID to chat with' })
-  otherUserId!: number;
-}
 
 @ApiTags('chat')
 @ApiBearerAuth()
@@ -27,7 +28,8 @@ class CreateChatRoomDto {
 @UseGuards(AccessTokenGuard)
 @Controller('chat')
 export class ChatController {
-  constructor(private readonly chatService: ChatService) {}
+  constructor(private readonly chatService: ChatService,
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'Create (or get) a chat room with another user' })
@@ -86,5 +88,60 @@ export class ChatController {
   ) {
     await this.chatService.markReadUntil(userId, roomId, messageId);
     return { ok: true };
+  }
+
+@Post('messages/text')
+@ApiOperation({ summary: 'Send a moderated text message' })
+@ApiBody({ type: SendTextDto })
+@ApiOkResponse({ type: MessageResponseDto })
+async sendText(
+  @GetUser('sub') userId: number,
+  @Body() body: SendTextDto,
+): Promise<MessageResponseDto> {
+  if (!body?.roomId || !body?.content?.trim()) {
+    throw new BadRequestException('roomId and content are required');
+  }
+  return this.chatService.createTextMessage(body.roomId, userId, body.content);
+}
+
+@Post('messages/voice')
+@ApiOperation({ summary: 'Send a voice note (transcribe + moderate + save)' })
+@ApiConsumes('multipart/form-data')
+@UseInterceptors(FileInterceptor('audio')) 
+@ApiOkResponse({ type: MessageResponseDto })
+async sendVoice(
+  @GetUser('sub') userId: number,
+  @Body() body: SendVoiceDto,
+  @UploadedFile() file?: Express.Multer.File,
+): Promise<MessageResponseDto> {
+  if (!file) throw new BadRequestException('audio file required (form-data key: audio)');
+  return this.chatService.handleVoiceUploadAndCreateMessage({
+    userId,
+    roomId: body.roomId,
+    file,
+  });
+}
+@Post('messages/image')
+  @ApiOperation({ summary: 'Send image (OpenAI moderation)' })
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiOkResponse({ description: 'Message created (or blocked)' })
+  async sendImage(
+    @GetUser('sub') userId: number,
+    @Body() body: any,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    if (!file) throw new BadRequestException('image file required (form-data key: image)');
+
+    const roomId = Number(body?.roomId);
+    if (!Number.isFinite(roomId)) {
+      throw new BadRequestException('roomId must be a number');
+    }
+
+    return this.chatService.handleImageUploadAndCreateMessage({
+      userId,
+      roomId,
+      file,
+    });
   }
 }

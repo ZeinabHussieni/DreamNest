@@ -31,6 +31,7 @@ model User {
   posts            Post[] 
   likes            PostLike[] 
   chatRooms        ChatRoomUser[] 
+  userModeration   UserModeration[]
   messages         Message[]   
   messageReads     MessageRead[] 
   notifications    Notification[] 
@@ -178,20 +179,37 @@ model ChatRoomUser {
 }
 
 model Message {
-  id         Int      @id @default(autoincrement())
-  content    String
-  createdAt  DateTime @default(now())
-  deliveredAt DateTime?
+  id            Int       @id @default(autoincrement())
+  type          String    @default("text") 
+  content       String?                  
+  censoredContent String?               
 
-  senderId   Int
-  sender     User     @relation(fields: [senderId], references: [id])
+  audioUrl      String?
+  transcript    String?
+  imageUrl      String?                 
 
-  chatRoomId Int
-  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id])
-  reads      MessageRead[]   
+  status        String    @default("sent") // "sent" | "delivered" | "delivered_censored" | "blocked"
+  isBad         Boolean   @default(false)
+  badReason     String?                 
+  quarantineUrl String?                  
+  moderatedAt   DateTime?
+
+  createdAt     DateTime  @default(now())
+  deliveredAt   DateTime?
+
+  senderId      Int
+  sender        User      @relation(fields: [senderId], references: [id])
+
+  chatRoomId    Int
+  chatRoom      ChatRoom  @relation(fields: [chatRoomId], references: [id])
+
+  reads         MessageRead[]
 
   @@index([chatRoomId, createdAt])
+  @@index([senderId, createdAt])
+  @@index([isBad, status, type])
 }
+
 
 
 model MessageRead {
@@ -206,6 +224,28 @@ model MessageRead {
   @@unique([userId, messageId])
   @@index([messageId], map: "idx_messageread_message")
   @@index([userId, readAt], map: "idx_messageread_user_readat")
+}
+
+model UserModeration {
+  id               Int      @id @default(autoincrement())
+  userId           Int      @unique
+  user             User     @relation(fields: [userId], references: [id])
+
+
+  totalInfractions Int      @default(0)
+  textInfractions  Int      @default(0)
+  voiceInfractions Int      @default(0)
+  imageInfractions Int      @default(0)
+
+
+  chatBlocked      Boolean  @default(false)
+  chatBlockedAt    DateTime?
+  siteBlocked      Boolean  @default(false)
+  siteBlockedAt    DateTime?
+
+
+  updatedAt        DateTime @updatedAt
+  createdAt        DateTime @default(now())
 }
 
 

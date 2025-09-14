@@ -4,6 +4,7 @@ import { PostService } from '../post.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { NotificationService } from '../../notification/notification.service';
 import { DashboardGateway } from '../../dashboard/gateway/dashboard.gateway';
+
 let logSpy: jest.SpyInstance;
 let errorSpy: jest.SpyInstance;
 
@@ -42,8 +43,10 @@ describe('PostService', () => {
     createAndPush: jest.fn(),
   };
 
+
   const dashboardGateway = {
     emitDashboardUpdate: jest.fn(),
+    emitAdminDashboardUpdate: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -77,6 +80,7 @@ describe('PostService', () => {
         data: { content: 'hello', user: { connect: { id: 1 } } },
       });
       expect(dashboardGateway.emitDashboardUpdate).toHaveBeenCalledWith(1);
+      expect(dashboardGateway.emitAdminDashboardUpdate).toHaveBeenCalled(); 
       expect(res).toMatchObject({ id: 10, content: 'hello', user_id: 1 });
     });
 
@@ -175,6 +179,7 @@ describe('PostService', () => {
 
       expect(prisma.post.delete).toHaveBeenCalledWith({ where: { id: 9 } });
       expect(dashboardGateway.emitDashboardUpdate).toHaveBeenCalledWith(77);
+      expect(dashboardGateway.emitAdminDashboardUpdate).toHaveBeenCalled(); // optional
       expect(res).toEqual({ success: true });
     });
 

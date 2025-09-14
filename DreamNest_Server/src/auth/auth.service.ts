@@ -1,4 +1,4 @@
-import { Injectable,ConflictException, UnauthorizedException,HttpException, InternalServerErrorException,NotFoundException } from '@nestjs/common';
+import { Injectable,ForbiddenException,ConflictException, UnauthorizedException,HttpException, InternalServerErrorException,NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as argon2 from 'argon2';
@@ -8,7 +8,7 @@ import { User as PrismaUser } from '@prisma/client';
 import { AuthResponseDto } from './responseDto/auth-response.dto';
 import { join } from 'path';
 import { Prisma } from '@prisma/client'
-
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class AuthService {
@@ -16,6 +16,7 @@ export class AuthService {
     private readonly users: UserService,
     private readonly jwt: JwtService,
     private readonly config: ConfigService,
+    private readonly prisma: PrismaService,
   ) {}
 
 
@@ -97,6 +98,10 @@ export class AuthService {
      errors: { identifier: 'Incorrect email/username or password' }
     });
     }
+    const mod = await this.prisma.userModeration.findUnique({ where: { userId: user.id } });
+    if (mod?.siteBlocked) {
+     throw new ForbiddenException('Account suspended.');
+    }
     const isValid = await argon2.verify(user.passwordHash, password);
     if (!isValid) {
      throw new UnauthorizedException({
@@ -120,6 +125,8 @@ export class AuthService {
     try {
       const user = await this.users.findById(userId);
       if (!user || !user.refreshTokenHash) throw new UnauthorizedException();
+      const mod = await this.prisma.userModeration.findUnique({ where: { userId } });
+      if (mod?.siteBlocked) throw new UnauthorizedException('Account suspended.');
 
       const isValid = await argon2.verify(user.refreshTokenHash, presentedToken);
       if (!isValid) throw new UnauthorizedException();

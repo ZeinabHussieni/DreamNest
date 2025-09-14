@@ -26,4 +26,14 @@ export class DashboardController {
   async getDashboard(@GetUser('sub') userId: number): Promise<DashboardResponseDto> {
     return this.dashboardService.getUserDashboard(userId);
   }
+
+
+  @Get('admin')
+  @ApiOperation({ summary: 'Global admin-like dashboard (public for now)' })
+  @ApiOkResponse({ description: 'Summary with moderation + totals + trends' })
+  async global() {
+    return this.dashboardService.getGlobalAdminDashboard();
+  }
 }
+
+  
