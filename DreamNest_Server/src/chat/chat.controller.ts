@@ -5,7 +5,6 @@ import { GetUser } from '../common/decorators/get-user.decorator';
 import { MessageResponseDto } from './responseDto/message-response.dto';
 import { UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ChatGateway } from './gateway/chat.gateway';
 import { SendVoiceDto } from './dto/SendVoiceDto';
 import { SendTextDto } from './dto/SendTextDto';
 import { CreateChatRoomDto } from './dto/CreateChatRoomDto';
@@ -30,7 +29,6 @@ import {
 @Controller('chat')
 export class ChatController {
   constructor(private readonly chatService: ChatService,
-      private readonly chatGateway: ChatGateway,
   ) {}
 
   @Post()
@@ -123,4 +121,27 @@ async sendVoice(
     file,
   });
 }
+@Post('messages/image')
+  @ApiOperation({ summary: 'Send image (OpenAI moderation)' })
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiOkResponse({ description: 'Message created (or blocked)' })
+  async sendImage(
+    @GetUser('sub') userId: number,
+    @Body() body: any,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    if (!file) throw new BadRequestException('image file required (form-data key: image)');
+
+    const roomId = Number(body?.roomId);
+    if (!Number.isFinite(roomId)) {
+      throw new BadRequestException('roomId must be a number');
+    }
+
+    return this.chatService.handleImageUploadAndCreateMessage({
+      userId,
+      roomId,
+      file,
+    });
+  }
 }

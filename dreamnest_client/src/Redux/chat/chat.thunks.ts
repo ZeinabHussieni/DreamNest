@@ -1,7 +1,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import type { ChatRoom, Message } from './chat.types';
 import { isMessage } from './chat.types';
-import { getChatRooms, getRoomMessages,sendVoice  } from '../../Services/chat/chatService'
+import { getChatRooms, getRoomMessages,sendVoice, sendImage  } from '../../Services/chat/chatService'
 import { toast } from "react-toastify";
 import {
   setActiveRoomId,
@@ -123,13 +123,36 @@ export const sendVoiceThunk = createAsyncThunk(
   "chat/sendVoice",
   async ({ roomId, file }: { roomId: number; file: File }, { rejectWithValue }) => {
     try {
-      return await sendVoice(roomId, file);
+      const msg = await sendVoice(roomId, file);
+
+      if (msg?.status === "blocked") {
+        toast.error("Voice message not sent: contains inappropriate words.");
+        return rejectWithValue({ blocked: true });
+      }
+
+      return msg;
     } catch (err: any) {
       if (err.status === 400 && err.message === "VOICE_BLOCKED") {
         toast.error("Voice message not sent: contains inappropriate words.");
       } else {
         toast.error(`Failed to send voice note: ${err.message || "Unknown error"}`);
       }
+      return rejectWithValue(err);
+    }
+  }
+);
+export const sendImageThunk = createAsyncThunk(
+  "chat/sendImage",
+  async ({ roomId, file }: { roomId: number; file: File }, { rejectWithValue }) => {
+    try {
+      const msg = await sendImage(roomId, file);
+      if (msg?.status === "blocked") {
+        toast.error("Image was blocked by moderation.");
+        return rejectWithValue({ blocked: true });
+      }
+      return msg;
+    } catch (err: any) {
+      toast.error(`Failed to send image: ${err?.message || "Unknown error"}`);
       return rejectWithValue(err);
     }
   }

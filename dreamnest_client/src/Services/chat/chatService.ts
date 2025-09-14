@@ -5,11 +5,16 @@ import type { ApiEnvelope } from "../axios/types";
 
 export type Message = {
   id: number;
-  type: 'text' | 'audio';
+  type: 'text' | 'voice' | 'image';
   content: string | null;
+  censoredContent?: string | null;
   audioUrl: string | null;
   transcript: string | null;
+  imageUrl: string | null;          
   status: 'sent' | 'delivered' | 'read' | string;
+  isBad?: boolean;
+  badReason?: string | null;
+  moderatedAt?: string | null;
   createdAt: string;
   deliveredAt?: string | null;
   senderId: number;
@@ -116,6 +121,26 @@ export async function sendVoice(roomId: number, file: File, onProgress?: (pct: n
       if (onProgress && e.total) {
         onProgress(Math.round((e.loaded / e.total) * 100));
       }
+    },
+  });
+
+  return res.data?.data;
+}
+
+
+export async function sendImage(
+  roomId: number,
+  file: File,
+  onProgress?: (pct: number) => void
+) {
+  const fd = new FormData();
+  fd.append('roomId', String(roomId));
+  fd.append('image', file, file.name || 'image.jpg');
+
+  const res = await api.post<ApiEnvelope<Message>>('/chat/messages/image', fd, {
+    headers: { "Content-Type": "multipart/form-data" },
+    onUploadProgress: (e) => {
+      if (onProgress && e.total) onProgress(Math.round((e.loaded / e.total) * 100));
     },
   });
 

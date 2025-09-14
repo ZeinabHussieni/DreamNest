@@ -21,7 +21,15 @@
   grid-template-columns: repeat(3, minmax(220px, 1fr));
   gap: 18px;
 }
-
+.metric-badgee {
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 25px;
+    font-weight: 600;
+    line-height: 1.6;
+    background: var(--soft-bg, #F2EAF7);
+    color: var(--button-bg, #49368F);
+}
 .metric-card {
   display: flex;
   align-items: center;

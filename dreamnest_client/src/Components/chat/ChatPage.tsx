@@ -1,23 +1,31 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import Avatar from "../shared/avatar/Avatar";
+import Lottie from "lottie-react";
+
 import { useAppDispatch } from "../../store/hooks";
+import { useAuth } from "../../Context/AuthContext";
+
 import useChatRedux from "../../Redux/chat/useChatRedux";
 import useChatUI from "../../Hooks/chat/useChatUI";
-import { useAuth } from "../../Context/AuthContext";
+import { initChatSocketThunk, loadRoomsThunk } from "../../Redux/chat/chat.thunks";
+import { useRecorder } from "../../Hooks/recorder/useRecorder";
+
+import type { ChatRoom } from "../../Redux/chat/chat.types";
+import { buildFileUrl } from "../../Utils/buildFileUrl";
+
+import Avatar from "../shared/avatar/Avatar";
+import AudioBubble from "./AudioBubble";
+
 import backk from "../../Assets/Icons/back.svg";
 import searchh from "../../Assets/Icons/search.svg";
 import audio from "../../Assets/Icons/audio.svg";
 import sendMsg from "../../Assets/Icons/send.svg";
 import paused from "../../Assets/Icons/paused.svg";
-import type { ChatRoom } from "../../Redux/chat/chat.types";
-import AudioBubble from "./AudioBubble";
-import { initChatSocketThunk, loadRoomsThunk } from "../../Redux/chat/chat.thunks";
-import Lottie from "lottie-react";
+import imageIcon from "../../Assets/Icons/image.svg";
 import EmptyConnectionsAnim from "../../Assets/Animations/connections.json";
-import { useRecorder } from "../../Hooks/recorder/useRecorder";
+
 import "./chat.css";
-import { buildFileUrl } from "../../Utils/buildFileUrl";
+
 const Ticks: React.FC<{ status?: "sent" | "delivered" | "read" }> = ({ status = "sent" }) => {
   if (status === "read") return <span className="tick tick-read">✓✓</span>;
   if (status === "delivered") return <span className="tick tick-delivered">✓✓</span>;
@@ -29,6 +37,8 @@ const ChatPage: React.FC = () => {
   const { user } = useAuth() as any;
   const userId = Number(user?.id) || 0;
 
+  const imageInputRef = useRef<HTMLInputElement | null>(null);
+
   const {
     rooms,
     activeRoom,
@@ -37,21 +47,25 @@ const ChatPage: React.FC = () => {
     loadingRooms,
     loadingMsgs,
     sendVoice,
+    sendImage,
     send,
-    
   } = useChatRedux(userId);
 
   const { start, stop, recording } = useRecorder();
 
   const {
-    text, setText,
-    search, setSearch,
-    mobileOpen, setMobileOpen,
+    text,
+    setText,
+    search,
+    setSearch,
+    mobileOpen,
+    setMobileOpen,
     filteredRooms,
     activeOther,
     statusLine,
     activeRoomTyping,
-    bodyRef, bottomRef,
+    bodyRef,
+    bottomRef,
     getOtherUser,
     onSubmit,
     firstUnreadId,
@@ -106,7 +120,9 @@ const ChatPage: React.FC = () => {
                   <div className="room-avatar-wrap">
                     <Avatar filename={other?.profilePicture ?? null} className="room-avatar-img" />
                     {!!other && (
-                      <span className={`presence-dot ${isUserOnline(other.id) ? "online" : "offline"}`} />
+                      <span
+                        className={`presence-dot ${isUserOnline(other.id) ? "online" : "offline"}`}
+                      />
                     )}
                   </div>
 
@@ -132,7 +148,9 @@ const ChatPage: React.FC = () => {
         {activeRoom ? (
           <header className="chat-header">
             <div className="chat-header-inner">
-              <button className="chat-menu-btn" onClick={() => setMobileOpen(true)}>☰</button>
+              <button className="chat-menu-btn" onClick={() => setMobileOpen(true)}>
+                ☰
+              </button>
 
               <div className="room-avatar-wrap">
                 <Avatar filename={activeOther?.profilePicture ?? null} className="room-avatar" />
@@ -164,52 +182,80 @@ const ChatPage: React.FC = () => {
                   <Lottie animationData={EmptyConnectionsAnim} loop />
                 </div>
                 <div className="empty-textt">
-                <h2>No conversations yet</h2>
-                <Link to="/connections" className="empty-cta">
-                  Find people to chat
-                </Link>
-                <div className="chat-actions-appear">
-                 <Link to="/" className="chat-back-appear">
-                   Back
-                </Link>
-                </div>
+                  <h2>No conversations yet</h2>
+                  <Link to="/connections" className="empty-cta">
+                    Find people to chat
+                  </Link>
+                  <div className="chat-actions-appear">
+                    <Link to="/" className="chat-back-appear">
+                      Back
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
           ) : messages.length === 0 ? (
-            <div className="empty-main"><p className="muted">No messages yet. Say hi 👋</p></div>
+            <div className="empty-main">
+              <p className="muted">No messages yet. Say hi 👋</p>
+            </div>
           ) : (
             <ul className="msg-list">
               {messages.map((m) => {
                 const mine = m.senderId === userId;
                 const showCatchUp = firstUnreadId && m.id === firstUnreadId;
+
                 return (
                   <React.Fragment key={m.id}>
-                    {showCatchUp && <li className="catch-up"><span>New</span></li>}
+                    {showCatchUp && (
+                      <li className="catch-up">
+                        <span>New</span>
+                      </li>
+                    )}
+
                     <li className={`msg ${mine ? "me" : "other"}`}>
-               <div className="bubble">
-                      {m.type === "audio" ? (
-                      <div className="audio-message">
-                      <AudioBubble
-                       src={m.audioUrl ? buildFileUrl(m.audioUrl) : ""}
-                       transcript={m.transcript}
-                       mine={mine}
-                      />
+                      <div className="bubble">
+                        {m.type === "voice" ? (
+                          m.status === "blocked" ? (
+                            <div className="voice-removed">Voice message was removed by moderation.</div>
+                          ) : (
+                            <AudioBubble
+                              src={m.audioUrl ? buildFileUrl(m.audioUrl) : ""}
+                              transcript={m.transcript}
+                              mine={mine}
+                            />
+                          )
+                        ) : m.type === "image" ? (
+                          m.status === "blocked" ? (
+                            <div className="image-removed">Image was removed by moderation.</div>
+                          ) : (
+                            <img
+                              className="chat-image"
+                              src={m.imageUrl ? buildFileUrl(m.imageUrl) : ""}
+                              alt="sent"
+                              loading="lazy"
+                              onError={(e) => {
+                                (e.currentTarget as HTMLImageElement).style.visibility = "hidden";
+                              }}
+                            />
+                          )
+                        ) : (
+                          <div className="text-message">
+                            <span>{m.content ?? m.censoredContent ?? ""}</span>
+                            {m.status === "delivered_censored" && (
+                              <span className="mod-pill" title="Moderated">
+                                moderated
+                              </span>
+                            )}
+                          </div>
+                        )}
 
-                    </div>
-                  ) : (
-                    <span>{m.content}</span>
-                   )}
-
-
-                  <div className="meta">
-                   <time>{fmtTime(m.createdAt)}</time>
-                   {mine && <Ticks status={(getMsgStatus(m.id) || "sent") as any} />}
-                 </div>
-              </div>
-
-              </li>
-              </React.Fragment>
+                        <div className="meta">
+                          <time>{fmtTime(m.createdAt)}</time>
+                          {mine && <Ticks status={(getMsgStatus(m.id) || "sent") as any} />}
+                        </div>
+                      </div>
+                    </li>
+                  </React.Fragment>
                 );
               })}
               <div ref={bottomRef} />
@@ -217,51 +263,74 @@ const ChatPage: React.FC = () => {
           )}
         </div>
 
-      {activeRoom ? (
-        <form className="chat-input" onSubmit={onSubmit}>
-         <input
-           value={text}
-           onChange={(e) => setText(e.target.value)}
-           placeholder="Type a message…"
-           autoComplete="off"
-           disabled={!userId || !activeRoom}
-           />
+        {activeRoom ? (
+          <form className="chat-input" onSubmit={onSubmit}>
+            <input
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder="Type a message…"
+              autoComplete="off"
+              disabled={!userId || !activeRoom}
+            />
 
-          {!recording ? (
+            <input
+              type="file"
+              accept="image/*"
+              ref={imageInputRef}
+              style={{ display: "none" }}
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) {
+                  sendImage(f);
+                  e.currentTarget.value = "";
+                }
+              }}
+            />
+
             <button
-            type="button"
-            onClick={start}
-           disabled={!userId || !activeRoom}
-           className="mic-btn"
-           title="Record voice"
-          >
-           <img src={audio} alt="" className="mic-icon" />
-        </button>
-        ) : (
-         <button
-           type="button"
-           onClick={async () => {
-           const file = await stop();
-           if (file) sendVoice(file);
-           }}
-           className="stop-btn"
-           title="Stop recording"
-          >
-           <img src={paused} alt="" className="paused-icon" />
-        </button>
-      )}
+              type="button"
+              className="image-btn"
+              title="Attach image"
+              onClick={() => imageInputRef.current?.click()}
+              disabled={!userId || !activeRoom}
+            >
+              <img src={imageIcon} alt="" className="image-icon" />
+            </button>
 
-     <button
-      type="submit"
-      disabled={!text.trim() || !userId || !activeRoom}
-      className="send-btn"
-      title="Send"
-     >
-      <img src={sendMsg} alt="send" className="sendmsg"/>
-     </button>
-     </form>
-   ) : null}
+            {!recording ? (
+              <button
+                type="button"
+                onClick={start}
+                disabled={!userId || !activeRoom}
+                className="mic-btn"
+                title="Record voice"
+              >
+                <img src={audio} alt="" className="mic-icon" />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={async () => {
+                  const file = await stop();
+                  if (file) sendVoice(file);
+                }}
+                className="stop-btn"
+                title="Stop recording"
+              >
+                <img src={paused} alt="" className="paused-icon" />
+              </button>
+            )}
 
+            <button
+              type="submit"
+              disabled={!text.trim() || !userId || !activeRoom}
+              className="send-btn"
+              title="Send"
+            >
+              <img src={sendMsg} alt="send" className="sendmsg" />
+            </button>
+          </form>
+        ) : null}
       </main>
 
       <div
@@ -271,7 +340,9 @@ const ChatPage: React.FC = () => {
       <aside className={`chat-drawer ${mobileOpen ? "open" : ""}`} role="dialog">
         <div className="drawer-header">
           <h3>Conversations</h3>
-          <button className="drawer-close" onClick={() => setMobileOpen(false)}>✕</button>
+          <button className="drawer-close" onClick={() => setMobileOpen(false)}>
+            ✕
+          </button>
         </div>
 
         <div className="drawer-search">
@@ -287,7 +358,9 @@ const ChatPage: React.FC = () => {
         ) : rooms.length === 0 ? (
           <div className="empty-state">
             <p>No conversations yet.</p>
-            <p className="muted">Go to <Link to="/connections">Connections</Link> to start one.</p>
+            <p className="muted">
+              Go to <Link to="/connections">Connections</Link> to start one.
+            </p>
           </div>
         ) : filteredRooms.length === 0 ? (
           <div className="muted">No conversations match “{search}”.</div>
@@ -310,14 +383,13 @@ const ChatPage: React.FC = () => {
                   <div className="room-avatar-wrap">
                     <Avatar filename={other?.profilePicture ?? null} className="room-avatar-img" />
                     {!!other && (
-                      <span className={`presence-dot ${isUserOnline(other.id) ? "online" : "offline"}`} />
+                      <span
+                        className={`presence-dot ${isUserOnline(other.id) ? "online" : "offline"}`}
+                      />
                     )}
                   </div>
 
-                  <div className="room-name">
-                    {other?.userName || r.name || `Room ${r.id}`}
-                  </div>
-
+                  <div className="room-name">{other?.userName || r.name || `Room ${r.id}`}</div>
                   {unread > 0 && <span className="unread-badge">{unread}</span>}
                 </li>
               );

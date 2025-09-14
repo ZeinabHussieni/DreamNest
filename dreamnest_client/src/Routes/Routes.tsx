@@ -13,6 +13,7 @@ import UserPosts from "../Pages/userPosts/UserPosts";
 import CommunityPosts from "../Pages/communityPosts/CommunityPosts";
 import DashboardPage from "../Pages/dashboard/Dashboard";
 import { ProtectedRoute, GuestRoute } from "./guards";
+import AdminDashboardPage from "../Components/admin/AdminDashboardPage";
 
 const AppRoutes: React.FC = () => {
   return (
@@ -38,6 +39,7 @@ const AppRoutes: React.FC = () => {
           <Route path="/connections" element={<Connections />} />
           <Route path="/myposts" element={<UserPosts />} />
           <Route path="/posts" element={<CommunityPosts />} />
+          <Route path="/admin" element={<AdminDashboardPage />} />
         </Route>
         <Route path="/chats" element={<ChatPage />} />
       </Route>

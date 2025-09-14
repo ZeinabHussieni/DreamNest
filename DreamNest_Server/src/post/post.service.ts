@@ -30,6 +30,8 @@ export class PostService {
             });
             //this for websocket dashboard
             await this.dashboardGateway.emitDashboardUpdate(data.user_id);
+            await this.dashboardGateway.emitAdminDashboardUpdate();  
+            
             return this.formatPost(post);
         } catch (err) {
             console.log(err);
@@ -102,6 +104,7 @@ export class PostService {
 
             //this for websocket dashboard
             await this.dashboardGateway.emitDashboardUpdate(post.user_id);
+            await this.dashboardGateway.emitAdminDashboardUpdate();  
             return{success:true};
         }catch(err){
             throw new NotFoundException('Post not found');

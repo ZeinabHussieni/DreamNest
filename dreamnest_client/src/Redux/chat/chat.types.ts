@@ -1,41 +1,55 @@
 export type ID = number;
 export type ISODateString = string;
 
+// chat.types.ts
+export type MessageStatus =
+  | "sent"
+  | "delivered"
+  | "read"
+  | "delivered_censored"  
+  | "blocked";          
 
 export type Message = {
-  id: ID;
-  type: 'text' | 'audio';
+  id: number;
+  type: 'text' | 'voice' | 'image';
   content: string | null;
+  censoredContent?: string | null;
   audioUrl: string | null;
   transcript: string | null;
+  imageUrl: string | null;          
   status: 'sent' | 'delivered' | 'read' | string;
-
-  createdAt: ISODateString;
-  deliveredAt?: ISODateString | null;
-  senderId: ID;
-  chatRoomId: ID;
+  isBad?: boolean;
+  badReason?: string | null;
+  moderatedAt?: string | null;
+  createdAt: string;
+  deliveredAt?: string | null;
+  senderId: number;
+  chatRoomId: number;
 };
 
-//for message payloads 
+
+
+
 export function isMessage(x: unknown): x is Message {
   if (!x || typeof x !== "object") return false;
   const m = x as Record<string, unknown>;
-  const deliveredOk =
-    m.deliveredAt === undefined || m.deliveredAt === null || typeof m.deliveredAt === "string";
-
   const nullableStr = (v: unknown) => v == null || typeof v === "string";
+  const statusOk =
+    typeof m.status === "string" &&
+    ["sent","delivered","read","delivered_censored","blocked"].includes(m.status as string);
 
   return (
     typeof m.id === "number" &&
-    (m.type === "text" || m.type === "audio") &&
+    (m.type === "text" || m.type === "voice" || m.type === "image") &&
     nullableStr(m.content) &&
+    nullableStr(m.censoredContent) &&
     nullableStr(m.audioUrl) &&
     nullableStr(m.transcript) &&
-    typeof m.status === "string" &&
+    nullableStr(m.imageUrl) &&        
+    statusOk &&
     typeof m.createdAt === "string" &&
     typeof m.senderId === "number" &&
-    typeof m.chatRoomId === "number" &&
-    deliveredOk
+    typeof m.chatRoomId === "number"
   );
 }
 

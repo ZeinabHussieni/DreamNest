@@ -66,7 +66,7 @@ export const togglePlanDone = async (
 };
 
 export default async function visionBoardUrl(filename: string): Promise<Blob> {
-  const response = await api.get(`/goals/visionBoard/${filename}`, {
+  const response = await api.get(`/goals/visionBoard/file/${filename}`, {
     responseType: "blob",
   });
   return response.data as Blob;

@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 import { loadRoomsThunk, loadMessagesThunk,sendVoiceThunk } from './chat.thunks';
 import { getChatSocket } from '../../Services/socket/socket';
 import type { Message } from './chat.types';
+import { sendImageThunk } from './chat.thunks';  
 
 export default function useChatRedux(currentUserId: number) {
   const dispatch = useAppDispatch();
@@ -56,10 +57,19 @@ useEffect(() => {
   const socket = getChatSocket();
 
   const onNew = (msg: Message) => {
-    if (msg.chatRoomId === activeRoom.id) {
-      dispatch(appendMessageIfActive(msg));
+  if (msg.chatRoomId === activeRoom.id) {
+    dispatch(appendMessageIfActive(msg));
+  }
+
+  if (msg.senderId === currentUserId) {
+    if (msg.status === "delivered_censored") {
+      toast.info("Your message was moderated and shown with masking.");
+    } else if (msg.status === "blocked") {
+      toast.error("Your voice message was blocked for inappropriate content.");
     }
-  };
+  }
+};
+
 
 
   socket.off('chat:newMessage', onNew);
@@ -94,6 +104,14 @@ useEffect(() => {
     [activeRoomId, dispatch]
   );
 
+  const sendImage = useCallback(
+    async (file: File) => {
+      if (!activeRoomId) return;
+      dispatch(sendImageThunk({ roomId: activeRoomId, file }));
+    },
+    [activeRoomId, dispatch]
+  );
+
 
   return {
     rooms,
@@ -104,6 +122,7 @@ useEffect(() => {
     setActiveId,
     send,
     sendVoice,
+    sendImage,
     reloadRooms: () => dispatch(loadRoomsThunk()),
   } as const;
 }

@@ -278,15 +278,25 @@
 .chat-input {
   position: sticky;
   bottom: 0;
-  width: 100%;
   z-index: 2;
   display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 10px;
+  grid-template-columns: 1fr auto auto auto; 
+  align-items: center;
+  gap: 7px;
   padding: 12px 16px;
   backdrop-filter: saturate(180%) blur(8px);
+  width: 100%;
 }
+.image-btn{
+  border: none;
 
+  background-color: transparent;
+}
+.image-icon{
+
+  height: 40px;
+  width: 40px;
+}
 .chat-actions {
   margin-top: auto;
   display: flex;
@@ -317,14 +327,7 @@
   height: 20px;
 }
 
-.chat-input input {
-  padding: 23px 24px;
-  border-radius: 16px;
-  border: 1px solid var(--border);
-  color: var(--text);
-  background-color: var(--soft-bg);
-  transition: border-color .2s ease, box-shadow .2s ease;
-}
+
 
 .chat-input input:focus-visible {
   outline: none;
@@ -397,7 +400,6 @@
   z-index: 40;
 }
 .mic-btn, .stop-btn {
-  margin-left: 8px;
   width: 64px;
   height: 64px;
   background: none;
@@ -414,17 +416,6 @@
   width: min(520px, 100%);
 }
 
-.chat-input {
-  position: sticky;
-  bottom: 0;
-  z-index: 2;
-  display: grid;
-  grid-template-columns: 1fr auto auto; 
-  align-items: center;              
-  gap: 10px;
-  padding: 12px 16px;
-  backdrop-filter: saturate(180%) blur(8px);
-}
 
 .chat-input input {
   padding: 16px 18px;
@@ -478,7 +469,43 @@
 .chat-input button:disabled {
    filter: grayscale(0.8) brightness(0.9); cursor: not-allowed;
 }
+.mod-pill {
+  margin-left: .5rem;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgba(255, 165, 0, .15);
+  color: #b05a00;
+  border: 1px solid rgba(255, 165, 0, .35);
+  vertical-align: middle;
+}
+.voice-removed {
+  font-size: 13px;
+  color: #777;
+  background: #f3f3f3;
+  border: 1px dashed #ddd;
+  padding: 8px 10px;
+  border-radius: 10px;
+}
 
+/* chat.css */
+.chat-image {
+  max-width: 320px;
+  max-height: 314px;
+  border-radius: 12px;
+  display: block;
+}
+.image-removed, .voice-removed {
+  font-size: 0.9rem;
+  opacity: 0.75;
+}
+.mod-pill {
+  margin-left: 6px;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 10px;
+  background: rgba(255, 200, 0, 0.2);
+}
 
 @media (max-width: 480px) {
   .send-btn, .mic-btn, .stop-btn { height: 40px; min-width: 40px; }

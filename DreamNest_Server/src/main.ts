@@ -55,6 +55,11 @@ async function bootstrap() {
     { maxAge: '1d', immutable: false }
   ));
 
+  app.use('/static/img', express.static(
+  join(process.cwd(), 'storage/private/image'),
+  { maxAge: '1d', immutable: false }
+));
+
 
   app.enableCors({
     origin: [

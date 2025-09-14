@@ -6,12 +6,14 @@ import { NotificationModule } from '../notification/notification.module';
 import { TranscribeModule } from 'src/transcribe/transcribe.module';
 import { StorageModule } from 'src/storage/storage.module';
 import { ModerationModule } from 'src/moderation/moderation.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { DashboardModule } from 'src/dashboard/dashboard.module';
 
 
 @Module({
   providers: [ChatGateway, ChatService],
   controllers: [ChatController],
-  imports: [NotificationModule,ModerationModule,TranscribeModule,StorageModule],
+  imports: [NotificationModule,ModerationModule,TranscribeModule,StorageModule, EventEmitterModule.forRoot(),DashboardModule],
   exports: [ChatService],  
 })
 export class ChatModule {}

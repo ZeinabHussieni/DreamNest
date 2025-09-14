@@ -1,4 +1,5 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, OnModuleInit,Logger  } from '@nestjs/common';
+import { buildWordRegex, censorText, normalizeForMatch } from './censor.util';
 import * as leo from 'leo-profanity';
 import * as fsp from 'fs/promises';
 import * as path from 'path';
@@ -80,6 +81,10 @@ export class ModerationService implements OnModuleInit {
   private customPhrasesPrepared: string[] = [];       
   private customPatterns: RegExp[] = [];
   private ready: ReadyState = { ready: false };
+  private readonly logger = new Logger(ModerationService.name);
+  private readonly apiKey = process.env.OPENAI_API_KEY!;
+ private readonly visionModel = process.env.OPENAI_IMAGE_MODEL || 'gpt-4o-mini'; // <-- for images
+  private readonly baseUrl = (process.env.OPENAI_BASE_URL ?? 'https://api.openai.com').replace(/\/+$/, '');
 
   private latinWordRegex: RegExp | null = null;
 
@@ -151,6 +156,28 @@ export class ModerationService implements OnModuleInit {
     return true;
   }
 
+  getWordRegex(): RegExp | null {
+    const latin = Array.from(this.customWords); 
+    return buildWordRegex(latin);
+  }
+
+ censor(content: string) {
+  const rx = this.getWordRegex();
+  const { censored: rxCensored, isBad: rxHit } = censorText(content, rx);
+  const raw = content.replace(ZERO_WIDTH_RX, '').trim();
+  const prepared = prep(raw);
+  const variants = englishRepeatVariants(raw).concat(englishRepeatVariants(prepared));
+  const leoHit = variants.some(v => leo.check(v));
+  let censored = rxCensored;
+  if (leoHit) {
+    const leoC = leo.clean(content);
+    censored = leoC.replace(/\*+/g, '████');
+  }
+
+  return { isBad: rxHit || leoHit, censored };
+}
+
+
   async isBlocked(text: string): Promise<ModerationVerdict> {
     if (!this.ensureReady()) {
       return { ok: true };
@@ -197,5 +224,72 @@ export class ModerationService implements OnModuleInit {
 
     return { ok: true };
   }
+
+  async isImageBlocked(buf: Buffer, mime: string): Promise<{ ok: boolean; raw?: any }> {
+    const dataUrl = `data:${mime};base64,${buf.toString('base64')}`;
+
+    const res = await fetch(`${this.baseUrl}/v1/responses`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${this.apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: this.visionModel,
+        input: [{
+          role: 'user',
+          content: [
+            {
+              type: 'input_text',
+              text:
+                'Classify this image for safety only. Reply with compact JSON:\n' +
+                '{"sexual":bool,"sexual_explicit":bool,"sexual_minors":bool,' +
+                '"violence":bool,"violence_graphic":bool,"self_harm":bool,"flagged":bool}.\n' +
+                'Set "flagged": true if ANY unsafe category is true. No extra text.'
+            },
+            { type: 'input_image', image_url: dataUrl },
+          ],
+        }],
+        temperature: 0,
+      }),
+    });
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      this.logger.warn(`Image moderation error ${res.status}: ${text}`);
+      return { ok: true };
+    }
+
+    const json: any = await res.json();
+    const outText =
+      json?.output_text ??
+      json?.output?.[0]?.content?.[0]?.text ??
+      json?.choices?.[0]?.message?.content ??
+      '';
+
+    let flags: any = {};
+    try {
+      const m = outText.match(/\{[\s\S]*\}/);
+      flags = m ? JSON.parse(m[0]) : JSON.parse(outText);
+    } catch {
+      this.logger.warn(`Image moderation parse failed. Raw: ${outText?.slice(0, 200)}`);
+      return { ok: true };
+    }
+
+    const blockAnyViolence = (process.env.BLOCK_ANY_VIOLENCE || 'false').toLowerCase() === 'true';
+
+    const block =
+      !!flags.flagged ||
+      !!flags.sexual ||
+      !!flags.sexual_explicit ||
+      !!flags.sexual_minors ||
+      !!flags.violence_graphic ||
+      !!flags.self_harm ||
+      (blockAnyViolence && !!flags.violence);
+
+    return { ok: !block, raw: flags };
+  }
 }
+
+
 
