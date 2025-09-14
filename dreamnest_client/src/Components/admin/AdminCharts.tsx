@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import {
-  ResponsiveContainer, ComposedChart, Bar, LineChart, Line,
+  ResponsiveContainer, ComposedChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell
 } from "recharts";
 import { MonthCounts, mergeMonthSeries, toBarSeries, stack3 } from "../../Utils/series";

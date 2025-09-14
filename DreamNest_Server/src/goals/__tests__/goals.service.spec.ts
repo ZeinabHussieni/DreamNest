@@ -7,17 +7,23 @@ import { OpenAIService } from 'src/openai/openai.service';
 import { NotificationService } from 'src/notification/notification.service';
 import { PlanningAgentService } from 'src/agent/agent.service';
 import { ConfigService } from '@nestjs/config';
+import { Logger } from '@nestjs/common';
 
 
+let logSpy: jest.SpyInstance;
+let warnSpy: jest.SpyInstance;
 let errSpy: jest.SpyInstance;
 beforeAll(() => {
-  errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  logSpy = jest.spyOn(Logger.prototype, 'log').mockImplementation(() => {});
+  warnSpy = jest.spyOn(Logger.prototype, 'warn').mockImplementation(() => {});
+  errSpy = jest.spyOn(Logger.prototype, 'error').mockImplementation(() => {});
 });
+
 afterAll(() => {
+  logSpy.mockRestore();
+  warnSpy.mockRestore();
   errSpy.mockRestore();
 });
-
-
 jest.mock('src/common/shared/file.utils', () => ({
   saveBase64Image: jest.fn(() => 'vision.png'),
 }));

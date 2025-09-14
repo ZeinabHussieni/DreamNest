@@ -76,8 +76,16 @@ export function getNotifSocket(): Socket {
   return notifSocketRef;
 }
 
-export function getDashboardSocket(): Socket {
-  if (!dashSocketRef) dashSocketRef = io(`${WS_BASE}/dashboard`, makeOptions());
+export function getDashboardSocket(isAdmin = false): Socket {
+  const baseAuth = buildAuthPayload();
+  const auth = isAdmin ? { ...baseAuth, admin: true as any } : baseAuth;
+  const sig = `${authSig(baseAuth)}:${isAdmin ? "A" : "U"}`;
+
+  if (!dashSocketRef || dashAuthSig !== sig) {
+    dashSocketRef?.disconnect();
+    dashSocketRef = io(`${WS_BASE}/dashboard`, { ...makeOptions(), auth });
+    dashAuthSig = sig;
+  }
   return dashSocketRef;
 }
 

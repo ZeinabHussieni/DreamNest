@@ -6,7 +6,7 @@ import { AdminOffendersCard, AdminRecentBadCard } from "../../Components/admin/A
 import "../dashboard/dashboard.css";
 
 const AdminDashboardPage: React.FC = () => {
-  const { data, loading, error, refresh } = useAdminDashboard();
+  const { data, loading, error } = useAdminDashboard();
 
   if (loading || !data) {
     return <div className="dash"><div className="card center">{error || "Loading admin dashboard…"}</div></div>;
