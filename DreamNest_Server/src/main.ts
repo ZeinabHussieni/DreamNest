@@ -13,7 +13,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-
+  const root = process.env.UPLOAD_ROOT || join(process.cwd(), 'storage');
   app.use(json({ limit: '10mb' }));
   app.use(urlencoded({ extended: true, limit: '10mb' }));
 
@@ -54,12 +54,16 @@ async function bootstrap() {
     join(process.cwd(), 'storage/private/voice'),
     { maxAge: '1d', immutable: false }
   ));
-
+  app.use('/static/profile',
+  express.static(join(root, 'private', 'profile'),
+  { maxAge: '1d', immutable: false })
+);
   app.use('/static/img', express.static(
   join(process.cwd(), 'storage/private/image'),
   { maxAge: '1d', immutable: false }
 ));
-
+app.use('/static/img',   express.static(join(root, 'private', 'image')));
+app.use('/static/voice', express.static(join(root, 'private', 'voice')));
 
   app.enableCors({
     origin: [
