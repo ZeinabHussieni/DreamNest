@@ -2,10 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { LlmService } from 'src/llm/llm.service';
 
-//specify what llm wil store
-type PlanItemIn = { title?: string; description?: string; due_date?: string };
-type PlanJson = { items?: PlanItemIn[] };
+type PlanItemIn = Partial<{
+  title: string;
+  description: string;
+  due_date: string; 
+}>;
 
+type PlanJson = { items?: PlanItemIn[] | null };
+
+type SolidPlanItem = { title: string; description: string; due_date: string };
 @Injectable()
 export class PlanningAgentService {
   constructor(private prisma: PrismaService, private llm: LlmService) {}
@@ -18,66 +23,127 @@ export class PlanningAgentService {
   }) {
     const { userId, goalId, title, description } = params;
 
+
     const goal = await this.prisma.goal.findUnique({
       where: { id: goalId },
       select: { id: true, user_id: true },
     });
     if (!goal || goal.user_id !== userId) throw new Error('Goal not found or not owned by user');
- 
-
-    const todayISO = isoDay(new Date());
-    const lang = 'en'
-    const system = buildSystemPrompt(todayISO);
-    const user = buildUserPrompt(title, description);
-
-    const json = await this.llm.chatJson<PlanJson>(system, user);
-    const items = Array.isArray(json?.items) ? json.items.slice(0, 8) : [];
 
 
-    const data = items.map((p, i) => {
-      const idx = i + 1;
-      return {
-        goal_id: goalId,
-        title: str(p?.title) || `Step ${idx}`,
-        description: str(p?.description),
-        due_date: toFutureDate(p?.due_date, i * 7), 
-        completed: false,
-      };
-    });
+    const today = isoDay(new Date());
+    const system = buildSystemPrompt(today);
+    const user   = buildUserPrompt(title, description || undefined);
+    let draft = await this.draftPlan(system, user);
 
-    if (data.length) await this.prisma.plan.createMany({ data });
 
-    return { created: data.length };
+    draft = await this.refinePlan(today, title, description ?? undefined, draft);
+
+
+    const solid = this.validateAndRepair(draft, /*min*/6, /*max*/8, today);
+
+    if (solid.length) {
+      await this.prisma.plan.createMany({
+        data: solid.map((p) => ({
+          goal_id: goalId,
+          title: p.title,
+          description: p.description,
+          due_date: new Date(p.due_date), 
+          completed: false,
+        })),
+      });
+    }
+
+    return { created: solid.length };
   }
-}
 
+
+
+  private async draftPlan(system: string, user: string): Promise<PlanJson> {
+    const json = await this.llm.chatJson<PlanJson>(system, user);
+    return json ?? {};
+  }
+
+  private async refinePlan(todayISO: string, title: string, desc: string | undefined, first: PlanJson): Promise<PlanJson> {
+    const criticSystem = [
+      'You are a rigorous planning critic and repairer.',
+      'Input: a JSON plan with items[{title,description,due_date}].',
+      'Rules to enforce strictly:',
+      '- 6 to 8 items total.',
+      '- Non-empty title & description.',
+      '- due_date must be ISO (YYYY-MM-DD), NOT in the past (>= TODAY).',
+      `- TODAY = ${todayISO}.`,
+      'Return ONLY minified JSON with the same shape. No prose.'
+    ].join('\n');
+
+    const criticUser = [
+      `Goal title: ${JSON.stringify(title)}`,
+      `Goal description: ${JSON.stringify(desc ?? '')}`,
+      'Plan to critique (JSON):',
+      JSON.stringify(first),
+      'Fix any problems. Preserve user intent.'
+    ].join('\n');
+
+    const repaired = await this.llm.chatJson<PlanJson>(criticSystem, criticUser);
+    return repaired ?? first;
+  }
+
+private validateAndRepair(json: PlanJson, min: number, max: number, todayISO: string): SolidPlanItem[] {
+  const items: PlanItemIn[] = Array.isArray(json?.items) ? json.items!.slice(0, max) : [];
+  const out: SolidPlanItem[] = [];
+  const today = new Date(todayISO);
+
+  const need = Math.max(min, Math.min(max, items.length || min));
+
+  const base: PlanItemIn[] = items.length
+    ? items
+    : Array.from({ length: need }, () => ({} as PlanItemIn));
+
+  for (let i = 0; i < need; i++) {
+    const raw: PlanItemIn = base[i] ?? {};
+    const idx = i + 1;
+
+    const title = str(raw.title) || `Step ${idx}`;
+    const description =
+      str(raw.description) ||
+      `Do a focused action toward "${title}". Aim for 20–30 minutes. You’ve got this!`;
+
+    const due = coerceFutureISO(raw.due_date, today, /*offsetDays*/ 7 * i);
+
+    out.push({ title, description, due_date: due });
+  }
+
+  return out;
+}
+}
 
 function isoDay(d: Date): string {
   const c = new Date(d); c.setHours(0, 0, 0, 0);
   return c.toISOString().slice(0, 10);
 }
-
-
 function str(v: unknown): string {
   return (v ?? '').toString().trim();
 }
 
+function coerceFutureISO(input: unknown, today: Date, offsetDays: number): string {
+  const fallback = new Date(today.getTime() + offsetDays * 86_400_000);
+  fallback.setHours(0, 0, 0, 0);
 
-function toFutureDate(input: unknown, offsetDays = 0): Date {
-  const base = new Date(); base.setHours(0, 0, 0, 0);
-  const fallback = new Date(base.getTime() + offsetDays * 86_400_000);
-  if (!input) return fallback;
+  if (typeof input === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(input)) {
+    const parsed = new Date(input + 'T00:00:00Z');
+    if (!Number.isNaN(parsed.getTime()) && parsed >= today) {
+      return input;
+    }
+  }
 
-  const parsed = new Date(String(input));
-  if (Number.isNaN(parsed.getTime())) return fallback;
-
-
-  const parsedStart = new Date(parsed); parsedStart.setHours(0, 0, 0, 0);
-  return parsedStart < base ? fallback : parsedStart;
+  const yyyy = fallback.getUTCFullYear();
+  const mm = String(fallback.getUTCMonth() + 1).padStart(2, '0');
+  const dd = String(fallback.getUTCDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
 }
 
 
-function buildSystemPrompt(todayISO: string ,lang = 'en'): string {
+function buildSystemPrompt(todayISO: string, lang = 'en'): string {
   return `
  You are a warm, friendly, and highly motivational planning coach whose only job is to help people turn their goals into clear, inspiring action plans. Imagine you are a caring mentor, a cheerleader, and a trusted advisor all in one. Your tone should feel alive, uplifting, and encouraging — the user should feel energized and supported when reading the plan. 💖💪✨
 
@@ -138,7 +204,7 @@ function buildUserPrompt(title: string, description?: string | null, lang = 'en'
   return `
 Goal title: "${title}"
 Goal description: "${description ?? '-'}"
-Create 6–8 steps exactly as defined in the system message. Use TODAY to schedule.
+Create 6–8 steps exactly as defined. Use TODAY to schedule.
 Final output must be entirely in ${lang}.
 `.trim();
 }
