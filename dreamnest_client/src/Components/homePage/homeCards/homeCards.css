@@ -85,7 +85,8 @@
 @media (max-width: 825px) {
 
   .image-steps img {
-    max-width: 90%;
+    max-width: 118%;
+    margin-left: -39px;
 
   }
   .section-title {
@@ -147,7 +148,7 @@
 }
 }
 
-@media (max-width: 495px) {
+@media (max-width: 490px) {
   .feature-card {
     width: 80%;
   }
@@ -157,6 +158,11 @@
   }
   .features-container {
     padding: 2rem 2%;
+  }
+  .image-steps img {
+    max-width: 100%;
+    margin-left: 0px;
+
   }
 
 }

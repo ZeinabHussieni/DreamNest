@@ -25,6 +25,7 @@ services:
       - ollama
     volumes:
       - backend_uploads:/app/uploads
+      - backend_storage:/app/storage 
     networks:
       - appnet
 
@@ -48,6 +49,7 @@ services:
       - "5679:5678"
     volumes:
       - n8n_data:/home/node/.n8n
+    restart: unless-stopped
     networks:
       - appnet
 
@@ -65,8 +67,11 @@ services:
 volumes:
   pgdata:
   n8n_data:
+    external: true
+    name: dreamnest_n8n_data
   ollama:
   backend_uploads:
+  backend_storage:  
 
 networks:
   appnet:

@@ -59,7 +59,6 @@ export class DashboardService {
   }
 
    async getGlobalAdminDashboard() {
-    // --- Totals ---
     const [usersTotal, postsTotal, goalsTotal, completedGoals, avgGoalProgress] =
       await this.prisma.$transaction([
         this.prisma.user.count(),
@@ -73,25 +72,29 @@ export class DashboardService {
       where: { progress: { gt: 0, lt: 100 } },
     });
 
-    const [modAgg, chatBlockedCount, siteBlockedCount] = await this.prisma.$transaction([
+   const [modAgg, chatBlockedCount, siteBlockedCount] = await this.prisma.$transaction([
       this.prisma.userModeration.aggregate({
-        _sum: {
-          totalInfractions: true,
-          textInfractions: true,
-          voiceInfractions: true,
-          imageInfractions: true,
-        },
-        _count: true,
-      }),
-      this.prisma.userModeration.count({ where: { chatBlocked: true } }),
-      this.prisma.userModeration.count({ where: { siteBlocked: true } }),
+      where: { totalInfractions: { gt: 0 } },
+      _sum: {
+       totalInfractions: true,
+       textInfractions: true,
+       voiceInfractions: true,
+       imageInfractions: true,
+      },
+     _count: true,
+    }),
+     this.prisma.userModeration.count({ where: { chatBlocked: true } }),
+     this.prisma.userModeration.count({ where: { siteBlocked: true } }),
     ]);
 
+
     const offendersRaw = await this.prisma.userModeration.findMany({
-      orderBy: { totalInfractions: "desc" },
-      take: 20,
-      include: { user: { select: { id: true, userName: true, email: true } } },
+     where: { totalInfractions: { gt: 0 } },
+     orderBy: { totalInfractions: 'desc' },
+     take: 20,
+     include: { user: { select: { id: true, userName: true, email: true } } },
     });
+
 
     const offenders: Offender[] = offendersRaw.map((o) => ({
       userId: o.userId,

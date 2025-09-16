@@ -28,7 +28,7 @@
     font-weight: 600;
     line-height: 1.6;
     background: var(--soft-bg, #F2EAF7);
-    color: var(--button-bg, #49368F);
+    color: var(--button-color);
 }
 .metric-card {
   display: flex;
@@ -97,7 +97,7 @@
   font-weight: 600;
   line-height: 1.6;
   background: var(--soft-bg, #F2EAF7);
-  color: var(--button-bg, #49368F);
+  color: var(--button-color);
 }
 
 .chart-title {
@@ -330,7 +330,17 @@ body.dark .dg-row {
 .dg-learn:hover {
   text-decoration: underline;
 }
-
+.p-card .p-card-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--text);
+}
+.p-card .p-card-subtitle {
+    font-weight: 400;
+    margin-bottom: 0.5rem;
+    color: var(--text);
+}
 .donut-legend {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -350,18 +360,17 @@ body.dark .dg-row {
 }
 
 .goals-card .p-card-title {
-  color: var(--text, #222);
+  color: var(--text);
   font-weight: 800;
 }
 .goal-titlee{
   font-size: 25px;
 }
 .goals-card .p-card-subtitle {
-  color: var(--muted, #6b7280);
+  color: var(--text);
 }
 .goal-header {
-    display: flex
-;
+    display: flex;
     align-items: center;
     justify-content: space-between;
     margin-bottom: -1px;
@@ -427,8 +436,8 @@ body.dark .dg-row {
 }
 
 .border-btn {
-  border-color: var(--button-bg);
-  color: var(--button-bg);
+  border-color: var(--button-color);
+  color: var(--button-color);
 }
 
 .goal-link-btn.p-button.p-button-text {
@@ -587,7 +596,7 @@ body.dark .lb-row {
 }
 
 .lb-rank-3 {
-  background: var(--muted);
+  background: var(--mutedd);
 }
 
 .lb-rank-4 {

@@ -1,4 +1,3 @@
-// api.ts
 import axios, { AxiosError } from "axios";
 
 const API_BASE =
@@ -20,19 +19,28 @@ api.interceptors.request.use((config) => {
   if (!(config.data instanceof FormData)) {
     (config.headers as any).set?.("Content-Type", "application/json");
   }
-
   return config;
 });
-
 
 api.interceptors.response.use(
   (res) => res,
   (err: AxiosError<any>) => {
+    const status = err.response?.status;
     const payload = err.response?.data as any;
+
+    if (status === 401) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("user");
+      localStorage.removeItem("userId");
+
+      window.location.href = "/login";
+    }
+
     const clean = new Error(
       payload?.error?.message || payload?.message || err.message || "Request failed"
     ) as any;
-    clean.status = err.response?.status ?? 0;
+    clean.status = status ?? 0;
     clean.errors = payload?.error?.errors || payload?.errors || {};
     return Promise.reject(clean);
   }

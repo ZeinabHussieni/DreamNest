@@ -6,14 +6,17 @@
   --topbar-h: 80px; 
   --button-bg: #49368F;
  --cards-bg: #1a1331;
+ --button-color: #49368F;
   --border: #eadff7;
   --text: #1f1b2d;
   --muted: #746b84;
-
+  --muted-color: #746b84;
+  --mutedd: #746b84;
+  --main-bg-auth: #ffffff;
   --track: #ffffff;
 
   --purple: #6f56c5;    
-   --purple-1: #9885d6;    
+  --purple-1: #9885d6;    
   --purple-2: #a48bff; 
   --empty-req:#f6f1ff;  
 
@@ -24,53 +27,51 @@
   --mark-done-color: #4b3e88;
   --connection:#e9e6ef;
   --grey:#DDDDDD;
-   --greyy:#f8f8f8de;
+  --greyy:#f8f8f8de;
+  --soft-bg-msg: #F2EAF7;
 }
-
 body.dark {
-  
-  --main-bg: #0f0e14;        
-  --nav-bg:  #151228;        
-  --soft-bg: #18162a;       
-  --soft-color: #1e1b34;  
 
- 
-  --text:  #efeaf6;        
-  --muted: #b5adc9;       
+  --main-bg:        #191726;  
+  --nav-bg:         #211E33; 
+  --soft-bg:        #292641;
+  --soft-color:     #302C4E; 
+--main-bg-auth: #2f2657;
+  --text:           #FFF9FF;  
+  --muted:          #ede8f8;
+  --mutedd:          #a18ecf;
+  --border:         #4A4670;
+  --connection:     #352F5C;
+  --grey:           #56527A;
+  --greyy:          #3A365F;
+  --track:          #241F3B;
+  --muted-color: #4e4066;
+  --purple:         #B491FF;  
+  --purple-1:       #C8B1FF;  
+  --purple-2:       #af93e4;  
 
-  --border:    #2e2944;     
-  --connection:#2a2741;     
-  --grey:      #3a3846;    
-  --greyy:     #242230;    
-  --track:     #131120;    
+  --teal:           #3FF2CF;  
+  --teal-1:         #79F7DE;
+  --teal-2:         #BDFBEF;
 
- 
-  --purple:   #7f6aff;      
-  --purple-1: #a495ff;       
-  --purple-2: #c9c0ff;     
+  --orange:         #FFB169;
+  --orange-1:       #FFC58F;
+  --orange-2:       #FFE0BF;
 
-  --pink:     #ff75c3;       
-  --pink-1:   #ff98d1;       
-  --pink-2:   #ffc0e2;
-
-
-  --button-bg:     #5f49e8;  
-  --button-hover:  #5640d9;
-  --button-pressed:#4a36c4;
-
-
-  --danger:   #ff6a81;     
-  --header-bg:#191636;     
-  --empty-req:#1b1833;      
-
-
-  --mark-done-bg:    #182524;
-  --mark-done-color: #aaf2cd;
-
-
+  --pink:           #FF86D1; 
+  --pink-1:         #FFA9DF;
+  --pink-2:         #FFD7EF;
+  --soft-bg-msg: #ffecf8;
+  --danger:         #FF5E7C;
+  --header-bg:      #222040;
+  --empty-req:      #272258;
+  --mark-done-bg:   rgba(132, 63, 242, 0.16);
+  --mark-done-color:#7FF7DE;
+  --button-color:white;
+  --glow-purple:    0 10px 30px rgba(180,145,255,0.25);
+  --glow-teal:      0 10px 26px rgba(63,242,207,0.22);
+  --glow-pink:      0 10px 26px rgba(255,134,209,0.22);
 }
-
-
 body {
   background-color: var(--main-bg);
   color: var(--text);
