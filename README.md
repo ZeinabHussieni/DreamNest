@@ -5,11 +5,11 @@
 <!-- project overview -->
 <img src="./readme/title2.svg"/>
 
-> DreamNest is an AI-powered web app that helps users visualize and achieve their goals. 
+> DreamNest is a platform where your dreams turn into action. Write down your dream, and our AI will generate clear steps to help you achieve it.
 >
-> It connects like-minded people based on personality, creates personalized step-by-step plans, and generates motivational visuals to keep them inspired.
+> You’ll also get matched with others through smart AI connections, so you can find people with similar goals or ways to help each other. Once connected, a private chat room opens where you can share text, voice notes, or images.
 > 
-> With progress tracking and daily reminders.
+> Beyond connections, you can post updates in the community, track your progress in your personal dashboard, and stay safe with built-in moderation. Admins also have their own dashboard to keep everything secure and positive.
 
 <br><br>
 
