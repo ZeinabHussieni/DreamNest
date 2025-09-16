@@ -28,7 +28,7 @@
   gap: 16px;
   padding: 16px;
   border-radius: 16px;
-  background: var(--connection);
+  background: var(--soft-bg);
 }
 .req-avatar { 
     width: 64px; 
