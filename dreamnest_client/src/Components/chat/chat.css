@@ -169,6 +169,7 @@
   margin: 0;
   display: grid;
   gap: 8px;
+  color: black;
 }
 
 .msg {
@@ -184,7 +185,7 @@
   max-width: min(72ch, 86%);
   padding: 10px 21px;
   border-radius: 16px;
-  background: var(--soft-bg);
+  background: var( --soft-bg-msg);
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04),
               0 2px 8px rgba(0, 0, 0, 0.04);
   line-height: 1.4;
@@ -268,7 +269,7 @@
 
 .bubble .meta time {
   font-size: 11px;
-  color: var(--muted);
+  color: var(--muted-color);
 }
 .chat-sidebar h3{
 
@@ -498,6 +499,7 @@
 .image-removed, .voice-removed {
   font-size: 0.9rem;
   opacity: 0.75;
+  color: black;
 }
 .mod-pill {
   margin-left: 6px;
@@ -576,7 +578,7 @@
 
 .ab-time {
   font-size: 12px;
-  color: var(--muted);
+  color: var(--mutedd);
   min-width: 72px;
   text-align: right;
 }
@@ -589,7 +591,7 @@
   padding: 10px 12px;
   border-radius: 12px;
   background: rgba(107, 91, 212, .06);
-  color: var(--text);
+  color: black;
 }
 
 .msg.me .bubble { 

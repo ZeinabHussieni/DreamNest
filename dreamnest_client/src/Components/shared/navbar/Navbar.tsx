@@ -28,7 +28,7 @@ const Navbar: React.FC = () => {
   return (
     <nav className="Navbar">
       <div className="Navbar-logo">
-        <img src={Logo} alt="Logo" className="logo-size" />
+        <a href="/"><img src={Logo} alt="Logo" className="logo-size" /></a>
         <div className="title">
           <h2 className="dreamNest">
             <NavLink to="/" className="dreamNest-link">DreamNest</NavLink>
