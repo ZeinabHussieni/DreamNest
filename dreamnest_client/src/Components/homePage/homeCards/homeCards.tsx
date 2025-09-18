@@ -3,7 +3,7 @@ import FeaturesCard from "./HomeCard";
 import calender from "../../../Assets/Images/calender.png";
 import connection from "../../../Assets/Images/connection.png";
 import dashboard from "../../../Assets/Images/dashboared.png";
-import image from "../../../Assets/Images/image.png";
+import image from "../../../Assets/Icons/message.svg";
 import steps from "../../../Assets/Images/steps.png";
 import coinsreward from "../../../Assets/Icons/coinsreward.svg";
 
@@ -21,13 +21,13 @@ const HomeCards: React.FC = () => {
         />
         <FeaturesCard
           image={image}
-          title="Visual Motivation"
-          description="Personalized motivational visuals keep your goals alive and inspiring"
+          title="Dream Connections & Chat"
+          description="Find like-minded dreamers and stay connected through real-time chat, voice, and image sharing. Collaboration made simple"
         />
         <FeaturesCard
           image={connection}
-          title="Dream Connections"
-          description="Connect with others who share similar goals or can help you succeed"
+          title="Community Hub"
+          description="Share your journey with everyone—post updates, celebrate wins, and get inspired by others’ stories"
         />
         <FeaturesCard
           image={coinsreward}

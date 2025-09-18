@@ -53,15 +53,16 @@
 }
 
 .metric-sub {
-  color: var(--muted);
-  font-size: 23px;
+  color: var(--text);
+  font-size: 27px;
+  font-weight: 550;
   margin-top: 41px;
   margin-left: 10px;
 }
 
 .metric-img {
-  width: 60px;
-  height: 60px;
+  width: 54px;
+  height: 54px;
   display: block;
   object-fit: contain;
   margin-right: 20px;
@@ -423,6 +424,7 @@ body.dark .dg-page-btn { background: rgba(255,255,255,.06); }
 }
 .goal-titlee{
   font-size: 25px;
+  color: var(--text);
 }
 .goals-card .p-card-subtitle {
   color: var(--text);
@@ -448,7 +450,7 @@ body.dark .dg-page-btn { background: rgba(255,255,255,.06); }
 .goal-sub {
   margin-top: -14px;
   font-size: 14px;
-  color: var(--muted);
+  color: var(--text);
 }
 
 .goal-header-actions {

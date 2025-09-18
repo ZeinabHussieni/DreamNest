@@ -72,7 +72,6 @@ const Pager: React.FC<{
         className="dg-page-btn"
         onClick={prev}
         disabled={!hasPrev}
-        aria-label="Previous page"
       >
         <ChevronLeft />
         <span className="sr-only">Prev</span>
@@ -83,7 +82,6 @@ const Pager: React.FC<{
         className="dg-page-btn"
         onClick={next}
         disabled={!hasNext}
-        aria-label="Next page"
       >
         <ChevronRight />
         <span className="sr-only">Next</span>
@@ -156,7 +154,7 @@ export const AdminRecentBadCard: React.FC<{ items: BadMsg[]; pageSize?: number }
               <li key={m.id} className="dg-row">
                 <div className="dg-main">
                   <div className="dg-title-sm">
-                    #{m.id} · {m.type.toUpperCase()} · {m.status}
+                    #{m.id} {m.type.toUpperCase()}
                   </div>
                   <div className="dg-subtitle">
                     by <strong>{m.senderName}</strong> in room {m.chatRoomId} — reason: {m.badReason}
