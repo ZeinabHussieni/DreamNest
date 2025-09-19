@@ -53,7 +53,7 @@ describe('PostController', () => {
 
   it('deleteById forwards to service', async () => {
     postsService.deleteById.mockResolvedValue({ success: true });
-    const res = await controller.deleteById(5 as any, 123 as any);
+    const res = await controller.deleteById(5 as any);
     expect(postsService.deleteById).toHaveBeenCalledWith(123);
     expect(res).toEqual({ success: true });
   });
