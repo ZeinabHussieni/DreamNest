@@ -3,7 +3,7 @@ import {
   ResponsiveContainer, ComposedChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell
 } from "recharts";
-import { MonthCounts, mergeMonthSeries, toBarSeries, stack3 } from "../../Utils/series";
+import { MonthCounts, mergeMonthSeries, stack3 } from "../../Utils/series";
 import "../dashboard/dashboard.css";
 
 const ChartCard: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
@@ -69,29 +69,6 @@ const AdminCharts: React.FC<Props> = ({
           </ResponsiveContainer>
         </ChartCard>
       </div>
-
-      <ChartCard title="Infractions by Type (total)">
-        <div className="donut-wrap">
-          <div className="donut-legend">
-            {donutData.map((d, i) => (
-              <div key={d.name} className="legend-item">
-                <span className="legend-bullet" style={{ background: i===0 ? "var(--purple-1)" : i===1 ? "var(--accent)" : "var(--accent-3)" }} />
-                <span>{d.name} — <strong>{d.value}</strong></span>
-              </div>
-            ))}
-          </div>
-          <ResponsiveContainer width="100%" height={240}>
-            <PieChart>
-              <Pie data={donutData} dataKey="value" nameKey="name" innerRadius={70} outerRadius={100} paddingAngle={2}>
-                <Cell fill="var(--purple-1)" />
-                <Cell fill="var(--purple-2)" />
-                <Cell fill="var(--button-bg)" />
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-      </ChartCard>
     </>
   );
 };

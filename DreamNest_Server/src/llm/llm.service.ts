@@ -41,40 +41,57 @@ export class LlmService {
 
 
   private async send(messages: Msg[], jsonMode = false, attempts = 2): Promise<string> {
-    let lastErr: unknown;
-    for (let i = 0; i < attempts; i++) {
-      try {
-        const res = await fetch(`${this.baseURL}/chat/completions`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${this.apiKey}`,
-          },
-          body: JSON.stringify({
-            model: this.model,
-            messages,
-            temperature: this.temp,
-            max_tokens: this.maxTok,
-            ...(jsonMode ? { response_format: { type: 'json_object' } } : {}),
-          }),
-        });
+  let lastErr: unknown;
+  for (let i = 0; i < attempts; i++) {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 20_000); 
 
-        if (!res.ok) {
-          const text = await res.text().catch(() => '');
-          throw new Error(`OpenAI ${res.status}: ${text}`);
-        }
+    try {
+      const res = await fetch(`${this.baseURL.replace(/\/+$/,'')}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.apiKey}`,
+        },
+        signal: ctrl.signal,
+        body: JSON.stringify({
+          model: this.model,
+          messages,
+          temperature: this.temp,
+          max_tokens: this.maxTok,
+          ...(jsonMode ? { response_format: { type: 'json_object' } } : {}),
+        }),
+      });
 
-        const data = await res.json();
-        const content = data?.choices?.[0]?.message?.content?.trim();
-        if (typeof content !== 'string') throw new Error('No content in OpenAI response');
-        return content;
-      } catch (e) {
-        lastErr = e;
-        if (i < attempts - 1) await wait(300 * 2 ** i);
+      clearTimeout(t);
+
+      if (!res.ok) {
+     
+        const text = await res.text().catch(() => '');
+        const err = new Error(`OpenAI ${res.status}: ${text}`);
+        if (res.status === 429 || res.status >= 500) throw err;
+        throw err; 
       }
+
+      const data = await res.json();
+      const content = data?.choices?.[0]?.message?.content?.trim();
+      if (typeof content !== 'string') throw new Error('No content in OpenAI response');
+      return content;
+
+    } catch (e) {
+      lastErr = e;
+  
+      if (i < attempts - 1) {
+        const base = 400 * 2 ** i;
+        await wait(base + Math.floor(Math.random() * 200));
+      }
+    } finally {
+      clearTimeout(t);
     }
-    throw lastErr;
   }
+  throw lastErr;
+}
+
 }
 
 const wait = (ms: number) => new Promise(r => setTimeout(r, ms));

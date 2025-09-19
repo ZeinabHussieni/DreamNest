@@ -89,8 +89,8 @@
 .post-card {
   display: flex;
   flex-direction: column;
-  height: 220px;                 
-  overflow: hidden;              
+  height: 369px;                 
+  overflow: visible;              
 }
 
 .post-title {
@@ -133,6 +133,8 @@
   width: 49px;
   height: 48px;
   border-radius: 50%;
+  object-fit: cover;
+    transition: transform 0.2s 
 }
 .post-name {
   font-weight: 600;

@@ -53,15 +53,16 @@
 }
 
 .metric-sub {
-  color: var(--muted);
-  font-size: 23px;
+  color: var(--text);
+  font-size: 27px;
+  font-weight: 550;
   margin-top: 41px;
   margin-left: 10px;
 }
 
 .metric-img {
-  width: 60px;
-  height: 60px;
+  width: 54px;
+  height: 54px;
   display: block;
   object-fit: contain;
   margin-right: 20px;
@@ -318,6 +319,64 @@ body.dark .dg-row {
   min-width: 36px;
 }
 
+.dg-pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(0,0,0,.08);
+}
+
+.dg-pager-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.dg-pager-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dg-page-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 32px; height: 32px;
+  border-radius: 10px;
+  border: 1px solid var(--border, #e5e7eb);
+  background: #fff;
+  color: var(--text);
+  cursor: pointer;
+  transition: background .15s ease, transform .06s ease, border-color .15s ease;
+}
+body.dark .dg-page-btn { background: rgba(255,255,255,.06); }
+.dg-page-btn:hover { background: #fafafa; }
+.dg-page-btn:active { transform: translateY(1px); }
+.dg-page-btn:disabled { opacity: .45; cursor: not-allowed; }
+
+.dg-page-num {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  min-width: 48px;
+  text-align: center;
+}
+
+
+.sr-only {
+  position: absolute !important;
+  height: 1px; width: 1px;
+  overflow: hidden; clip: rect(1px,1px,1px,1px);
+  white-space: nowrap; border: 0; padding: 0; margin: -1px;
+}
+
+.dg-list { margin-left: 0; }
+
 .dg-learn {
   grid-column: 2 / 3;
   grid-row: 1 / 2;
@@ -365,6 +424,7 @@ body.dark .dg-row {
 }
 .goal-titlee{
   font-size: 25px;
+  color: var(--text);
 }
 .goals-card .p-card-subtitle {
   color: var(--text);
@@ -390,7 +450,7 @@ body.dark .dg-row {
 .goal-sub {
   margin-top: -14px;
   font-size: 14px;
-  color: var(--muted);
+  color: var(--text);
 }
 
 .goal-header-actions {

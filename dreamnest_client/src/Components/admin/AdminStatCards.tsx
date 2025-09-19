@@ -1,6 +1,7 @@
 import React from "react";
 import "../dashboard/dashboard.css"; 
-import "../../Assets/Images/goal.png"
+import goalPng from "../../Assets/Images/goal.png";
+import block from "../../Assets/Icons/block-visitor-svgrepo-com.svg";
 type Props = {
   usersTotal: number;
   postsTotal: number;
@@ -13,9 +14,11 @@ type Props = {
   siteBlockedCount: number;
 };
 
-const Card: React.FC<{ title: string; value: string; badge?: string }> = ({ title, value, badge }) => (
+const Card: React.FC<{ title: string; value: string; icon?:string;badge?: string }> = ({ title, value,icon, badge }) => (
   <div className="card metric-card">
-    <div className="metric-icon"><span /></div>
+     <div className="metric-icon">
+       {icon && <img className="metric-img" src={icon} alt="" />}
+    </div>
     <div className="metric-body">
       <div className="metric-top">
 
@@ -30,15 +33,16 @@ const Card: React.FC<{ title: string; value: string; badge?: string }> = ({ titl
 const AdminStatCards: React.FC<Props> = (p) => {
   return (
     <div className="metric-grid">
-      <Card title="Users" value={`${p.usersTotal}`} />
-      <Card title="Posts" value={`${p.postsTotal}`} />
-      <Card title="Goals" value={`${p.goalsTotal}`} />
-      <Card title="Active Goals" value={`${p.inProgressGoals}`} badge={`${Math.round((p.inProgressGoals / Math.max(1,p.goalsTotal))*100)}%`} />
-      <Card title="Completed Goals" value={`${p.completedGoals}`} badge={`${Math.round((p.completedGoals / Math.max(1,p.goalsTotal))*100)}%`} />
-      <Card title="Avg Goal Progress" value={`${p.avgGoalProgress.toFixed(1)}%`} />
-      <Card title="Infractions (all time)" value={`${p.totalInfractions}`} />
-      <Card title="Chat-blocked Users" value={`${p.chatBlockedCount}`} />
-      <Card title="Site-blocked Users" value={`${p.siteBlockedCount}`} />
+      
+      <Card title="Users" icon={goalPng} value={`${p.usersTotal}`} />
+      <Card title="Posts" icon={goalPng} value={`${p.postsTotal}`} />
+      <Card title="Goals" icon={goalPng} value={`${p.goalsTotal}`} />
+      <Card title="Active Goals" icon={goalPng}  value={`${p.inProgressGoals}`} badge={`${Math.round((p.inProgressGoals / Math.max(1,p.goalsTotal))*100)}%`} />
+      <Card title="Completed Goals" icon={goalPng}  value={`${p.completedGoals}`} badge={`${Math.round((p.completedGoals / Math.max(1,p.goalsTotal))*100)}%`} />
+      <Card title="Avg Goal Progress" icon={goalPng}  value={`${p.avgGoalProgress.toFixed(1)}%`} />
+      <Card title="Infractions (all time)" icon={block} value={`${p.totalInfractions}`} />
+      <Card title="Chat-blocked Users" icon={block}  value={`${p.chatBlockedCount}`} />
+      <Card title="Site-blocked Users" icon={block} value={`${p.siteBlockedCount}`} />
     </div>
   );
 };
