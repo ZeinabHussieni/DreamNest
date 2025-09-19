@@ -50,7 +50,6 @@ export class PostController {
   @ApiParam({ name: 'id', type: Number })
   @ApiOkResponse({ description: 'Post deleted' })
   async deleteById(
-    @GetUser('sub') userId: number, // kept for guard context; not used here
     @Param('id', ParseIntPipe) id: number,
   ) {
     return this.postsService.deleteById(id);
@@ -66,4 +65,5 @@ export class PostController {
   ) {
     return this.postsService.toggleLike(userId, postId);
   }
+  
 }

@@ -70,19 +70,9 @@ function englishRepeatVariants(text: string) {
   return [v0, v1];
 }
 
-function buildLatinBoundaryRegex(terms: string[]) {
-  const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const body = terms.map(esc).join('|');
-  if (!body) return null;
-  return new RegExp(`(?<![\\p{L}\\p{N}])(?:${body})(?![\\p{L}\\p{N}])`, 'iu');
-}
-
 @Injectable()
 export class ModerationService implements OnModuleInit {
   private customWords = new Set<string>();
-  private customPhrasesRaw: string[] = [];
-  private customPhrasesPrepared: string[] = [];
-  private customPatterns: RegExp[] = [];
   private ready: ReadyState = { ready: false };
   private readonly logger = new Logger(ModerationService.name);
   private readonly apiKey = process.env.OPENAI_API_KEY!;
@@ -92,7 +82,6 @@ export class ModerationService implements OnModuleInit {
   private looseRx: RegExp | null = null;
   private arStrictRx: RegExp | null = null;
   private arLooseRx: RegExp | null = null;
-  private latinWordRegex: RegExp | null = null;
 
   async onModuleInit() {
     leo.clearList();
@@ -149,9 +138,6 @@ export class ModerationService implements OnModuleInit {
 
   private async loadBlocklists() {
     this.customWords.clear();
-    this.customPhrasesRaw = [];
-    this.customPhrasesPrepared = [];
-    this.customPatterns = [];
     try {
       const arList: string[] = Array.isArray(naughtyWords?.ar) ? naughtyWords.ar : [];
       for (const w of arList) this.customWords.add(prep(w));
@@ -225,26 +211,8 @@ export class ModerationService implements OnModuleInit {
         return { ok: false, reason: 'blocklist' };
       }
     }
-    if (this.latinWordRegex && this.latinWordRegex.test(prepared)) {
-      return { ok: false, reason: 'blocklist' };
-    }
     for (const w of this.customWords) {
       if (prepared.includes(w)) {
-        return { ok: false, reason: 'blocklist' };
-      }
-    }
-    for (let i = 0; i < this.customPhrasesRaw.length; i++) {
-      const rawPhrase = this.customPhrasesRaw[i];
-      const prepPhrase = this.customPhrasesPrepared[i];
-      if (raw.toLowerCase().includes(rawPhrase.toLowerCase())) {
-        return { ok: false, reason: 'blocklist' };
-      }
-      if (prepared.includes(prepPhrase)) {
-        return { ok: false, reason: 'blocklist' };
-      }
-    }
-    for (const r of this.customPatterns) {
-      if (r.test(raw) || r.test(prepared)) {
         return { ok: false, reason: 'blocklist' };
       }
     }
