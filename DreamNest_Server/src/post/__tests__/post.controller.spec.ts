@@ -52,11 +52,11 @@ describe('PostController', () => {
   });
 
   it('deleteById forwards to service', async () => {
-    postsService.deleteById.mockResolvedValue({ success: true });
-    const res = await controller.deleteById(5 as any);
-    expect(postsService.deleteById).toHaveBeenCalledWith(123);
-    expect(res).toEqual({ success: true });
-  });
+  postsService.deleteById.mockResolvedValue({ success: true });
+  const res = await controller.deleteById(123 as any);
+  expect(postsService.deleteById).toHaveBeenCalledWith(123); 
+  expect(res).toEqual({ success: true });
+});
 
   it('toggleLike forwards to service', async () => {
     postsService.toggleLike.mockResolvedValue({ liked: true, likeCount: 1 });
