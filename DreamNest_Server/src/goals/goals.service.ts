@@ -1,256 +1,274 @@
-import { Injectable, NotFoundException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import {Injectable,NotFoundException,BadRequestException,InternalServerErrorException,Logger,} from '@nestjs/common';
+import { Prisma, Goal } from '@prisma/client';
+import { join } from 'path';
+
 import { PrismaService } from '../prisma/prisma.service';
 import { saveBase64Image } from '../common/shared/file.utils';
-import { join } from 'path';
-import { Prisma } from '@prisma/client'; 
 import { OpenAIService } from '../openai/openai.service';
+import { PlanningAgentService } from 'src/agent/agent.service';
 import { DashboardGateway } from 'src/dashboard/gateway/dashboard.gateway';
 import { GoalResponseDto } from './responseDto/goal-response.dto';
 import { NotificationService } from 'src/notification/notification.service';
+import { ConfigService } from '@nestjs/config';
+
+type Vec = number[];
 
 @Injectable()
 export class GoalsService {
+  private readonly logger = new Logger(GoalsService.name);
+  private readonly simThreshold: number;
+
   constructor(
     private readonly prisma: PrismaService,
-    private readonly dashboardGateway: DashboardGateway,
-    private readonly openAIService: OpenAIService,
-    private readonly notificationService: NotificationService,
+    private readonly dashboard: DashboardGateway,
+    private readonly openAI: OpenAIService,
+    private readonly notifications: NotificationService,
+    private readonly agent: PlanningAgentService,
+    private readonly config: ConfigService,
+  ) {
+    this.simThreshold = Number(this.config.get('SIM_THRESHOLD') ?? 0.4);
+  }
 
-    
-  ) {}
 
 
   async findById(id: number): Promise<GoalResponseDto> {
     try {
-      const goal = await this.prisma.goal.findUnique({ where: { id } });
+      const goal = await this.prisma.goal.findUnique({
+        where: { id },
+        include: { plans: true },
+      });
       if (!goal) throw new NotFoundException('Goal not found');
       return this.formatGoal(goal);
-    } catch (err) {
+    } catch (err: any) {
       if (err instanceof NotFoundException) throw err;
+      this.logger.error('findById failed', err?.stack || err);
       throw new InternalServerErrorException('Failed to fetch goal');
     }
   }
 
-  async getAllByUserId(userId: number): Promise<GoalResponseDto[]>  {
+  async getGoals(userId: number,status?: 'completed' | 'in-progress',
+  ): Promise<GoalResponseDto[]> {
     try {
-      const goal= await this.prisma.goal.findMany({ where: { user_id: userId } });
-      return goal.map((g) => this.formatGoal(g));
-    } catch (err) {
-      throw new InternalServerErrorException('Failed to fetch goals');
-    }
-  }
+      const where: Prisma.GoalWhereInput = { user_id: userId };
+      if (status === 'completed') where.progress = { gte: 100 };
+      if (status === 'in-progress') where.progress = { gte: 0, lt: 100 };
 
-  async getGoalsByStatus(userId: number, status: 'completed' | 'in-progress'): Promise<GoalResponseDto[]>{
-    try {
-      const goal=  await this.prisma.goal.findMany({
-        where: {
-          user_id: userId,
-          progress: status === 'completed'
-          ? { gte: 100 } : { gte: 0, lt: 100 } 
-        },
+      const goals = await this.prisma.goal.findMany({
+        where,
         include: { plans: true },
       });
-     return goal.map((g) => this.formatGoal(g));
-    } catch (err) {
-      throw new InternalServerErrorException('Failed to fetch goals by status');
+      return goals.map((g) => this.formatGoal(g));
+    } catch (err: any) {
+      this.logger.error('getGoals failed', err?.stack || err);
+      throw new InternalServerErrorException('Failed to fetch goals');
     }
   }
 
   async deleteById(id: number): Promise<{ success: boolean }> {
     try {
       const goal = await this.prisma.goal.delete({ where: { id } });
-      await this.dashboardGateway.emitDashboardUpdate(goal.user_id);
+      this.dashboard.emitDashboardUpdate(goal.user_id).catch((e) =>
+        this.logger.warn(`emitDashboardUpdate failed: ${e?.message ?? e}`),
+      );
       return { success: true };
-    } catch (err) {
+    } catch {
+      this.logger.warn(`deleteById: ${id} not found`);
       throw new NotFoundException('Goal not found');
     }
   }
 
-   async createGoalWithAI(data: {
+  async createGoalWithAI(data: {
     title: string;
     description: string;
-    help_text?: string;
+    helpText?: string;
     visionBoardBase64?: string;
     user_id: number;
   }): Promise<GoalResponseDto> {
+    const { title, description, helpText, visionBoardBase64, user_id } = data;
+
     try {
-      const threshold = 0.4;
-
-     let vision_board_filename: string | undefined;
-
-     if (data.visionBoardBase64) {
-       vision_board_filename = saveBase64Image(
-        data.visionBoardBase64,
-        join(process.cwd(), 'storage/private/visionBoard')
- 
-       );
-     }
-
-      // generate embedding and plas
-      const [goalEmbedding, aiPlans] = await Promise.all([
-        this.generateGoalEmbedding(data.title, data.description),
-        this.openAIService.generatePlan(data.title, data.description),
+      const [visionBoardFilename, goalEmbedding, helpEmbedding] = await Promise.all([
+        visionBoardBase64
+          ? Promise.resolve(
+              saveBase64Image(
+                visionBoardBase64,
+                join(process.cwd(), 'storage/private/visionBoard'),
+              ),
+            )
+          : Promise.resolve<string | undefined>(undefined),
+        this.embedText(`${title}. ${description}`, 'goal'),
+        helpText ? this.embedText(helpText, 'help') : Promise.resolve<Vec | null>(null),
       ]);
 
-      // create goal
-      const goal = await this.createGoalInDB(data, goalEmbedding, aiPlans);
+      const goal = await this.prisma.goal.create({
+        data: {
+          title,
+          description,
+          helpText: helpText ?? null,
+          visionBoardFilename: visionBoardFilename ?? null,
+          embedding: goalEmbedding.length ? goalEmbedding : Prisma.JsonNull,
+          user: { connect: { id: user_id } },
+        },
+        select: { id: true },
+      });
 
-      // create help if provided
-      const helpEmbedding = data.help_text
-        ? await this.createHelp(data.user_id, data.help_text)
-        : null;
+      await this.agent.planAndAttachToGoal({
+        userId: user_id,
+        goalId: goal.id,
+        title,
+        description,
+      });
 
-      // create connections: goal → helps / help → other goals
-      await this.createConnections(data.user_id, goal, goalEmbedding, helpEmbedding, threshold);
+      const goalWithPlans = await this.prisma.goal.findUnique({
+        where: { id: goal.id },
+        include: { plans: true },
+      });
+      if (!goalWithPlans) throw new Error('Created goal not found');
 
+      await this.buildConnections(user_id, goalWithPlans, goalEmbedding, helpEmbedding);
 
-      await this.dashboardGateway.emitDashboardUpdate(data.user_id);
+      this.dashboard.emitDashboardUpdate(user_id).catch((e) =>
+        this.logger.warn(`emitDashboardUpdate failed: ${e?.message ?? e}`),
+      );
 
-      return this.formatGoal(goal);
-    } catch (err) {
-      console.error('Goal creation with AI failed:', err);
+      return this.formatGoal(goalWithPlans);
+    } catch (err: any) {
+      this.logger.error('createGoalWithAI failed', err?.stack || err);
       throw new BadRequestException('Goal creation with AI failed');
     }
   }
 
 
 
-  // generate embedding helpers
-  private async generateGoalEmbedding(title: string, description: string): Promise<number[]> {
-    return this.openAIService.generateEmbedding(`${title}. ${description}`);
-  }
-
-  private async generateHelpEmbedding(helpText: string): Promise<number[]> {
-    return this.openAIService.generateEmbedding(helpText);
+  private async embedText(text: string, label: 'goal' | 'help'): Promise<Vec> {
+    const v = await this.openAI.generateEmbedding(text);
+    this.logger.log(`[EMBED] ${label} dims=${v?.length ?? 0}`);
+    return v ?? [];
   }
 
 
-  // data helpers
-  private async createGoalInDB(
-    data: any,
-    goalEmbedding: number[],
-    aiPlans: any[],
-  ) {
-    return this.prisma.goal.create({
-      data: {
-        title: data.title,
-        description: data.description,
-        help_text: data.help_text || null,
-        vision_board_filename: data.vision_board_filename || null,
-        embedding: goalEmbedding.length ? goalEmbedding : Prisma.JsonNull,
-        user: { connect: { id: data.user_id } },
-        plans: { create: aiPlans.map(p => ({ ...p, due_date: new Date(), completed: false })) },
-      },
-      include: { plans: true },
-    });
-  }
 
-  private async createHelp(userId: number, helpText: string): Promise<number[]> {
-    const helpEmbedding = await this.generateHelpEmbedding(helpText);
-    await this.prisma.help.create({
-      data: {
-        description: helpText,
-        embedding: helpEmbedding.length ? helpEmbedding : Prisma.JsonNull,
-        user_id: userId,
-      },
-    });
-    return helpEmbedding;
-  }
-
-
-  // connections
-  private async createConnections(
+  private async buildConnections(
     userId: number,
-    goal: any,
-    goalEmbedding: number[],
-    helpEmbedding: number[] | null,
-    threshold: number,
-  ) {
-    const helps = await this.prisma.help.findMany({
-      where: { embedding: { not: Prisma.JsonNull } },
-      include: { user: true },
-    });
+    goal: Goal & { plans?: any[] },
+    goalEmbedding: Vec,
+    helpEmbedding: Vec | null,
+  ): Promise<void> {
+    if (!goalEmbedding?.length) return;
 
-    const connectionsToCreate: any[] = [];
+    const threshold = this.simThreshold;
 
-    // goal to helps
-    helps.forEach(h => {
-      if (!h.embedding) return;
-      const score = this.cosineSimilarity(goalEmbedding, h.embedding as number[]);
+    const [helps, otherGoals] = await Promise.all([
+      this.prisma.help.findMany({
+        where: { embedding: { not: Prisma.JsonNull } },
+        select: { user_id: true, embedding: true },
+      }),
+      helpEmbedding?.length
+        ? this.prisma.goal.findMany({
+            where: { embedding: { not: Prisma.JsonNull }, user_id: { not: userId } },
+            select: { id: true, user_id: true, embedding: true },
+          })
+        : Promise.resolve<Array<{ id: number; user_id: number; embedding: Prisma.JsonValue }>>([]),
+    ]);
+
+    const toCreate: Prisma.ConnectionCreateManyInput[] = [];
+    for (const h of helps) {
+      const emb = (h.embedding as Vec | null) ?? null;
+      if (!emb || h.user_id === userId) continue;
+
+      const score = this.cosineSimilarity(goalEmbedding, emb);
       if (score >= threshold) {
-        connectionsToCreate.push({
-          helper_id: h.user_id, 
+        toCreate.push({
+          helper_id: h.user_id,
           seeker_id: userId,
           goal_id: goal.id,
           similarityScore: score,
           status: 'pending',
+          helperDecision: 'pending',
+          seekerDecision: 'pending',
         });
       }
-    });
+    }
 
-    // help to other goals
-    if (helpEmbedding) {
-      const otherGoals = await this.prisma.goal.findMany({
-        where: { embedding: { not: Prisma.JsonNull }, user_id: { not: userId } },
-      });
-      otherGoals.forEach(g => {
-        const score = this.cosineSimilarity(helpEmbedding, g.embedding as number[]);
+    if (helpEmbedding?.length) {
+      for (const g of otherGoals) {
+        const emb = (g.embedding as Vec | null) ?? null;
+        if (!emb) continue;
+
+        const score = this.cosineSimilarity(helpEmbedding, emb);
         if (score >= threshold) {
-          connectionsToCreate.push({
+          toCreate.push({
             helper_id: userId,
             seeker_id: g.user_id,
             goal_id: g.id,
             similarityScore: score,
             status: 'pending',
+            helperDecision: 'pending',
+            seekerDecision: 'pending',
           });
         }
-      });
+      }
     }
 
-    // insert connections
-    if (connectionsToCreate.length > 0) {
-      await this.prisma.connection.createMany({ data: connectionsToCreate });
-    }
+    if (!toCreate.length) return;
 
-     for (const conn of connectionsToCreate) {
-      await this.notificationService.createNotification({
-        type: 'NEW_CONNECTION',
-        userId: conn.seeker_id,        
-        actorId: conn.helper_id,       
-        goalId: conn.goal_id,
-        content: `You have a new connection request from user ${conn.helper_id} for goal ${conn.goal_id}`,
-      });
-    }
+    await this.prisma.connection.createMany({ data: toCreate, skipDuplicates: true });
+
+    await Promise.allSettled(
+      toCreate.flatMap((c) => [
+        this.notifications.createAndPush({
+          type: 'NEW_CONNECTION',
+          userId: c.seeker_id,
+          actorId: c.helper_id,
+          goalId: c.goal_id,
+          content: 'Someone may help with your goal.',
+        }),
+        this.notifications.createAndPush({
+          type: 'NEW_CONNECTION',
+          userId: c.helper_id,
+          actorId: c.seeker_id,
+          goalId: c.goal_id,
+          content: 'You may help someone with their goal.',
+        }),
+      ]),
+    );
   }
 
-  // similarity
   private cosineSimilarity(a: number[], b: number[]): number {
-    const dot = a.reduce((sum, val, i) => sum + val * b[i], 0);
-    const normA = Math.sqrt(a.reduce((sum, val) => sum + val * val, 0));
-    const normB = Math.sqrt(b.reduce((sum, val) => sum + val * val, 0));
-    return dot / (normA * normB);
+    if (!Array.isArray(a) || !Array.isArray(b)) return 0;
+    const n = a.length;
+    if (!n || n !== b.length) return 0;
+    let dot = 0,
+      na = 0,
+      nb = 0;
+    for (let i = 0; i < n; i++) {
+      const ai = a[i];
+      const bi = b[i];
+      dot += ai * bi;
+      na += ai * ai;
+      nb += bi * bi;
+    }
+    if (!na || !nb) return 0;
+    return dot / (Math.sqrt(na) * Math.sqrt(nb));
   }
 
-
-  //helper for mapping
   private formatGoal(goal: any): GoalResponseDto {
-  return {
-    id: goal.id,
-    title: goal.title,
-    description: goal.description,
-    help_text: goal.help_text,
-    vision_board_filename: goal.vision_board_filename,
-    progress: goal.progress,
-    createdAt: goal.createdAt,
-    updatedAt: goal.updatedAt,
-    plans: goal.plans?.map((plan: any) => ({
-      id: plan.id,
-      title: plan.title,
-      description: plan.description,
-      due_date: plan.due_date,
-      completed: plan.completed,
-    })),
-  };
-}
-
+    return {
+      id: goal.id,
+      title: goal.title,
+      description: goal.description,
+      helpText: goal.helpText,
+      visionBoardFilename: goal.visionBoardFilename,
+      progress: goal.progress,
+      createdAt: goal.createdAt,
+      updatedAt: goal.updatedAt,
+      plans: goal.plans?.map((p: any) => ({
+        id: p.id,
+        title: p.title,
+        description: p.description,
+        due_date: p.due_date,
+        completed: p.completed,
+      })),
+    };
+  }
 }

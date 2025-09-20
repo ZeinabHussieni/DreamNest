@@ -8,7 +8,6 @@ import { PlanModule } from './plan/plan.module';
 import { PostModule } from './post/post.module';
 import { ChatModule } from './chat/chat.module';
 import { NotificationModule } from './notification/notification.module';
-import { AutomationModule } from './automation/jobs/automation.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { DashboardController } from './dashboard/dashboard.controller';
 import { DashboardModule } from './dashboard/dashboard.module';
@@ -17,16 +16,23 @@ import { OpenaiModule } from './openai/openai.module';
 import { ConnectionsController } from './connections/connections.controller';
 import { ConnectionsService } from './connections/connections.service';
 import { ConnectionsModule } from './connections/connections.module';
+import { CoinsModule } from './coins/coins.module';
+import { LlmModule } from './llm/llm.module';
+import { AgentModule } from './agent/agent.module';
+import { PlanningAgentService } from './agent/agent.service';
+import { ModerationModule } from './moderation/moderation.module';
+import { TranscribeModule } from './transcribe/transcribe.module';
+import { StorageModule } from './storage/storage.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
   ScheduleModule.forRoot(),
-  AutomationModule,
   ConfigModule.forRoot({ isGlobal: true }),
-  AuthModule, UserModule, PrismaModule, GoalsModule,PlanModule, PostModule, ChatModule, NotificationModule, AutomationModule, DashboardModule,OpenaiModule, ConnectionsModule
+  AuthModule, UserModule, PrismaModule, GoalsModule,PlanModule, PostModule, ChatModule, NotificationModule, DashboardModule,OpenaiModule, ConnectionsModule, CoinsModule, LlmModule, AgentModule, ModerationModule, TranscribeModule, StorageModule, EventEmitterModule.forRoot(),
 
 ],
   controllers: [DashboardController, ConnectionsController],
-  providers: [OpenAIService, ConnectionsService],
+  providers: [OpenAIService, ConnectionsService, PlanningAgentService],
 })
 export class AppModule {}

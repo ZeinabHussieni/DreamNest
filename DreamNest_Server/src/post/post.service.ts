@@ -2,8 +2,14 @@ import { BadRequestException, Injectable, InternalServerErrorException, NotFound
 import { PrismaService } from 'src/prisma/prisma.service';
 import { NotificationService } from 'src/notification/notification.service';
 import { DashboardGateway } from 'src/dashboard/gateway/dashboard.gateway'; 
-import { Post as PrismaPost } from '@prisma/client';
 import { PostResponseDto } from './responseDto/post-response.dto';
+
+import { Post as PrismaPost, User } from '@prisma/client';
+
+type PostWithUser = PrismaPost & {
+  user?: { id: number; userName: string; profilePicture: string | null };
+  _count?: { likes: number };
+};
 
 
 @Injectable()
@@ -24,6 +30,8 @@ export class PostService {
             });
             //this for websocket dashboard
             await this.dashboardGateway.emitDashboardUpdate(data.user_id);
+            await this.dashboardGateway.emitAdminDashboardUpdate();  
+            
             return this.formatPost(post);
         } catch (err) {
             console.log(err);
@@ -31,30 +39,72 @@ export class PostService {
         }
     }
 
-    async getAllPost():Promise<PrismaPost[]>{
-        try{
-            const posts=await this.prisma.post.findMany();
-            return posts.map(this.formatPost);
-        }catch(err){
+    async getAllPost(viewerId: number): Promise<PostResponseDto[]> {
+      try {
+         const posts = await this.prisma.post.findMany({
+         include: {
+              user: { select: { id: true, userName: true, profilePicture: true } },
+              _count: { select: { likes: true } },          
+              likes: {                                     
+                 where: { user_id: viewerId },
+                 select: { id: true },
+                 take: 1,
+               },
+           },
+              orderBy: { createdAt: 'desc' },
+            });
+
+            return posts.map((p) => ({
+               id: p.id,
+               content: p.content,
+               user_id: p.user_id,
+               createdAt: p.createdAt,
+               updatedAt: p.updatedAt,
+               user: p.user,
+               likeCount: p._count.likes,
+               viewerLiked: p.likes.length > 0,
+           }));
+        } catch {
             throw new InternalServerErrorException('Failed to fetch posts');
         }
     }
 
-    async getUserAllPosts(userId: number): Promise<PostResponseDto[]>{
-        try{
-            const posts=await this.prisma.post.findMany({where: {user_id:userId}})
-            return posts.map(this.formatPost)
-        }catch(err){
-            throw new InternalServerErrorException('Failed to fetch user posts');
-        }
-    }
+   async getUserAllPosts(ownerId: number, viewerId: number): Promise<PostResponseDto[]> {
+        try {
+            const posts = await this.prisma.post.findMany({
+            where: { user_id: ownerId },
+            include: {
+           _count: { select: { likes: true } },
+           likes: {
+              where: { user_id: viewerId }, 
+              select: { id: true },
+              take: 1,
+            },
+        },
+           orderBy: { createdAt: 'desc' },
+        });
 
+       return posts.map((p) => ({
+         id: p.id,
+         content: p.content,
+         user_id: p.user_id,
+         createdAt: p.createdAt,
+         updatedAt: p.updatedAt,
+         likeCount: p._count.likes,
+         viewerLiked: p.likes.length > 0,
+        }));
+      } catch {
+      throw new InternalServerErrorException('Failed to fetch user posts');
+      }
+    }
+    
     async deleteById(id:number): Promise<{success:boolean}>{
         try{
            const post= await this.prisma.post.delete({where:{id}});
 
             //this for websocket dashboard
             await this.dashboardGateway.emitDashboardUpdate(post.user_id);
+            await this.dashboardGateway.emitAdminDashboardUpdate();  
             return{success:true};
         }catch(err){
             throw new NotFoundException('Post not found');
@@ -89,36 +139,45 @@ export class PostService {
                },
               });
               liked = true;
-              await this.notificationService.createNotification({
-              type: 'LIKE_POST',
-              userId: post.user_id,      
-              actorId: userId,          
-              postId: postId,
-              content: `${post.user.userName} liked your post`,
-           });
+             const actor = await this.prisma.user.findUnique({
+               where: { id: userId },
+               select: { userName: true },
+              });
 
-            }
-
-           const likeCount = await this.prisma.postLike.count({ where: { post_id: postId } });
-           
-
-           return { liked, likeCount };
-       } catch (err) {
+            await this.notificationService.createAndPush({
+            type: 'LIKE_POST',
+            userId: post.user_id,     
+            actorId: userId,          
+            postId,
+            content: `${actor?.userName ?? 'Someone'} liked your post`,
+         });
+       }
+       const likeCount = await this.prisma.postLike.count({ where: { post_id: postId } });
+       return { liked, likeCount };
+      } catch (err) {
         console.error(err);
         throw new BadRequestException('Failed to toggle like');
       }
-    }
+  }
     
 
-    private formatPost(post: PrismaPost): PostResponseDto {
-        return {
-            id: post.id,
-            content: post.content,
-            user_id: post.user_id,
-            createdAt: post.createdAt,
-            updatedAt: post.updatedAt,
-        };
-    }
+  private formatPost(post: PostWithUser): PostResponseDto {
+    return {
+      id: post.id,
+      content: post.content,
+      user_id: post.user_id,
+      createdAt: post.createdAt,
+      updatedAt: post.updatedAt,
+      user: post.user
+        ? {
+            id: post.user.id,
+            userName: post.user.userName,
+            profilePicture: post.user.profilePicture,
+          }
+        : undefined,
+   
+    };
+  }
 
 
 }

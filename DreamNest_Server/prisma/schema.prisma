@@ -25,13 +25,18 @@ model User {
   profilePicture   String?
   coins            Int          @default(0)
 
+  lastActiveAt     DateTime?
+
   goals            Goal[] 
   posts            Post[] 
   likes            PostLike[] 
   chatRooms        ChatRoomUser[] 
+  userModeration   UserModeration[]
   messages         Message[]   
   messageReads     MessageRead[] 
   notifications    Notification[] 
+  coinLedgers      CoinLedger[]
+  coinPurchases    CoinPurchase[]
 
   helps            Help[]
   helperConnections Connection[] @relation("HelperConnection")
@@ -45,13 +50,13 @@ model Goal {
   id                  Int       @id @default(autoincrement())
   title               String
   description         String
-  help_text           String?   
-  vision_board_filename String?  
+  helpText           String?   
+  visionBoardFilename String?  
   progress            Float     @default(0) 
   embedding           Json?     
 
   plans               Plan[] 
-  user_id             Int
+  user_id               Int
   user                User       @relation(fields: [user_id], references: [id])
 
 
@@ -65,7 +70,7 @@ model Help {
   id          Int    @id @default(autoincrement())
   description String
   embedding   Json?      
-  user_id     Int
+  user_id       Int
   user        User   @relation(fields: [user_id], references: [id])
 
   createdAt   DateTime @default(now())
@@ -74,26 +79,40 @@ model Help {
   @@index([user_id])
 }
 
+enum ConnectionDecision {
+  pending
+  accepted
+  rejected
+}
+
 model Connection {
-  id              Int    @id @default(autoincrement())
-  helper_id       Int   
-  seeker_id       Int   
-  goal_id         Int   
+  id              Int                 @id @default(autoincrement())
+  helper_id       Int
+  seeker_id       Int
+  goal_id         Int
+  similarityScore Float
+  status          ConnectionStatus    @default(pending)
 
-  similarityScore Float   
-  status          ConnectionStatus @default(pending) 
+  helperDecision  ConnectionDecision  @default(pending)
+  seekerDecision  ConnectionDecision  @default(pending)
 
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  chatRoomId      Int?
+  chatRoom        ChatRoom?           @relation("ConnectionChatRoom", fields: [chatRoomId], references: [id])
+
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
 
   helper          User @relation("HelperConnection", fields: [helper_id], references: [id])
   seeker          User @relation("SeekerConnection", fields: [seeker_id], references: [id])
-  goal            Goal @relation(fields: [goal_id], references: [id])
+  goal            Goal @relation(fields: [goal_id], references: [id], onDelete: Cascade)
 
   @@index([helper_id])
   @@index([seeker_id])
   @@index([goal_id])
+  @@unique([helper_id, seeker_id, goal_id])
 }
+
+
 
 enum ConnectionStatus {
   pending
@@ -108,7 +127,7 @@ model Plan {
   due_date    DateTime
   completed   Boolean 
   goal_id     Int
-  goal        Goal     @relation(fields: [goal_id], references: [id])
+  goal        Goal     @relation(fields: [goal_id], references: [id], onDelete: Cascade) 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -116,7 +135,7 @@ model Plan {
 model Post {
   id        Int        @id @default(autoincrement())
   content   String
-  user_id   Int
+  user_id     Int
   user      User       @relation(fields: [user_id], references: [id])
   likes     PostLike[] 
   createdAt DateTime   @default(now())
@@ -125,80 +144,178 @@ model Post {
 
 model PostLike {
   id          Int      @id @default(autoincrement()) 
-  user_id          Int
+  user_id            Int
   post_id          Int
   user             User       @relation(fields: [user_id], references: [id]) 
-  post             Post       @relation(fields: [post_id], references: [id])
+  post      Post @relation(fields: [post_id], references: [id], onDelete: Cascade)      
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   @@unique([user_id, post_id])
 }
 
 model ChatRoom {
-  id            Int            @id @default(autoincrement()) 
+  id            Int            @id @default(autoincrement())
   createdAt     DateTime       @default(now())
-  name        String?   
+  name          String?
 
-  participants  ChatRoomUser[] 
-  messages      Message[] 
+  participants  ChatRoomUser[]
+  messages      Message[]
+
+  connections   Connection[]   @relation("ConnectionChatRoom")
 }
 
 model ChatRoomUser {
   id        Int      @id @default(autoincrement()) 
-  userId    Int
+  userId      Int
   chatRoomId Int
+  lastSeenAt DateTime @default(now())
 
   user      User     @relation(fields: [userId], references: [id])
   chatRoom  ChatRoom @relation(fields: [chatRoomId], references: [id])
 
-  @@unique([userId, chatRoomId])          
+  @@unique([userId, chatRoomId])      
+  @@index([chatRoomId, userId, lastSeenAt])     
 }
 
 model Message {
-  id         Int      @id @default(autoincrement())
-  content    String
-  createdAt  DateTime @default(now())
+  id            Int       @id @default(autoincrement())
+  type          String    @default("text") 
+  content       String?                  
+  censoredContent String?               
 
-  senderId   Int
-  sender     User     @relation(fields: [senderId], references: [id])
+  audioUrl      String?
+  transcript    String?
+  imageUrl      String?                 
 
-  chatRoomId Int
-  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id])
-  reads      MessageRead[]   
+  status        String    @default("sent") // "sent" | "delivered" | "delivered_censored" | "blocked"
+  isBad         Boolean   @default(false)
+  badReason     String?                 
+  quarantineUrl String?                  
+  moderatedAt   DateTime?
+
+  createdAt     DateTime  @default(now())
+  deliveredAt   DateTime?
+
+  senderId      Int
+  sender        User      @relation(fields: [senderId], references: [id])
+
+  chatRoomId    Int
+  chatRoom      ChatRoom  @relation(fields: [chatRoomId], references: [id])
+
+  reads         MessageRead[]
 
   @@index([chatRoomId, createdAt])
+  @@index([senderId, createdAt])
+  @@index([isBad, status, type])
 }
+
+
 
 model MessageRead {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  messageId Int
-  readAt    DateTime @default(now())
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  messageId  Int
+  readAt     DateTime @default(now())
 
-  user      User     @relation(fields: [userId], references: [id])
-  message   Message  @relation(fields: [messageId], references: [id])
-  @@index([userId, readAt])
-
+  user       User     @relation(fields: [userId], references: [id])
+  message    Message  @relation(fields: [messageId], references: [id])
 
   @@unique([userId, messageId])
+  @@index([messageId], map: "idx_messageread_message")
+  @@index([userId, readAt], map: "idx_messageread_user_readat")
 }
+
+model UserModeration {
+  id               Int      @id @default(autoincrement())
+  userId           Int      @unique
+  user             User     @relation(fields: [userId], references: [id])
+
+
+  totalInfractions Int      @default(0)
+  textInfractions  Int      @default(0)
+  voiceInfractions Int      @default(0)
+  imageInfractions Int      @default(0)
+
+
+  chatBlocked      Boolean  @default(false)
+  chatBlockedAt    DateTime?
+  siteBlocked      Boolean  @default(false)
+  siteBlockedAt    DateTime?
+
+
+  updatedAt        DateTime @updatedAt
+  createdAt        DateTime @default(now())
+}
+
 
 model Notification {
   id         Int      @id @default(autoincrement())
-  type       String   
-  userId     Int     
-  actorId    Int?     
+  type       String
+  userId     Int
+  actorId    Int?
   goalId     Int?
   planId     Int?
   postId     Int?
   chatRoomId Int?
   messageId  Int?
-  content    String   
+  content    String
   read       Boolean  @default(false)
   createdAt  DateTime @default(now())
 
   user       User     @relation(fields: [userId], references: [id])
+
+  @@index([userId, read, createdAt])
+  @@index([createdAt])
 }
 
+enum CoinReason {
+  PLAN_COMPLETED
+  PLAN_UNCHECKED
+  DAILY_DECAY
+  PURCHASE
+}
 
+model CoinLedger {
+  id         Int        @id @default(autoincrement())
+  userId     Int
+  user       User       @relation(fields: [userId], references: [id])
 
+  delta      Int                    // + or - coins
+  reason     CoinReason
+
+  goalId     Int?
+  planId     Int?
+
+  purchaseId Int?
+  purchase   CoinPurchase? @relation("PurchaseLedger", fields: [purchaseId], references: [id])
+
+  decayDay   DateTime?           
+
+  createdAt  DateTime   @default(now())
+
+  @@index([userId, createdAt])
+  @@index([reason, createdAt])
+  @@unique([userId, reason, decayDay])
+}
+
+enum PurchaseStatus {
+  pending
+  succeeded
+  failed
+}
+
+model CoinPurchase {
+  id            Int            @id @default(autoincrement())
+  userId        Int
+  user          User           @relation(fields: [userId], references: [id])
+
+  coins         Int
+  amountCents   Int
+  status        PurchaseStatus  @default(pending)
+
+  createdAt     DateTime        @default(now())
+  completedAt   DateTime?
+
+  ledgerEntries CoinLedger[]    @relation("PurchaseLedger")
+}

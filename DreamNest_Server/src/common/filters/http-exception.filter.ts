@@ -1,10 +1,5 @@
 import {
-  ArgumentsHost,
-  Catch,
-  ExceptionFilter,
-  HttpException,
-  HttpStatus,
-} from '@nestjs/common';
+  ArgumentsHost,Catch,ExceptionFilter,HttpException, HttpStatus,} from '@nestjs/common';
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -13,23 +8,27 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const res = ctx.getResponse();
     const req = ctx.getRequest();
 
-    // Default values for unexpected errors
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
-    let message: any = 'Internal server error';
     let errorName = 'Error';
+    let message: any = 'Internal server error';
+    let errors: Record<string, string> | undefined;
 
     if (exception instanceof HttpException) {
       status = exception.getStatus();
-      const response = exception.getResponse();
       errorName = exception.name;
+      const response = exception.getResponse();
 
-      // Nest/Validation errors may return an object or string/array
       if (typeof response === 'string') {
         message = response;
       } else if (Array.isArray((response as any)?.message)) {
         message = (response as any).message;
       } else if (typeof response === 'object' && response) {
-        message = (response as any).message || message;
+        const obj = response as any;
+        message = obj.message || message;
+    
+        if (obj.errors && typeof obj.errors === 'object') {
+          errors = obj.errors;
+        }
       }
     } else if (exception instanceof Error) {
       errorName = exception.name;
@@ -44,6 +43,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       error: {
         name: errorName,
         message,
+        ...(errors ? { errors } : {}), 
       },
     });
   }

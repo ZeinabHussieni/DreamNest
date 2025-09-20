@@ -1,0 +1,152 @@
+.footer {
+  background-color: var(--nav-bg); 
+  color: white;
+  padding: 90px 20px;
+  margin-left: -35px; 
+  margin-right: -32px; 
+  margin-bottom: -35px;
+}
+
+.footer-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  max-width: 1400px;
+  margin: 0 200px; 
+  gap: 60px;
+}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.footer-logo-img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid white;
+}
+
+.footer-logo h2 {
+  font-size: 26px;
+  font-weight: bold;
+}
+
+.footer-desc {
+  flex-basis: 100%;
+  max-width: 800px;
+  margin: 0 auto 30px;
+  color: white;
+  text-align: left;
+  font-size: 18px;
+  line-height: 1.5;
+  white-space: normal;
+}
+
+.footer-socials {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.footer-socials a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background-color: #F2EAF7;;
+  color: var(--nav-bg); 
+  font-size: 18px;
+  transition: all 0.3s ease;
+}
+
+.footer-socials a:hover {
+  background-color: var(--main-bg);
+  color: var(--nav-bg);
+}
+
+.footer-middle h3,
+.footer-right h3 {
+  margin-bottom: 15px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.footer-middle ul {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-middle li {
+  margin-bottom: 10px;
+}
+
+.footer-middle a {
+  color: white;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.footer-middle a:hover {
+ color: white;
+}
+
+.footer-right p {
+  margin: 8px 0;
+  font-size: 16px;
+}
+
+.footer-right a {
+  color: white;
+  text-decoration: underline;
+}
+
+@media (max-width: 1049px) {
+  .footer-desc {
+    font-size: 16px;
+  }
+  .footer-logo h2 {
+    font-size: 20px;
+  }
+  .footer-left {
+    margin-left: -80px;
+  }
+  .footer-middle {
+    font-size: 16px;
+    margin-right: 5px;
+  }
+}
+
+@media (max-width: 827px) {
+  .footer {
+    margin-left: -140px;
+  }
+  .footer-left {
+    margin-left: -20px;
+  }
+  .footer-desc {
+    font-size: 15px;
+  }
+  .footer-logo h2 {
+    font-size: 18px;
+  }
+  .footer-right h3 {
+    font-size: 18px;
+  }
+  .footer-middle h3 {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 765px) {
+  .footer {
+    display: none;
+  }
+}

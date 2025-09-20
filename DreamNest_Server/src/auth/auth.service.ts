@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, InternalServerErrorException,NotFoundException } from '@nestjs/common';
+import { Injectable,ForbiddenException,ConflictException, UnauthorizedException,HttpException, InternalServerErrorException,NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as argon2 from 'argon2';
@@ -7,8 +7,8 @@ import { saveBase64Image } from '../common/shared/file.utils';
 import { User as PrismaUser } from '@prisma/client';
 import { AuthResponseDto } from './responseDto/auth-response.dto';
 import { join } from 'path';
-
-
+import { Prisma } from '@prisma/client'
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class AuthService {
@@ -16,9 +16,9 @@ export class AuthService {
     private readonly users: UserService,
     private readonly jwt: JwtService,
     private readonly config: ConfigService,
+    private readonly prisma: PrismaService,
   ) {}
 
-  // public methods
 
   async register(
     firstName: string,
@@ -30,7 +30,15 @@ export class AuthService {
   ) {
     try {
       const exists = await this.users.findByEmailOrUsername(email, userName);
-      if (exists) throw new UnauthorizedException('Email or username already in use');
+      if (exists) {
+      throw new ConflictException({
+        message: 'Email or username already in use',
+        errors: {
+        ...(exists.email === email ? { email: 'Email already in use' } : {}),
+        ...(exists.userName === userName ? { userName: 'Username already in use' } : {}),
+        },
+      });
+      }
 
       const hashedPassword = await argon2.hash(password);
 
@@ -59,19 +67,48 @@ export class AuthService {
         ...tokens,
       } as AuthResponseDto;
     } catch (err) {
-      if (err instanceof UnauthorizedException) throw err;
-      throw new InternalServerErrorException('Failed to register user');
+      if (err instanceof HttpException) throw err;
+
+
+    if (err?.code === 'P2002') {
+      const target = (err as Prisma.PrismaClientKnownRequestError)?.meta?.target as string[] | undefined;
+      const errors: Record<string, string> = {};
+      if (target?.includes('email')) errors.email = 'Email already in use';
+      if (target?.includes('userName')) errors.userName = 'Username already in use';
+
+      throw new ConflictException({
+        message: 'Email or username already in use',
+        errors: Object.keys(errors).length ? errors : {
+          email: 'Email already in use', userName: 'Username already in use'
+        },
+      });
     }
+
+
+    throw new InternalServerErrorException('Failed to register user');
+  }
   }
 
   async login(identifier: string, password: string) {
     try {
       const user = await this.users.findByIdentifier(identifier);
-      if (!user) throw new UnauthorizedException('Invalid credentials');
-
-      const isValid = await argon2.verify(user.passwordHash, password);
-      if (!isValid) throw new UnauthorizedException('Invalid credentials');
-
+    if (!user) {
+    throw new UnauthorizedException({
+     message: 'Invalid credentials',
+     errors: { identifier: 'Incorrect email/username or password' }
+    });
+    }
+    const mod = await this.prisma.userModeration.findUnique({ where: { userId: user.id } });
+    if (mod?.siteBlocked) {
+     throw new ForbiddenException('Account suspended.');
+    }
+    const isValid = await argon2.verify(user.passwordHash, password);
+    if (!isValid) {
+     throw new UnauthorizedException({
+     message: 'Invalid credentials',
+     errors: { identifier: 'Incorrect email/username or password' }
+    });
+    }
       const tokens = await this.generateAndSaveTokens(user);
 
       return {
@@ -79,8 +116,8 @@ export class AuthService {
         ...tokens,
       } as AuthResponseDto;
     } catch (err) {
-      if (err instanceof UnauthorizedException) throw err;
-      throw new InternalServerErrorException('Login failed');
+     if (err instanceof HttpException) throw err;
+    throw new InternalServerErrorException('Login failed');
     }
   }
 
@@ -88,6 +125,8 @@ export class AuthService {
     try {
       const user = await this.users.findById(userId);
       if (!user || !user.refreshTokenHash) throw new UnauthorizedException();
+      const mod = await this.prisma.userModeration.findUnique({ where: { userId } });
+      if (mod?.siteBlocked) throw new UnauthorizedException('Account suspended.');
 
       const isValid = await argon2.verify(user.refreshTokenHash, presentedToken);
       if (!isValid) throw new UnauthorizedException();
@@ -133,6 +172,7 @@ export class AuthService {
     lastName: user.lastName,
     userName: user.userName,
     email: user.email,
+    coins:user.coins,
     profilePicture: user.profilePicture
 
   };
@@ -150,7 +190,7 @@ export class AuthService {
 
       const accessToken = this.jwt.sign(payload, {
         secret: this.config.get<string>('JWT_ACCESS_SECRET'),
-        expiresIn: this.config.get<string>('JWT_ACCESS_TTL') || '15m',
+        expiresIn: this.config.get<string>('JWT_ACCESS_TTL') || '45m',
       });
 
       const refreshToken = this.jwt.sign(payload, {

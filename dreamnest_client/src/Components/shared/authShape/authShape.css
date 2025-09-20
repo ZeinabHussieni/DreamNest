@@ -1,0 +1,37 @@
+.auth-shape-container {
+  position: fixed;    
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;          
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.auth-shape-left {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 700px;       
+  height: 490px;
+  object-fit: cover;
+}
+
+.auth-shape-right {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 900px;       
+  height: 390px;
+  object-fit: cover;
+}
+@media (max-width: 1588px) {
+  .auth-shape-left {
+    display: none;
+  }
+  .auth-shape-right {
+    display: none;
+  }
+}
+

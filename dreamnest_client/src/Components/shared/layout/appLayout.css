@@ -1,0 +1,29 @@
+.page-wrapper {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main-content{
+  min-width: 0;                
+  padding-block: clamp(12px, 2vw, 32px);
+  padding-inline: clamp(12px, 4vw, 32px);
+  overflow: hidden;
+}
+
+
+.main-content .container{
+  box-sizing: border-box;      
+  width: 100%;
+  max-width: 1900px;
+  margin-inline: auto;             
+}
+
+
+ video, canvas, svg{
+  max-width: 100%;
+  height: auto;
+}
+
+html, body{
+  overflow-x: hidden;
+}
