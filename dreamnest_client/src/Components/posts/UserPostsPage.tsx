@@ -17,7 +17,7 @@ const UserPostsPage: React.FC = () => {
       <PostComposer onPublish={publish} loading={publishing} />
 
       {loading ? (
-        <p className="muted">Loading…</p>
+        <p className="muted loading">Loading…</p>
       ) : items.length === 0 ? (
 
       <div className="no-posts">

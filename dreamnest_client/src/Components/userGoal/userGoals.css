@@ -29,7 +29,9 @@
   color: var(--muted);
   letter-spacing: .2px;
 }
-
+.loading{
+  text-align: center;
+}
 .user-goals .goal-title-card {
   margin: 0;
   font-size: 18px;

@@ -11,7 +11,7 @@ const ConnectionsPage: React.FC = () => {
   const { connections, loading, error, onAccept, onReject } = useConnections(userId);
 
   if (!userId) return <div className="req-page"><p>Sign in first.</p></div>;
-  if (loading) return <div className="req-page"><p>Loading…</p></div>;
+  if (loading) return <div className="req-page loading"><p>Loading…</p></div>;
   if (error) return <div className="req-page"><p className="err">{error}</p></div>;
 
   return (

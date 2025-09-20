@@ -60,7 +60,7 @@ const UserGoals: React.FC = () => {
       </header>
       
 
-     {loading && <p>Loading goals…</p>}
+     {loading && <p className="loading">Loading goals…</p>}
      {error && <p className="error">{error}</p>}
 
      {!loading && !error && (

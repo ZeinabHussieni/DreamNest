@@ -12,7 +12,7 @@ const DashboardPage: React.FC = () => {
   if (loading || !data) {
     return (
       <div className="dash">
-        <div className="card center">Loading dashboard…</div>
+        <div className="card center loading">Loading dashboard…</div>
       </div>
     );
   }
