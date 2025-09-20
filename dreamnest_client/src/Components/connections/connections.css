@@ -1,0 +1,72 @@
+.req-page { 
+  padding: 24px; 
+}
+.req-title { 
+    font-size: 28px; 
+    font-weight: 700;
+    margin-bottom: 20px;
+ }
+.req-empty {
+    padding: 24px;
+    border-radius: 12px;
+    background:var(--empty-req);
+    color:var(--nav-bg);
+    
+}
+
+.req-list { 
+    list-style: none;
+    padding: 0; 
+    margin: 0; 
+    display: grid;
+    gap: 14px; 
+}
+.req-card {
+  display: grid;
+  grid-template-columns: 64px 1fr auto;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--soft-bg);
+}
+.req-avatar { 
+    width: 64px; 
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover; 
+}
+.req-name { 
+    font-weight: 700;
+    font-size: 20px; 
+    margin-bottom: 4px; 
+}
+.req-sub { 
+    color: var(--muted);
+    font-size: 17px;
+
+}
+.req-actions {
+ display: flex;
+ gap: 10px;
+ }
+
+.btnn { 
+   border: 0;
+   border-radius: 8px;
+   padding: 8px 16px; 
+   cursor: pointer; 
+   font-weight: 700;
+   font-size: 17px; 
+}
+.btnn.confirm { 
+    background:var(--nav-bg) ; 
+    color: white; 
+}
+.btnn.reject {
+    background: var(--danger); 
+    color: white; 
+}
+.err {
+    color: var(--danger);
+}

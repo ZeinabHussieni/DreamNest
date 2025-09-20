@@ -1,0 +1,80 @@
+version: "3.9"
+
+services:
+  frontend:
+    build:
+      context: ./dreamnest_client
+    env_file:
+      - ./env/frontend.env
+    ports:
+      - "3001:3001"
+    depends_on:
+      - backend
+    networks:
+      - appnet
+
+  backend:
+    build:
+      context: ./DreamNest_Server
+    env_file:
+      - ./env/backend.env
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+      - ollama
+    volumes:
+      - backend_uploads:/app/uploads
+      - backend_storage:/app/storage 
+    networks:
+      - appnet
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    env_file:
+      - ./env/db.env
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - appnet
+
+  n8n:
+    image: n8nio/n8n:latest
+    env_file:
+      - ./env/n8n.env
+    ports:
+      - "5679:5678"
+    volumes:
+      - n8n_data:/home/node/.n8n
+    restart: unless-stopped
+    networks:
+      - appnet
+
+  ollama:
+    image: ollama/ollama:latest
+    env_file:
+      - ./env/ollama.env
+    volumes:
+      - ollama:/root/.ollama
+    ports:
+      - "11434:11434"
+    networks:
+      - appnet
+
+volumes:
+  pgdata:
+  n8n_data:
+    external: true
+    name: dreamnest_n8n_data
+  ollama:
+  backend_uploads:
+  backend_storage:  
+
+networks:
+  appnet:
+    driver: bridge
+
+

@@ -1,0 +1,18 @@
+.primary-button{
+  align-self: center;
+  margin-top: auto;
+  padding: 15px 25px;
+  font-size: 15px;
+  background-color: var(--button-bg);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-weight: 600;
+  margin-right: 30px;
+}
+
+.primary-button:hover {
+  background-color: var #b8683d;
+}
