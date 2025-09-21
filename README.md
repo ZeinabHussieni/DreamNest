@@ -2,14 +2,22 @@
 
 <br><br>
 
-<!-- project overview -->
+<!-- Project Overview -->
 <img src="./readme/title2.svg"/>
 
-> DreamNest is an AI-powered web app that helps users visualize and achieve their goals. 
->
-> It connects like-minded people based on personality, creates personalized step-by-step plans, and generates motivational visuals to keep them inspired.
-> 
-> With progress tracking and daily reminders.
+# DreamNest
+
+**DreamNest is where your dreams turn into action.** ✨  
+Write down your vision, and our AI transforms it into a personalized step-by-step plan to help you achieve it.  
+
+But you won’t be alone on the journey — DreamNest’s **smart matching system** connects you with people who share similar goals or complementary skills. Once matched, you’ll unlock a **private chat space** where you can exchange text, voice notes, and images.  
+
+Beyond one-to-one connections, you can:  
+- Share updates in the **community feed**  
+- Track your progress in a **personal dashboard**  
+- Stay safe with **built-in AI moderation**  
+
+Meanwhile, **admins** have their own dashboard to keep the environment secure, supportive, and positive.  
 
 <br><br>
 
@@ -119,7 +127,7 @@ For designing and maintaining our system and database diagrams, we relied on Era
 
 | CI                                      | CI                                    | 
 | --------------------------------------- | ------------------------------------- | 
-| ![Landing](./readme/screenshots/c11.jpg)| ![fsdaf](./readme/demo/1440x1024.png) | 
+| ![Landing](./readme/screenshots/c11.jpg)| ![fsdaf](./readme/screenshots/c2.jpg) | 
 
 ### Services, Validation and Testing
 | Services                                     | Validation                                       | 
