@@ -90,7 +90,7 @@ Meanwhile, **admins** have their own dashboard to keep the environment secure, s
 
 | n8n                                          | 
 | ---------------------------------------------| 
-| ![Landing](./readme/screenshots/n8n.jpeg)    | 
+| ![Landing](./readme/gifs/n8n.gif)            | 
 
 <br><br>
 
