@@ -50,7 +50,7 @@ Meanwhile, **admins** have their own dashboard to keep the environment secure, s
 
 <img src="./readme/screenshots/features.png"/>
 
-### 🚀 Future Work  
+### Future Work  
 
 - 📱 **Mobile App**  
   Launch DreamNest on iOS & Android so users can stay connected and track progress anywhere.  
@@ -59,7 +59,7 @@ Meanwhile, **admins** have their own dashboard to keep the environment secure, s
   Extend existing blocking features with timers, allowing temporary blocks to reduce distractions and boost focus.  
 
 - 🎮 **Coins & Unlockable Features**  
-  Gamify the journey — the more coins you earn, the more advanced features and rewards you can unlock.  
+  Gamify the journey the more coins you earn, the more advanced features and rewards you can unlock.  
 <br><br>
 
 <!-- Demo -->
@@ -149,7 +149,6 @@ For designing and maintaining our system and database diagrams, we relied on Era
 | ---------------------------------------------------| ------------------------------------------------- | 
 | ![Landing](./readme/screenshots/backendtester.jpg) | ![fsdaf](./readme/screenshots/frontendtester.jpg) | 
 
-<br><br>
 
 ### ⚡ API Usage (Swagger & Postman)
 
