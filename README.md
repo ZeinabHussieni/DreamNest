@@ -49,6 +49,17 @@ Meanwhile, **admins** have their own dashboard to keep the environment secure, s
   Automated pep talks, reminders, and progress reports. DreamNest keeps the energy flowing so you never lose momentum on your goals.
 
 <img src="./readme/screenshots/features.png"/>
+
+### 🚀 Future Work  
+
+- 📱 **Mobile App**  
+  Launch DreamNest on iOS & Android so users can stay connected and track progress anywhere.  
+
+- ⏱ **Timed Chat & Site Blocking**  
+  Extend existing blocking features with timers, allowing temporary blocks to reduce distractions and boost focus.  
+
+- 🎮 **Coins & Unlockable Features**  
+  Gamify the journey — the more coins you earn, the more advanced features and rewards you can unlock.  
 <br><br>
 
 <!-- Demo -->
@@ -138,6 +149,24 @@ For designing and maintaining our system and database diagrams, we relied on Era
 | ---------------------------------------------------| ------------------------------------------------- | 
 | ![Landing](./readme/screenshots/backendtester.jpg) | ![fsdaf](./readme/screenshots/frontendtester.jpg) | 
 
+<br><br>
+
+### ⚡ API Usage (Swagger & Postman)
+
+DreamNest provides a fully documented API that can be tested through **Swagger UI** or imported into **Postman**.  
+
+- **Swagger UI** → Test endpoints directly in your browser with clear parameter, request, and response examples.  
+- **Postman Collection** → Run API calls directly in Postman for fast debugging and local testing.  
+- **Authentication Ready** → Add your JWT token once to easily access all secured endpoints.  
+- **Organized Reference** → Endpoints are grouped by module (Auth, Goals, Posts, Chat, Notifications) for easy navigation.  
+
+| Swagger 1                                        | Swagger 2                                      | 
+| ------------------------------------------------ | ---------------------------------------------- |
+| ![Swagger](./readme/screenshots/swagger2.jpg)    | ![Swagger2](./readme/screenshots/swagger3.jpg) | 
+
+| Postman 1                                      | Postman 2                                      |
+| ---------------------------------------------- | ---------------------------------------------- |
+| ![Postman1](./readme/screenshots/postman1.jpg) | ![Postman2](./readme/screenshots/postman2.jpg) |
 
 <br><br>
 
@@ -173,23 +202,5 @@ For designing and maintaining our system and database diagrams, we relied on Era
 
 
 <img src="./readme/screenshots/deploy.jpg"/>
-
-
-<br><br>
-
-### Usage
-
-- **Swagger UI** → Explore and test the API interactively in your browser. All endpoints are documented with parameters, request/response formats, and example bodies.  
-- **Postman Collection** → Import our Postman collection to run API calls directly, perfect for quick testing and debugging.  
-- **Auth-ready** → Add your JWT token once and easily access secured routes in both Swagger and Postman.  
-- **Full Reference** → Endpoints are grouped by module (auth, goals, posts, chat, notifications) for easier navigation.  
-
-| Swagger 1                                        | Swagger 2                                      | 
-| ------------------------------------------------ | ---------------------------------------------- |
-| ![Swagger](./readme/screenshots/swagger2.jpg)    | ![Swagger2](./readme/screenshots/swagger3.jpg) | 
-
-| Postman 1                                      | Postman 2                                      |
-| ---------------------------------------------- | ---------------------------------------------- |
-| ![Postman1](./readme/screenshots/postman1.jpg) | ![Postman2](./readme/screenshots/postman2.jpg) |
 
 <br><br>
