@@ -1,67 +1,77 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import getUserProfile from "../../../Services/auth/getUserProfile";
+import profiledef from "../../../Assets/Images/profiledef.jpg";
 
 type Props = {
-  filename?: string | null;
+  filename?: string | null;     
   className?: string;
   alt?: string;
-  size?: number;
+  size?: number;                
 };
 
-const Avatar: React.FC<Props> = ({ filename, className, alt = "", size }) => {
-  const [url, setUrl] = useState<string | null>(null);
+const Avatar: React.FC<Props> = ({ filename, className, alt = "User avatar", size }) => {
+  const [src, setSrc] = useState<string>(profiledef); 
+  const urlRef = useRef<string | null>(null);         
 
   useEffect(() => {
     let cancelled = false;
-    let objectUrl: string | undefined;
+
+  
+    const revoke = () => {
+      if (urlRef.current) {
+        URL.revokeObjectURL(urlRef.current);
+        urlRef.current = null;
+      }
+    };
+
+    
+    if (!filename || filename === "null" || filename === "undefined" || filename.trim() === "") {
+      revoke();
+      setSrc(profiledef);
+      return;
+    }
 
     (async () => {
-      if (!filename) {
-        setUrl(null);
-        return;
-      }
       try {
         const blob = await getUserProfile(filename); 
         if (cancelled) return;
-        objectUrl = URL.createObjectURL(blob);
-        setUrl(objectUrl);
+        revoke();
+        const objectUrl = URL.createObjectURL(blob);
+        urlRef.current = objectUrl;
+        setSrc(objectUrl);
       } catch {
-    
-        setUrl(null);
+        revoke();
+        setSrc(profiledef);
       }
     })();
 
     return () => {
       cancelled = true;
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
+      revoke();
     };
   }, [filename]);
 
-  const style = size ? { width: size, height: size, objectFit: "cover", borderRadius: "50%" } : undefined;
+  const style = size
+    ? ({ width: size, height: size, objectFit: "cover", borderRadius: "50%" } as React.CSSProperties)
+    : undefined;
 
-  return url ? (
+  return (
     <img
-  src={url}
-  className={className}
-  style={
-    size
-      ? ({ width: size, height: size, objectFit: "cover", borderRadius: "50%" } as React.CSSProperties)
-      : undefined
-  }
-  alt={alt}
-/>
-
-  ) : (
- 
-    <img
-      src="https://via.placeholder.com/64?text=%20"
-      className={className}
-       style={
-    size
-      ? ({ width: size, height: size, objectFit: "cover", borderRadius: "50%" } as React.CSSProperties)
-      : undefined
-  }
+      src={src}
       alt={alt}
+      className={className}
+      style={style}
+      loading="lazy"
+      referrerPolicy="no-referrer"
+      onError={() => {
+        if (src !== profiledef) {
+          if (urlRef.current) {
+            URL.revokeObjectURL(urlRef.current);
+            urlRef.current = null;
+          }
+          setSrc(profiledef);
+        }
+      }}
     />
   );
 };

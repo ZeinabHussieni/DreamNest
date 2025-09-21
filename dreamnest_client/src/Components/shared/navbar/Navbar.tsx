@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import Logo from "../../../Assets/Images/Final logo.png";
 import drop from "../../../Assets/Icons/dropdown.svg";
 import coinIcon from "../../../Assets/Icons/coins.svg";
+import defaultpro from "../../../Assets/Images/profiledef.jpg";
 import menu from "../../../Assets/Icons/menu.svg";
 import ThemeToggle from "../../themeToggle/ThemeToggle";
 import { useAuth } from "../../../Context/AuthContext";
@@ -124,7 +125,7 @@ const Navbar: React.FC = () => {
               role="button"
               tabIndex={0}
             >
-              <img src={profilePicUrl || "/default-profile.png"} alt="Profile" className="pro-pic" />
+              <img src={profilePicUrl || defaultpro} alt="Profile" className="pro-pic" />
               {profileDropdownOpen && (
                 <ul className="dropdown">
                   <li>

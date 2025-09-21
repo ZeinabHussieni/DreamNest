@@ -79,9 +79,10 @@ const ChatPage: React.FC = () => {
     dispatch(initChatSocketThunk());
     dispatch(loadRoomsThunk());
   }, [dispatch]);
-// Focus search with Ctrl/⌘+K like WhatsApp web
-useEffect(() => {
-  const onKey = (e: KeyboardEvent) => {
+
+  //for search effect
+  useEffect(() => {
+   const onKey = (e: KeyboardEvent) => {
     const k = e.key.toLowerCase();
     if ((e.ctrlKey || e.metaKey) && k === "k") {
       e.preventDefault();
@@ -89,10 +90,10 @@ useEffect(() => {
       el?.focus();
       el?.select();
     }
-  };
-  window.addEventListener("keydown", onKey);
-  return () => window.removeEventListener("keydown", onKey);
-}, []);
+   };
+     window.addEventListener("keydown", onKey);
+     return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   return (
     <div className="chat-wrap">
@@ -100,28 +101,25 @@ useEffect(() => {
         <h3>Conversations</h3>
 
       <div className={`chat-search ${search ? "has-value" : ""}`}>
-  <img src={searchh} alt="" className="search-icon" aria-hidden="true" />
-  <input
-    placeholder="Search…"
-    value={search}
-    onChange={(e) => setSearch(e.target.value)}
-    onKeyDown={(e) => {
-      if (e.key === "Escape") setSearch("");
-    }}
-    autoComplete="off"
-    spellCheck={false}
-    inputMode="search"
-    aria-label="Search conversations"
-  />
-  {/* clear button (shows only when there is text) */}
-  <button
-    type="button"
-    className="search-clear"
-    onClick={() => setSearch("")}
-    aria-label="Clear search"
-    tabIndex={search ? 0 : -1}
-  />
-</div>
+        <img src={searchh} alt="" className="search-icon" aria-hidden="true" />
+        <input
+         placeholder="Search…"
+         value={search}
+         onChange={(e) => setSearch(e.target.value)}
+         onKeyDown={(e) => {
+          if (e.key === "Escape") setSearch("");
+         }}
+         autoComplete="off"
+         spellCheck={false}
+         inputMode="search"
+        />
+         <button
+           type="button"
+           className="search-clear"
+           onClick={() => setSearch("")}
+           tabIndex={search ? 0 : -1}
+          />
+      </div>
 
 
         {!userId ? (
