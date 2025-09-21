@@ -30,6 +30,12 @@ Meanwhile, **admins** have their own dashboard to keep the environment secure, s
 ### System Architecture
 <img src="./readme/screenshots/software.png"/>
 
+### Automation Workflow
+
+| n8n                                          | 
+| ---------------------------------------------| 
+| ![Landing](./readme/gifs/n8n.gif)            | 
+
 <br><br>
 
 <!-- Project Highlights -->
@@ -96,12 +102,6 @@ Meanwhile, **admins** have their own dashboard to keep the environment secure, s
 | Admin Dashboard                              | 
 | ---------------------------------------------| 
 | ![Landing](./readme/gifs/adminDashboard.gif) | 
-
-### Automation Workflow
-
-| n8n                                          | 
-| ---------------------------------------------| 
-| ![Landing](./readme/gifs/n8n.gif)            | 
 
 <br><br>
 
