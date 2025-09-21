@@ -10,7 +10,7 @@
 **DreamNest is where your dreams turn into action.** ✨  
 Write down your vision, and our AI transforms it into a personalized step-by-step plan to help you achieve it.  
 
-But you won’t be alone on the journey — DreamNest’s **smart matching system** connects you with people who share similar goals or complementary skills. Once matched, you’ll unlock a **private chat space** where you can exchange text, voice notes, and images.  
+But you won’t be alone on the journey. DreamNest’s **smart matching system** connects you with people who share similar goals or complementary skills. Once matched, you’ll unlock a **private chat space** where you can exchange text, voice notes, and images.  
 
 Beyond one-to-one connections, you can:  
 - Share updates in the **community feed**  
