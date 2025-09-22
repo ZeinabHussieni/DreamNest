@@ -174,7 +174,7 @@ Here’s how it works for the user:
 
 <br>
 
-<img src="./readme/screenshots/ai agent.png"/>
+<img src="./readme/screenshots/ai agent.png" width="700"/>  
 
 <br><br>
 
