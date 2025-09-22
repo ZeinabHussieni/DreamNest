@@ -150,24 +150,37 @@ For designing and maintaining our system and database diagrams, we relied on Era
 | ![Landing](./readme/screenshots/backendtester.jpg) | ![fsdaf](./readme/screenshots/frontendtester.jpg) | 
 
 
-### ⚡ API Usage (Swagger & Postman)
+### AI Agent
 
-DreamNest provides a fully documented API that can be tested through **Swagger UI** or imported into **Postman**.  
+In DreamNest, the AI agent works like a **personal planning coach**.  
+Its job is to take a user’s goal and turn it into a clear, step-by-step action plan that feels motivating and doable.  
 
-- **Swagger UI** → Test endpoints directly in your browser with clear parameter, request, and response examples.  
-- **Postman Collection** → Run API calls directly in Postman for fast debugging and local testing.  
-- **Authentication Ready** → Add your JWT token once to easily access all secured endpoints.  
-- **Organized Reference** → Endpoints are grouped by module (Auth, Goals, Posts, Chat, Notifications) for easy navigation.  
+Here’s how it works for the user:  
 
-| Swagger 1                                        | Swagger 2                                      | 
-| ------------------------------------------------ | ---------------------------------------------- |
-| ![Swagger](./readme/screenshots/swagger2.jpg)    | ![Swagger2](./readme/screenshots/swagger3.jpg) | 
+1. **The user chooses a goal**  
+   Example: “Get fit in 3 months” or “Learn JavaScript.”  
 
-| Postman 1                                      | Postman 2                                      |
-| ---------------------------------------------- | ---------------------------------------------- |
-| ![Postman1](./readme/screenshots/postman1.jpg) | ![Postman2](./readme/screenshots/postman2.jpg) |
+2. **The agent creates a plan**  
+   It breaks the user’s goal into 6–8 practical steps, each with:  
+   - A short title (often with emojis 🎯✨)  
+   - A motivational description (like a mini pep-talk)  
+   - A realistic due date (spaced across weeks or months)  
+
+3. **The plan gets refined automatically**  
+   If anything is missing (like a date or description), the agent fills it in so the plan always feels complete and ready to follow.  
+
+4. **The user’s plan is saved**  
+   The final plan is attached to the user’s goal inside DreamNest so every time the user logs in, there is a roadmap that guides them forward step by step.  
+
+<br>
+
+<img src="./readme/screenshots/ai agent.png"/>
 
 <br><br>
+
+
+<br><br>
+
 
 <img src="./readme/title7.svg"/>
 
@@ -201,5 +214,23 @@ DreamNest provides a fully documented API that can be tested through **Swagger U
 
 
 <img src="./readme/screenshots/deploy.jpg"/>
+
+
+### ⚡ API Usage (Swagger & Postman)
+
+DreamNest provides a fully documented API that can be tested through **Swagger UI** or imported into **Postman**.  
+
+- **Swagger UI** → Test endpoints directly in your browser with clear parameter, request, and response examples.  
+- **Postman Collection** → Run API calls directly in Postman for fast debugging and local testing.  
+- **Authentication Ready** → Add your JWT token once to easily access all secured endpoints.  
+- **Organized Reference** → Endpoints are grouped by module (Auth, Goals, Posts, Chat, Notifications) for easy navigation.  
+
+| Swagger 1                                        | Swagger 2                                      |  Swagger 3                                   | 
+| ------------------------------------------------ | ---------------------------------------------- |----------------------------------------------| 
+| ![Swagger](./readme/screenshots/swagger2.jpg)    | ![Swagger2](./readme/screenshots/swagger3.jpg) |![Swagger2](./readme/screenshots/swagger1.jpg)| 
+
+| Postman 1                                      | Postman 2                                      | Postman 3                                    | 
+| ---------------------------------------------- | ---------------------------------------------- |----------------------------------------------| 
+| ![Postman1](./readme/screenshots/postman1.jpg) | ![Postman2](./readme/screenshots/postman2.jpg) |![Postman3](./readme/screenshots/notify.jpg)  | 
 
 <br><br>
