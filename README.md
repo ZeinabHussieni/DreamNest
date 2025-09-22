@@ -174,7 +174,10 @@ Here’s how it works for the user:
 
 <br>
 
-<img src="./readme/screenshots/ai agent.png" width="700"/>  
+<p align="center">
+  <img src="./readme/screenshots/ai-agent.png" width="500" alt="AI Agent flow" />
+</p>
+
 
 <br><br>
 
