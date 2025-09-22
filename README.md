@@ -182,9 +182,6 @@ Here’s how it works for the user:
 <br><br>
 
 
-<br><br>
-
-
 <img src="./readme/title7.svg"/>
 
 ### Development → Deployment Flow
