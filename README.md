@@ -45,13 +45,13 @@ Meanwhile, **admins** have their own dashboard to keep the environment secure, s
 
 - ✨ AI Agent Planner
   DreamNest’s AI creates smart, personalized action plans for each goal. No generic steps your journey is uniquely mapped to keep you on track and motivated.
-- 💬 Chat Hub
+-  Chat Hub
    Seamless real-time messaging powered by WebSockets. Stay connected with fast, reliable text chat safe, moderated, and always ready.
-- 🎤 Voice, Images & Text Detection
+- Voice, Images & Text Detection
   Send voice notes, share images, and chat freely. AI moderation ensures every conversation stays safe, respectful, and supportive.
-- 📊 Dashboard & Notifications
+- Dashboard & Notifications
   Live metrics and instant alerts. DreamNest keeps you updated in real time with WebSockets progress, posts, and community vibes all in one place.
-- 🔄 n8n Automation
+- n8n Automation
   Automated pep talks, reminders, and progress reports. DreamNest keeps the energy flowing so you never lose momentum on your goals.
 
 <img src="./readme/screenshots/features.png"/>
