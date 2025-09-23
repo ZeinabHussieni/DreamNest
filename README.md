@@ -25,7 +25,7 @@ Meanwhile, **admins** have their own dashboard to keep the environment secure, s
 <img src="./readme/title3.svg"/>
 
 ### ER Diagram
-<img src="./readme/screenshots/eraser er daigram.png"  height="700" />
+<img src="./readme/screenshots/eraser er daigram.png"  height="800" />
 
 ### System Architecture
 <img src="./readme/screenshots/software.png"/>
