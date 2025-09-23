@@ -218,7 +218,7 @@ Here’s how it works for the user:
 <img src="./readme/screenshots/deploy.jpg"/>
 
 
-### ⚡ API Usage (Swagger & Postman)
+### Swagger & Postman Documentation
 
 DreamNest provides a fully documented API that can be tested through **Swagger UI** or imported into **Postman**.  
 
@@ -227,11 +227,11 @@ DreamNest provides a fully documented API that can be tested through **Swagger U
 - **Authentication Ready** → Add your JWT token once to easily access all secured endpoints.  
 - **Organized Reference** → Endpoints are grouped by module (Auth, Goals, Posts, Chat, Notifications) for easy navigation.  
 
-| Swagger 1                                        | Swagger 2                                      |  Swagger 3                                   | 
+|Create Post `POST`                                | List Chatroom Messages `GET`                   | Notifications & Plans APIs                   | 
 | ------------------------------------------------ | ---------------------------------------------- |----------------------------------------------| 
 | ![Swagger](./readme/screenshots/swagger2.jpg)    | ![Swagger2](./readme/screenshots/swagger3.jpg) |![Swagger2](./readme/screenshots/swagger1.jpg)| 
 
-| Postman 1                                      | Postman 2                                      | Postman 3                                    | 
+|  User Login `POST`                             | Admin Dashboard `GET`                          | Mark Notification as Read `PATCH`            | 
 | ---------------------------------------------- | ---------------------------------------------- |----------------------------------------------| 
 | ![Postman1](./readme/screenshots/postman1.jpg) | ![Postman2](./readme/screenshots/postman2.jpg) |![Postman3](./readme/screenshots/notify.jpg)  | 
 
