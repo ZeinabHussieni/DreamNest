@@ -30,7 +30,8 @@ Meanwhile, **admins** have their own dashboard to keep the environment secure, s
 </p>
 
 ### System Architecture
-<img src="./readme/screenshots/software.png"/>
+| ---------------------------------------------| 
+| ![Landing](./readme/screenshots/software.png)| 
 
 ### Automation Workflow
 
