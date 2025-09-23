@@ -25,10 +25,10 @@ Meanwhile, **admins** have their own dashboard to keep the environment secure, s
 <img src="./readme/title3.svg"/>
 erasererdaigram.png
 ### ER Diagram
-|                                                     | 
-| ----------------------------------------------------| 
-| ![Landing](./readme/screenshots/erasererdaigram.png)| 
 
+<p align="center">
+<img src="./readme/screenshots/eraser er daigram.png" width="900" height="850" position=center/>
+</p>
 
 ### System Architecture
 |                                              | 
