@@ -30,6 +30,7 @@ Meanwhile, **admins** have their own dashboard to keep the environment secure, s
 </p>
 
 ### System Architecture
+|                                              | 
 | ---------------------------------------------| 
 | ![Landing](./readme/screenshots/software.png)| 
 
