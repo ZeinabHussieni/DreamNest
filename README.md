@@ -23,11 +23,12 @@ Meanwhile, **admins** have their own dashboard to keep the environment secure, s
 
 <!-- System Design -->
 <img src="./readme/title3.svg"/>
-erasererdaigram.png
+
+
 ### ER Diagram
 
 <p align="center">
-<img src="./readme/screenshots/eraser er daigram.png" width="900" height="850" position=center/>
+<img src="./readme/screenshots/eraser er daigram.png" width="1000" height="850" position=center/>
 </p>
 
 ### System Architecture
