@@ -177,7 +177,7 @@ Here’s how it works for the user:
 <br>
 
 <p align="center">
-  <img src="./readme/screenshots/ai agent.png" width="800" height="800" position=center/>
+  <img src="./readme/screenshots/ai agent.png" width="700" height="700" position=center/>
 </p>
 
 
