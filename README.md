@@ -38,7 +38,7 @@ Meanwhile, **admins** have their own dashboard to keep the environment secure, s
 | ---------------------------------------------| 
 | ![Landing](./readme/gifs/n8n.gif)            | 
 
-<br><br>
+<br><br>s
 
 <!-- Project Highlights -->
 <img src="./readme/title4.svg"/>
@@ -135,12 +135,6 @@ For designing and maintaining our system and database diagrams, we relied on Era
 
 [Eraser Link](https://app.eraser.io/workspace/knf1IWEgYhvckGNlIZQC?origin=share)
 <br><br>
-
-### CI Workflow
-
-| CI                                      | CI                                    | 
-| --------------------------------------- | ------------------------------------- | 
-| ![Landing](./readme/screenshots/c11.jpg)| ![fsdaf](./readme/screenshots/c2.jpg) | 
 
 ### Services, Validation and Testing
 | Services                                     | Validation                                       | 
