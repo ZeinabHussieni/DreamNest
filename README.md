@@ -43,7 +43,7 @@ Meanwhile, **admins** have their own dashboard to keep the environment secure, s
 
 ### DreamNest Sexy Features
 
-- ✨ AI Agent Planner
+- AI Agent Planner
   DreamNest’s AI creates smart, personalized action plans for each goal. No generic steps your journey is uniquely mapped to keep you on track and motivated.
 -  Chat Hub
    Seamless real-time messaging powered by WebSockets. Stay connected with fast, reliable text chat safe, moderated, and always ready.
@@ -58,13 +58,13 @@ Meanwhile, **admins** have their own dashboard to keep the environment secure, s
 
 ### Future Work  
 
-- 📱 **Mobile App**  
+-  **Mobile App**  
   Launch DreamNest on iOS & Android so users can stay connected and track progress anywhere.  
 
-- ⏱ **Timed Chat & Site Blocking**  
+- **Timed Chat & Site Blocking**  
   Extend existing blocking features with timers, allowing temporary blocks to reduce distractions and boost focus.  
 
-- 🎮 **Coins & Unlockable Features**  
+- **Coins & Unlockable Features**  
   Gamify the journey the more coins you earn, the more advanced features and rewards you can unlock.  
 <br><br>
 
