@@ -170,9 +170,11 @@ Here’s how it works for the user:
 
 <br>
 
-<p align="center">
+| ---------------------------------------------------| 
+|<p align="center">
   <img src="./readme/screenshots/ai agent.png" width="800" height="700" position=center/>
-</p>
+</p>| 
+
 
 
 <br><br>
